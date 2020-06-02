@@ -3,8 +3,8 @@
       
       
 	  <url>
-	    <loc>http://pancho.dev/posts/multinode-k8s-ignite-k3s/</loc>
-	    <lastmod>2020-05-17</lastmod>
+	    <loc>http://pancho.dev/posts/creating-kubernetes-kind-cluster/</loc>
+	    <lastmod>2020-05-30</lastmod>
         
 
         
@@ -15,6 +15,17 @@
       
 	  <url>
 	    <loc>http://pancho.dev/posts/</loc>
+	    <lastmod>2020-05-30</lastmod>
+        
+
+        
+	  </url>
+	  
+  
+      
+      
+	  <url>
+	    <loc>http://pancho.dev/posts/multinode-k8s-ignite-k3s/</loc>
 	    <lastmod>2020-05-17</lastmod>
         
 

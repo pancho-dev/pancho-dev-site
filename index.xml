@@ -12,6 +12,15 @@
     
     
     <item>
+      <title>Creating Kubernetes Kind Cluster</title>
+      <link>http://pancho.dev/posts/creating-kubernetes-kind-cluster/</link>
+      <pubDate>Sat, 30 May 2020 15:11:30 -0300</pubDate>
+      
+      <guid>http://pancho.dev/posts/creating-kubernetes-kind-cluster/</guid>
+      <description>In an earlier post I showed how to create Multinode k8s cluster using ignite and k3s, while this was a good experience I needed to test some other tools, and this time I decided to go for kind (kubernetes in docker). Which looks like a good approach to work with clusters locally and it will still be lightweight as the kubernetes &amp;ldquo;nodes&amp;rdquo; will be actually running as docker containers. This at first glance looks like a easier approach and seems to work in a similar way in Mac, linux or wirndows, which gives a great advantage.</description>
+    </item>
+    
+    <item>
       <title>Multinode k8s cluster using ignite and k3s</title>
       <link>http://pancho.dev/posts/multinode-k8s-ignite-k3s/</link>
       <pubDate>Sun, 17 May 2020 18:22:05 -0300</pubDate>
