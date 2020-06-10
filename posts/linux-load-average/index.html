@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en-us"><title>
+    The Misunderstood Load Average in Linux Hosts | 
+    
+    pancho.dev</title>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Ever wondered when someone runs the command uptime in a linux host what the values in the load average: section mean? well I have wondered about it many times in my carreer. And this should be a simple question to ask a seasoned linux administrator or developer, right? well it&rsquo;s not entirely true, as the load average value in a linux hosts probably is the most misunderstood term and often associated with the wrong concepts.
+    ">
+
+
+<meta property="og:title" content="The misunderstood load average in linux hosts" />
+<meta property="og:description" content="Ever wondered when someone runs the command uptime in a linux host what the values in the load average: section mean? well I have wondered about it many times in my carreer. And this should be a simple question to ask a seasoned linux administrator or developer, right? well it&rsquo;s not entirely true, as the load average value in a linux hosts probably is the most misunderstood term and often associated with the wrong concepts." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://pancho.dev/posts/linux-load-average/" />
+<meta property="article:published_time" content="2020-06-07T20:02:27-03:00" />
+<meta property="article:modified_time" content="2020-06-07T20:02:27-03:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="The misunderstood load average in linux hosts"/>
+<meta name="twitter:description" content="Ever wondered when someone runs the command uptime in a linux host what the values in the load average: section mean? well I have wondered about it many times in my carreer. And this should be a simple question to ask a seasoned linux administrator or developer, right? well it&rsquo;s not entirely true, as the load average value in a linux hosts probably is the most misunderstood term and often associated with the wrong concepts."/>
+
+<meta itemprop="name" content="The misunderstood load average in linux hosts">
+<meta itemprop="description" content="Ever wondered when someone runs the command uptime in a linux host what the values in the load average: section mean? well I have wondered about it many times in my carreer. And this should be a simple question to ask a seasoned linux administrator or developer, right? well it&rsquo;s not entirely true, as the load average value in a linux hosts probably is the most misunderstood term and often associated with the wrong concepts.">
+<meta itemprop="datePublished" content="2020-06-07T20:02:27-03:00" />
+<meta itemprop="dateModified" content="2020-06-07T20:02:27-03:00" />
+<meta itemprop="wordCount" content="2940">
+
+
+
+<meta itemprop="keywords" content="" />
+<link rel="canonical" href="http://pancho.dev/posts/linux-load-average/" />
+
+<link rel="icon" type="image/png" href="http://pancho.dev/image/favicon.ico">
+
+<link rel="stylesheet" href="/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/bulma.min.css">
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-920705-12', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+<script src=/js/ramium.js></script>
+<link rel="stylesheet" href=/css/ramium.css>
+
+
+
+
+
+<body><nav class="navbar is-dark" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a class="navbar-item" href=/>
+      
+      <strong>pancho.dev </strong>
+      
+    </a>
+
+    <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false"
+      data-target="navbarBasicExample">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+
+  <div id="navbarBasicExample" class="navbar-menu">
+    <div class="navbar-start">
+      
+      
+      <a class="navbar-item" href="/">Home</a>
+      
+      
+      
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">Blog</a>
+        <div class="navbar-dropdown">
+          
+          <a class="navbar-item" href="/posts/">All Posts</a>
+          
+        </div>
+      </div>
+      
+      
+    </div>
+
+    <div class="navbar-end">
+      
+
+      
+      <div class="navbar-item">
+        <form id="cse-search-box-form-id" onsubmit="return executeQuery();" role="search">
+          <div class="field has-addons">
+            <div class="control is-expanded">
+              <input id="cse-search-input-box-id" size=15 class="input" type="text" autocomplete="off"
+                placeholder="&#xf1a0; Google search" style="font-family:Arial, FontAwesome">
+            </div>
+
+            <div class="control">
+              <button type="submit" class="button is-black">
+                <i class="fa fa-search"></i>
+                </a>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+      
+    </div>
+  </div>
+</nav><div class="columns is-centered">
+        <div id="page-body" class="column is-7">
+
+<div class="content blog">
+    <h1 class="title">The Misunderstood Load Average in Linux Hosts</h1>
+
+    <div id="infobar" class="level is-mobile">
+        <div class="level-left">
+            
+            <div class="level-item">
+                <p class="subtitle info date">Jun 7, 2020
+                </p>
+            </div>
+            
+
+            <div class="level-item">
+                <p class="subtitle info">
+                    16 mins read
+                </p>
+            </div>
+        </div>
+        <div class="level-right is-hidden-touch">
+            <div class="tags">
+                
+            </div>
+        </div>
+    </div>
+
+    <div class="tags is-hidden-desktop">
+        
+    </div>
+
+    <div class="blog-text">
+        
+
+        <p>Ever wondered when someone runs the command <code>uptime</code> in a linux host what the values in the <code>load average:</code> section mean? well I have wondered about it many times in my carreer. And this should be a simple question to ask a seasoned linux administrator or developer, right? well it&rsquo;s not entirely true, as the load average value in a linux hosts probably is the most misunderstood term and often associated with the wrong concepts. In this post I will explain and tell a bit more about my experience about load average value in linux and how it helps me everyday to spot issues in infrastructure.</p>
+<h1 id="then-what-is-it">Then, what is it?</h1>
+<p>To actually explain what is it I will start talking about what&rsquo;s not it.</p>
+<h4 id="is-it-cpu">Is it CPU?</h4>
+<p>Well, it&rsquo;s a big no. The most common mistake is to associate the load average of a system with cpu usage, while high cpu usage is one of the causes that might drive this value up, it&rsquo;s not only CPU that might end in a high load average.<br>
+I could be speaking a long time about what it&rsquo;s not, but I wanted to emphasize CPU because is one of the most common mistakes.</p>
+<h3 id="simple-explanation">Simple explanation</h3>
+<p>How load average is calculated sometimes could be complex as there are many moving parts and situations in a linux system that might generate a high load situation. I will not go into the details of it, I will share my perspective and experience through the years from a practical point of view. If you need to understand more deeply how this value is calculated there is a great article named <a href="http://www.brendangregg.com/blog/2017-08-08/linux-load-averages.html">Linux Load Averages: Solving the Mystery</a>. While this post is very educational, it can be tedious to read. So I will take a simple approach and talk about my personal experience.<br>
+I have my own definition for the term, which can be found in many articles on the internet, load average in a linux system <code>is the average amount of processes waiting for cpu time</code>. As can be seen, in my own simple definition involves CPU in it, but wait, didn&rsquo;t I say load average is not CPU, yes I did, but even if I said so, a high load average might not be related to CPU issues, it can be many other things, and I think that is why people get confused by the term. In the end, a process will always be waiting for it&rsquo;s turn to use CPU, and there are other sittuations that a process might be waiting for the CPU and the cpu will be idle anyway. Confusing, isn&rsquo;t it. Well yes. I will try to explain this situations from a practical standpoint that will make sense why I said it&rsquo;s not only CPU.</p>
+<h1 id="what-does-the-values-mean">What does the values mean?</h1>
+<p>First lets look at the output of <code>uptime</code> command, load average can also be found in <code>top</code> command at the top right corner.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ uptime
+ 23:07:56 up <span style="color:#ae81ff">21</span> days, 23:59,  <span style="color:#ae81ff">1</span> user,  load average: 0.51, 0.25, 0.22
+</code></pre></div><p>As a quick explanation. <code>load average: 0.51, 0.25, 0.22</code> the first value is the average last minute, the second value is the average of the last 5 minutes and the third is the average of the last 15 minutes. In this example it means that in the last minute there were 0.51 processes in average waiting for CPU time and the last 5 minutes there as an average of 0.25 processes waiting for cpu time, same for the 15 minute value has an averaga of 0.22 processes waiting for cpu time.<br>
+Still this explanation doesn&rsquo;t say much. And this is one of the most controversial topics about this values. First we need to ask as ourselves, what is what we want to know? This values can catch situations where performace is starting to be an issue. And defining when this values mean our system has performance issues is the key. And there is no magic formula or answer for all systems. And any senior engineer would respond, it depends.</p>
+<h1 id="how-to-calculate-threshholds">How to calculate threshholds</h1>
+<p>This is the very tricky part, how to know which is the right value to know if a system is having performance problems. In the past I have heard if the load average value is above 1.00 then the system is having performance issues. Well as I said before, it depends. I have heard many people saying this is the rule for load average, and it was true, when we all had single core machines. Today this is is not true anymore as even our mobile phones have multiple cores, then the previous statement is not true.<br>
+Going back to my definition, we can say that we might be having issues when a system load average is above the number of cores. Since the load average value is the amount of processes waiting for cpu time, then if we have more processes waiting for CPU than the amount of cores we have in the system we might be having trouble, as our processes might be waiting too long for resources, and the impact depends really in what is running on the server but as a general rule we can use the <code>load average / amount of cores</code> to calculate the &ldquo;Load percentage&rdquo;. Of course this percentage can go above 100% and in my experience after hitting above 100% a system should be &lsquo;investigated&rsquo; to see is there are perfomance issues. As I mentioned this depends on the system and the performance requirements of the applications running but in general a system that goes above 100% is having a some kind of bottleneck that needs investigation.</p>
+<h1 id="monitoring-load-average">Monitoring Load Average</h1>
+<p>Now that I talked a little about some concepts, which are important to understant to properly monitor systems.<br>
+Load average is a good metric to catch when a system might be having performance issues and needs further investigation. But there is a catch about this, having high load average won&rsquo;t tell exactly what is wrong with your system and gives a hint that there might be a bottleneck somewhere, but it doesn&rsquo;t tell which one is the bottleneck. So there are sittuations that another complimentary metric from the system will be needed in order to find where the bottleneck is.<br>
+I find extremely useful to add to my generic set of metrics I monitor in all systems, as it is general enough to catch multiple issues or situations without having a lot of other complex metrics to track when monitoring a system.  In my experience if I have to set a generic threshold that will fit most systems I would set to alert after load average percentage goes above 120%-130%, I found this to be generic enough to catch issues while not generating too many false possitives.</p>
+<h3 id="alerting">Alerting</h3>
+<p>When alerting using load average, we need to be careful with the thresholds, as if we set to a low value it will page the on call engineer too much, while if we set it to a value that is too high we might miss an issue with the application. As metioned before, I usually set a generic value for most systems, but some systems will need tuning, and it will depend on the applications tolerance to performance issues running on a given system. Being that said, I experienced some systems running applications that had low tolerance to latency, and since high load average could mean higher latency, in such systems I used 100% or even lower threshold. On the other hand, I also had to tune whan alerting on systems that could tolerate a bit more load, an example would be big data and analytics systems, to big databases running big queries that don&rsquo;t require to run with low latency, in such systems we could afford a bigger latency, in those cases I have set values of 200% or more, but it depends on the case and the tolerance to latency the application has.<br>
+One thing to have in mind when definning alerts or tuning an exisiting one, is to have enough metrics data to look at the history of load average in a system to see the baseline usage and maximum usages. It will always be better to have history of the load average to understad how it behaves and also how it correlated to other metrics in the system.</p>
+<h1 id="how-do-i-find-the-bottlenecks">How do I find the bottlenecks?</h1>
+<p>Whenever load average exceeds the defined thresholds, it means we could have found a bottleneck or a simple resource starvation of some sort. In this section I will mention the most common ones I have come across and what too look for in each case.<br>
+Common use cases of high load average</p>
+<ul>
+<li>High CPU usage</li>
+<li>Heavy read or write to disks</li>
+<li>Exhausting the memory</li>
+<li>High peripherals activity</li>
+</ul>
+<p>There are many more cases or combination of use cases that might happen, however they could be more infrequent. This is not an exhaustive list of them, just the ones I had to deal with more frequently.<br>
+I will mention some command line tools to catch some of the issues but I recommend if possible to use a graphic tool to see the load average and other system metrics history, things are much more clear when one is looking at a graph rather than looking at values in the console. For this purposes I generally use <a href="https://prometheus.io/">prometheus</a> to store metrics in a time series database and <a href="https://grafana.com/">Grafana</a> to visualize the data history for system metrics. Also I use another too called <a href="https://www.netdata.cloud/">Netdata</a> to watch metrics in realtime.</p>
+<h3 id="high-cpu-usage">High CPU usage</h3>
+<p>Off course when having high load average one of the most common problems would be high CPU usage. This is one of the use cases easier to spot as there are tools that will show right in your face processes using a lot of CPU. <code>top</code> is the most common tool to watch processes and CPU usage, among other metrics. When spotting processes using a lot of cpu we need to find process names and pids and investigate each one of this processes why they are using CPU, this task is out of the scope of this post.<br>
+The impact that high cpu usage in a system will have, first thing it will impact is latency, if it&rsquo;s a database server queries will take longer to be served, or if it&rsquo;s a server running an HTTP application we will see latency going highed to serve request and in some cases requests will timeout, but it all depends on what the system is running.<br>
+Usually solving high cpu will mean the we need more cores in the system or we need to work with the application owner to optimize the application to use less cpu, or scale horizontally the application.</p>
+<h3 id="heavy-read-or-write-to-disks">Heavy read or write to disks</h3>
+<p>A very common case of high load is when applications are doing either heavy read, write or both to disk. This increases the I/O (Input/Output) happening in the system and the system will be found many times waiting for this I/O to happen, when this happens load average spikes as processes are kept waiting more time for resources. This one is not as easy as CPU to spot becuase I/O are values is something we are not used to look at, to catch this in the command line we can use <code>iostat</code> or <code>iotop</code> to see metrics around the I/O. Another good place to look would be to <code>iowait</code> value of the cpu, which tell us what is the percentage of time the CPU was locked waiting for I/O to happen, as ususally I/O operations are costly and much slower than the CPU,we found many times that the cpu is waiting for this operations to complete and this <code>iowait</code> can be found in the top command as <code>wa</code> in the CPU metrics shown. When we see an increase in iowait most likely it will be the one driving up the load of the system. To check which processes are the ones doing I/O we can use the <code>sar</code> command, I won&rsquo;t go into details how to use sar as explaining it might require a blog post on it&rsquo;s own.<br>
+To solve high I/O in systems it is also tricky, if we can&rsquo;t optimize the applications, then we might need to increase resources. If running on baremetal servers, then we need to see what can be optimized on the disk to gain more speed, also we could change to faster disks but that is not always an option. Another good option is to add more disks and configure them in a RAID array in mode RAID0 or RAID10, when using this modes it would be using a technique called striping which it&rsquo;s writes/reads will be balanced between the disks in parallel and if we combine this with multicore systems, this will increase the throughput considerably.
+If we are running in cloud VMs we can do some other optimizations, depending on the cloud vendor we are using we could increase I/O throughput by chosing different disks types or different vm types. Most major cloud providers offer similar approach to IOPS (Input Output Operations) where depending on the size and type of disk you choose it provides differents IOPS, also vm types will offer different max IOPS capacity per vm so I recommend to read the cloud provider docs in order to find the best approach, also the RAID approach mentioned before can also be used in vms in cloud providers to increase throughput.</p>
+<h3 id="exhausting-memory">Exhausting memory</h3>
+<p>Having memory pressure on a system can also cause high load average. When applications are requesting more memory that the system has available to allocate one of the symptoms would be that the load average will be higher, if the system has swap memory it will start swapping out memory pages to disk driving the load high becuase swap to disk is much slower than RAM, then the memory problem is not the memory itself that drives the load but the high I/O generated when swapping to disk. So memory issues turn into the issue mentioned in the previous section generating a high I/O situation.<br>
+Exhausting the memory has more serious effects than CPU or high I/O, as running out of memory and swap can cause the applications to crash, or to get killed by the out of memory killer or having strange behavior in the application because it can&rsquo;t allocate memory. Normally in the case of running out of memory it will end up leaving the system unstanble or even unaccessible and might need a reboot to get the system back.</p>
+<h3 id="high-peripherals-activity">High peripherals activity</h3>
+<p>One use case that is not as common as the others and also hard to troubleshoot or catch. There are some times that hardware is the source of high load, and the reason would be that some peripherals generate a lot of interrupts (IRQ) that might end up locking the CPU until finished, this is hard to catch since tools to watch it are less used, on way to look at interrupts would be to do <code>watch -n1 &quot;cat /proc/interrupts&quot;</code>. Also using node exporter for prometheus export IRQ usage and context switches as well as netdata, I recoomend using this tool to graphically watch this metrics.<br>
+In order to see what is happening we need to watch the load average metric and also watch the IRQ metrics and correlate them, once confirmed that the load average is driven by IRQ then we could check which are the IRQ that are spiking at the time and investigate how to solve it. I haven&rsquo;t come across this issue too many times in the past, and there are some ways to ease the pressure, for example doing CPU pinning in multicore systems which will use only 1 or 2 defined cpus for handling a particular piece of hardware, but solving this issue will require more research each time we hit this issue.</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>In this post I shared some of my experience with load average in linux and tried to explain what to look for when having high load on a system. What I can say is that I find this metric very useful as it is a generic way to get how a system is performing and easy to configure and set thresholds. It allows to catch most performance issues in a system with one single metric. It is helpful when managing a large fleet of systems and need to deploy/configure monitoring and alerts.<br>
+The downside of load average, as mentioned before, it will tell that something is wrong but won&rsquo;t tell what is wrong, then more investigation is needed to catch what resource is driving the load up, but helps in standardization of monitoring. Also load average is not a bulletproof metric to watch, there are some cases when still having performance issues but they will not show in the load average, specially in latency sensitive applications. In this cases we should watch other metrics on the applications or the system to catch this errors. One example is that some network applications performance can&rsquo;t be caught by load average but still have issues, in that case we need to watch more closely network parameters and look for errors there. For example I experieced performance problems with applications using udp traffic where load average was very low but application started seeing dropped packets, so that needed tuning on other side but was not caught by the load average.<br>
+Bottom line, load average is useful but you will need to monitor other metrics and applications in order to fully catch performance problems.</p>
+
+    </div>
+</div><div id="social-media-share" class="has-text-centered">
+	<p><i>Sharing is caring!</i></p>
+	<br>
+	
+	<div class="share-buttons">
+	    <a  href="https://www.facebook.com/sharer/sharer.php?u=http%3a%2f%2fpancho.dev%2fposts%2flinux-load-average%2f"
+	        onclick="socialMediaPopUp(this.href, '', 500, 500); return false;"
+	        title="Share on Facebook. Opens in a new window.">
+	        <img src=/img/icons/45px/facebook.png>
+	    </a>
+
+	    <a  href="https://twitter.com/intent/tweet?text=The%20misunderstood%20load%20average%20in%20linux%20hosts&url=http%3a%2f%2fpancho.dev%2fposts%2flinux-load-average%2f"
+	        onclick="socialMediaPopUp(this.href, '', 500, 500); return false;"
+	        title="Share on Twitter. Opens in a new window." >
+	        <img src=/img/icons/45px/twitter.png>
+	    </a>
+
+		<a  href="http://www.reddit.com/submit?url=http%3a%2f%2fpancho.dev%2fposts%2flinux-load-average%2f"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on Reddit. Opens in a new window." >
+	        <img src=/img/icons/45px/reddit.png>
+	    </a>
+
+	    <a  href="http://pinterest.com/pin/create/button/?url=http%3a%2f%2fpancho.dev%2fposts%2flinux-load-average%2f"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on Pinterest. Opens in a new window." >
+	        <img src=/img/icons/45px/pinterest.png>
+	    </a>
+
+	    <a  href="http://www.tumblr.com/share/link?url=http%3a%2f%2fpancho.dev%2fposts%2flinux-load-average%2f"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on Tumblr. Opens in a new window." >
+	        <img src=/img/icons/45px/tumblr.png>
+	    </a>
+
+		<a  href="https://www.linkedin.com/shareArticle?mini=true&url=http%3a%2f%2fpancho.dev%2fposts%2flinux-load-average%2f
+			&title=The%20misunderstood%20load%20average%20in%20linux%20hosts&summary=Ever%20wondered%20when%20someone%20runs%20the%20command%20uptime%20in%20a%20linux%20host%20what%20the%20values%20in%20the%20load%20average%3a%20section%20mean%3f%20well%20I%20have%20wondered%20about%20it%20many%20times%20in%20my%20carreer.%20And%20this%20should%20be%20a%20simple%20question%20to%20ask%20a%20seasoned%20linux%20administrator%20or%20developer%2c%20right%3f%20well%20it%26rsquo%3bs%20not%20entirely%20true%2c%20as%20the%20load%20average%20value%20in%20a%20linux%20hosts%20probably%20is%20the%20most%20misunderstood%20term%20and%20often%20associated%20with%20the%20wrong%20concepts.&source=rafed123.github.io"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on LinkedIn. Opens in a new window." >
+	        <img src=/img/icons/45px/linkedin.png>
+	    </a>
+
+	    <a  href="mailto:?subject=The%20misunderstood%20load%20average%20in%20linux%20hosts&amp;body=Check out this site http%3a%2f%2fpancho.dev%2fposts%2flinux-load-average%2f"
+	        title="Share via Email. Opens in a new window." >
+	        <img src=/img/icons/45px/mail.png>
+	    </a>
+	</div>
+</div>
+
+
+<br>
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    (function () {
+        
+        
+        if (window.location.hostname == "localhost")
+            return;
+
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        var disqus_shortname = 'disqus-code';
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+        </div>
+    </div>
+<script async src="https://cse.google.com/cse.js?cx=google-search-code"></script>
+<gcse:searchresults-only></gcse:searchresults-only>
+
+
+<footer class="footer has-background-dark">
+    <div class="content has-text-centered has-text-white">
+        <p>
+            © 2020 Ramium. Powered by
+            <a class="has-text-light" href="https://github.com/gohugoio/hugo" target="_blank">
+            Hugo</a>. Theme
+            <a class="has-text-light" href="https://github.com/rafed123/ramium/" target="_blank">
+                Ramium.
+            </a>
+        </p>
+    </div>
+</footer>
+</body>
+
+</html>

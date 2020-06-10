@@ -6,10 +6,19 @@
     <description>Recent content in Posts on pancho.dev</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 30 May 2020 15:11:30 -0300</lastBuildDate>
+    <lastBuildDate>Sun, 07 Jun 2020 20:02:27 -0300</lastBuildDate>
     
 	<atom:link href="http://pancho.dev/posts/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>The misunderstood load average in linux hosts</title>
+      <link>http://pancho.dev/posts/linux-load-average/</link>
+      <pubDate>Sun, 07 Jun 2020 20:02:27 -0300</pubDate>
+      
+      <guid>http://pancho.dev/posts/linux-load-average/</guid>
+      <description>Ever wondered when someone runs the command uptime in a linux host what the values in the load average: section mean? well I have wondered about it many times in my carreer. And this should be a simple question to ask a seasoned linux administrator or developer, right? well it&amp;rsquo;s not entirely true, as the load average value in a linux hosts probably is the most misunderstood term and often associated with the wrong concepts.</description>
+    </item>
     
     <item>
       <title>Creating Kubernetes Kind Cluster</title>
