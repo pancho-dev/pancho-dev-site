@@ -96,10 +96,14 @@ input:focus::placeholder {
     margin-bottom: 1.5em;
 }
 
-/* For margin below videos */
-.blog-text div { 
-    margin-bottom: 1em;
+.blog .blog-text li ol, .blog .blog-text li ul {
+    margin-top: 0px;
 }
+
+/* For margin below videos */
+/* .blog-text div { 
+    margin-bottom: 1em;
+} */
 
 #admin-table-summary {
     font-weight: bold;
@@ -214,4 +218,13 @@ kbd {
     padding-left: 5px;
     padding-right: 5px;
     border-radius: 4px;
+}
+
+/**** For codes ****/
+.highlight {
+    font-size: 0.9em;
+}
+
+#___gcse_0 {
+    max-height: 0;
 }

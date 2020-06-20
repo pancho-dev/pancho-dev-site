@@ -12,6 +12,15 @@
     
     
     <item>
+      <title>Multipass Microk8s Cluster on multiple nodes</title>
+      <link>http://pancho.dev/posts/multipass-microk8s-cluster/</link>
+      <pubDate>Sat, 13 Jun 2020 11:37:56 -0300</pubDate>
+      
+      <guid>http://pancho.dev/posts/multipass-microk8s-cluster/</guid>
+      <description>A couple of posts ago I talked about multinode kubernetes clusters and the benefis of them running them for developing automation, testing software and configurations. I still think is that most developers probably don&amp;rsquo;t need this setup or can live with a simpler setup. My motivation is because I work on cloud infrastructure and automation of delployments, databases, and lots of complex scenarios that running single node k8s cluster doesn&amp;rsquo;t fit my needs.</description>
+    </item>
+    
+    <item>
       <title>The misunderstood load average in linux hosts</title>
       <link>http://pancho.dev/posts/linux-load-average/</link>
       <pubDate>Sun, 07 Jun 2020 20:02:27 -0300</pubDate>
