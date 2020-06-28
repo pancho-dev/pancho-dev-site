@@ -3,8 +3,8 @@
       
       
 	  <url>
-	    <loc>http://pancho.dev/posts/multipass-microk8s-cluster/</loc>
-	    <lastmod>2020-06-13</lastmod>
+	    <loc>http://pancho.dev/posts/</loc>
+	    <lastmod>2020-06-27</lastmod>
         
 
         
@@ -14,7 +14,18 @@
       
       
 	  <url>
-	    <loc>http://pancho.dev/posts/</loc>
+	    <loc>http://pancho.dev/posts/whats-ulid/</loc>
+	    <lastmod>2020-06-27</lastmod>
+        
+
+        
+	  </url>
+	  
+  
+      
+      
+	  <url>
+	    <loc>http://pancho.dev/posts/multipass-microk8s-cluster/</loc>
 	    <lastmod>2020-06-13</lastmod>
         
 
