@@ -166,9 +166,9 @@ if (!doNotTrack) {
 So this time I will introduce the <code>ulid</code>. Spoiler alert, it&rsquo;s an ID or at least a data structure that can be used to represent an ID. So why do we have another way of expressing an ID, I won&rsquo;t get into too much details into that but yes there are many ways of defining ids, it can be numerical, using UUIDs, etc. So my motivation is that I found useful the properies of ulid for some specific use cases.</p>
 <h3 id="background">Background</h3>
 <p>I just want to give some background how I came across ulid and why I found it handy to use. I regularly find myself browsing through code from open source projects, even if I am not familiar with the language the projects are written, I always take a peek at the code. I have this obsesion to know how things work under the hood, which has helped me to solve many tricky issues operating open source software.<br>
-So one day I was looking at <a href="https://prometheus.io/">prometheus</a> data folder and I found the following</p>
+So one day I was looking at <a href="https://prometheus.io/">Prometheus</a> data folder and I found the following</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">
-<span style="color:#75715e"># Looking at files and folders in the prometheus data folder</span>
+<span style="color:#75715e"># Looking at files and folders in the Prometheus data folder</span>
 $ ls -l
 total <span style="color:#ae81ff">84</span>
 drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> May <span style="color:#ae81ff">29</span> 21:00 01E9H3RBHR7NP48DNJJK99SRVN
@@ -202,7 +202,7 @@ drwxr-xr-x <span style="color:#ae81ff">2</span> nobody nogroup 4.0K Jun <span st
 -rw-r--r-- <span style="color:#ae81ff">1</span> nobody nogroup 845K Jun <span style="color:#ae81ff">27</span> 17:00 index
 -rw-r--r-- <span style="color:#ae81ff">1</span> nobody nogroup  <span style="color:#ae81ff">279</span> Jun <span style="color:#ae81ff">27</span> 17:00 meta.json
 -rw-r--r-- <span style="color:#ae81ff">1</span> nobody nogroup    <span style="color:#ae81ff">9</span> Jun <span style="color:#ae81ff">27</span> 17:00 tombstones
-</code></pre></div><p>Ever since I looked into that folder I wondered about the logic behind the design. Then some day I was looking trought the prometheus code and I came across the term ulid. Off course I quickly googled the term and found out what it was, then the whole directory structure stated to make sense. I won&rsquo;t get into details of that as it is a subject matter that probably could get 2 or 3 blog posts itself. But I will get into details what ulid are and it might give developers some perspective to solve some problems in a clever way like promtetheus developers did.</p>
+</code></pre></div><p>Ever since I looked into that folder I wondered about the logic behind the design. Then some day I was looking trought the Prometheus code and I came across the term ulid. Off course I quickly googled the term and found out what it was, then the whole directory structure stated to make sense. I won&rsquo;t get into details of that as it is a subject matter that probably could get 2 or 3 blog posts itself. But I will get into details what ulid are and it might give developers some perspective to solve some problems in a clever way like promtetheus developers did.</p>
 <h1 id="what-is-it-then">What is it then?</h1>
 <p>The term is ulid and it&rsquo;s long name is <code>Universally Unique Lexicographically Sortable Identifier</code>. <a href="https://github.com/ulid/spec">ulid spec</a> is hosted in github if you would like to know more in details.<br>
 But in plain words it is a 128 bit ID, represented in a string using <a href="https://en.wikipedia.org/wiki/Base32#Crockford's_Base32">Crockford&rsquo;s Base32 encoding</a>.<br>
@@ -246,7 +246,7 @@ Some examples:</p>
 <li>picture history</li>
 <li>revision/version control of files</li>
 <li>Events in a distributed system</li>
-<li>Time series blocks (prometheus use case)</li>
+<li>Time series blocks (Prometheus use case)</li>
 </ul>
 <p>I wanted to point out a use case that catches my attention and probably would have saved some problems with race contitions when sending messages in an async messaging plattform and still have events that need to be ordered. In an distributed system sending messages/events to other systems and attaching a ulid to the message would help prevent or detect race conditions, it won&rsquo;t guarantee that my messages arrived in order but at least I would know that I got a message older than a message that I already received. Helping detect and remediate the situation that might have generated a race condition. Well this is not a bulletproof approach but whould helped to detect some of this situations.</p>
 <h4 id="example">Example</h4>
