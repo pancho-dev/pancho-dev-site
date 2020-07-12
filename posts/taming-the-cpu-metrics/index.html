@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head><title>
+    Taming the Cpu Metrics | 
+    
+    pancho.dev</title>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="In a past blog post I talked about The misunderstood load average in linux hosts, while load average is a good metric to watch in linux systems to catch generic performance problems, it does not reveal what the issue might be. This time I will dig more into cpu metrics collected from a linux system and explain them, for this purpose I will use multipass vms, and will be showing metrics from grafana screnshots which take the data from prometheus and prometheus node exporter (this is actually out of the scope of this post).
+    ">
+
+
+<meta property="og:title" content="Taming the Cpu Metrics" />
+<meta property="og:description" content="In a past blog post I talked about The misunderstood load average in linux hosts, while load average is a good metric to watch in linux systems to catch generic performance problems, it does not reveal what the issue might be. This time I will dig more into cpu metrics collected from a linux system and explain them, for this purpose I will use multipass vms, and will be showing metrics from grafana screnshots which take the data from prometheus and prometheus node exporter (this is actually out of the scope of this post)." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://pancho.dev/posts/taming-the-cpu-metrics/" />
+<meta property="article:published_time" content="2020-07-11T15:08:51-03:00" />
+<meta property="article:modified_time" content="2020-07-11T15:08:51-03:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Taming the Cpu Metrics"/>
+<meta name="twitter:description" content="In a past blog post I talked about The misunderstood load average in linux hosts, while load average is a good metric to watch in linux systems to catch generic performance problems, it does not reveal what the issue might be. This time I will dig more into cpu metrics collected from a linux system and explain them, for this purpose I will use multipass vms, and will be showing metrics from grafana screnshots which take the data from prometheus and prometheus node exporter (this is actually out of the scope of this post)."/>
+
+<meta itemprop="name" content="Taming the Cpu Metrics">
+<meta itemprop="description" content="In a past blog post I talked about The misunderstood load average in linux hosts, while load average is a good metric to watch in linux systems to catch generic performance problems, it does not reveal what the issue might be. This time I will dig more into cpu metrics collected from a linux system and explain them, for this purpose I will use multipass vms, and will be showing metrics from grafana screnshots which take the data from prometheus and prometheus node exporter (this is actually out of the scope of this post).">
+<meta itemprop="datePublished" content="2020-07-11T15:08:51-03:00" />
+<meta itemprop="dateModified" content="2020-07-11T15:08:51-03:00" />
+<meta itemprop="wordCount" content="3202">
+
+
+
+<meta itemprop="keywords" content="" />
+<link rel="canonical" href="http://pancho.dev/posts/taming-the-cpu-metrics/" />
+
+<link rel="icon" type="image/png" href="http://pancho.dev/image/favicon.ico">
+
+<link rel="stylesheet" href="/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/bulma.min.css">
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-920705-12', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+<script src=/js/ramium.js></script>
+<link rel="stylesheet" href=/css/ramium.css>
+
+
+
+
+
+</head>
+
+<body><nav class="navbar is-dark" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a class="navbar-item" href=/>
+      
+      <strong>pancho.dev </strong>
+      
+    </a>
+
+    <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false"
+      data-target="navbarBasicExample">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+
+  <div id="navbarBasicExample" class="navbar-menu">
+    <div class="navbar-start">
+      
+      
+      <a class="navbar-item" href="/">Home</a>
+      
+      
+      
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">Blog</a>
+        <div class="navbar-dropdown">
+          
+          <a class="navbar-item" href="/posts/">All Posts</a>
+          
+        </div>
+      </div>
+      
+      
+    </div>
+
+    <div class="navbar-end">
+      
+
+      
+      <div class="navbar-item">
+        <form id="cse-search-box-form-id" onsubmit="return executeQuery();" role="search">
+          <div class="field has-addons">
+            <div class="control is-expanded">
+              <input id="cse-search-input-box-id" size=15 class="input" type="text" autocomplete="off"
+                placeholder="&#xf1a0; Google search" style="font-family:Arial, FontAwesome">
+            </div>
+
+            <div class="control">
+              <button type="submit" class="button is-black">
+                <i class="fa fa-search"></i>
+                </a>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+      
+    </div>
+  </div>
+</nav><div class="columns is-centered">
+        <div id="page-body" class="column is-7">
+
+<div class="content blog">
+    <h1>Taming the Cpu Metrics</h1>
+
+    <div id="infobar" class="level is-mobile">
+        <div class="level-left">
+            
+            <div class="level-item">
+                <p class="subtitle info date">Jul 11, 2020
+                </p>
+            </div>
+            
+
+            <div class="level-item">
+                <p class="subtitle info">
+                    18 mins read
+                </p>
+            </div>
+        </div>
+        <div class="level-right is-hidden-touch">
+            <div class="tags">
+                
+            </div>
+        </div>
+    </div>
+
+    <div class="tags is-hidden-desktop">
+        
+    </div>
+
+    <div class="blog-text">
+        
+
+        <p>In a past blog post I talked about <a href="/posts/linux-load-average/">The misunderstood load average in linux hosts</a>, while load average is a good metric to watch in linux systems to catch generic performance problems, it does not reveal what the issue might be. This time I will dig more into cpu metrics collected from a linux system and explain them, for this purpose I will use multipass vms, and will be showing metrics from <a href="https://grafana.com/">grafana</a> screnshots which take the data from <a href="https://prometheus.io/">prometheus</a> and <a href="https://github.com/prometheus/node_exporter">prometheus node exporter</a> (this is actually out of the scope of this post). To gather some metrics I will run a few vms in my home linux server and do some stress tests to catch some operations that will show in the cpu metrics and explain what each one of them is.</p>
+<h1 id="start-virtual-machines">Start virtual machines</h1>
+<p>For the tests as I metioned before I will be running vms using multipass, and adding some configuration to them using ansible to get some basic software in order to look at the metrics in prometheus.</p>
+<h3 id="requirements">Requirements</h3>
+<ul>
+<li>multipass installed</li>
+<li>python virtualent, to run ansible in a isolated environment</li>
+<li>jq, for parsing json output to generate ansible inventory</li>
+</ul>
+<p>Preparing vms for running tests.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Start vms with multipass</span>
+<span style="color:#75715e"># you need to specify the username you will use</span>
+<span style="color:#75715e"># for ansible and the public key for passwrodless</span>
+<span style="color:#75715e"># authentication</span>
+$ <span style="color:#66d9ef">for</span> i in <span style="color:#f92672">{</span>1..3<span style="color:#f92672">}</span>
+<span style="color:#66d9ef">do</span> cat <span style="color:#e6db74">&lt;&lt;EOF | multipass launch --name testvm${i} -m 1G --cloud-init -
+</span><span style="color:#e6db74">users:
+</span><span style="color:#e6db74">  - default
+</span><span style="color:#e6db74">  - name: testuser
+</span><span style="color:#e6db74">    sudo: ALL=(ALL) NOPASSWD:ALL
+</span><span style="color:#e6db74">    groups: users, admin
+</span><span style="color:#e6db74">    ssh_import_id: None
+</span><span style="color:#e6db74">    lock_passwd: true
+</span><span style="color:#e6db74">    ssh_authorized_keys:
+</span><span style="color:#e6db74">      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCyrauoMmTD5Ar2MAvYd7hCXPKXLR75MabnZvMLyNxFVdbEX0M8Sz+UKIlnOGGUwoFgcl1xj7Bt7oUS/TVWBRBP/r9DQ47FxUZkEBycTty6hESkTSs56If7jMio56ygSTghA1aMYP8mGmVdcjWH0DYc1xgJylfvjuuUEaLJyMvWZeVGwUhPbX3/wqNSsGXczSTRJuYqfL+/tcAAs2u74Hg0YdY8GTT6pcKtchdsR4o9zih6MQktIotvAYinaD71inaggrN67DqIH8MfKk97jE8IIn1wjtMphuZEdRdVvn4ZbYQok1Fnm1kTelxLNWNar8h9hwGRx0O0lQyG1Todl3yL testuser
+</span><span style="color:#e6db74">EOF</span>
+<span style="color:#66d9ef">done</span>
+
+Launched: testvm1
+Launched: testvm2
+Launched: testvm3
+<span style="color:#66d9ef">done</span>
+
+<span style="color:#75715e"># Prepare the asible playbooks to configure the newly</span>
+<span style="color:#75715e"># created vms</span>
+$ mkdir ansible
+
+$ cd ansible
+
+<span style="color:#75715e"># Generate ansible invetory file</span>
+$ echo <span style="color:#e6db74">&#34;[all]&#34;</span> &gt; inventory
+
+$ multipass list --format json | jq .list<span style="color:#f92672">[]</span>.ipv4<span style="color:#f92672">[]</span> | cut -d<span style="color:#e6db74">&#34;\&#34;&#34;</span> -f2 &gt;&gt; inventory
+
+<span style="color:#75715e"># Create a new virtualenv</span>
+$ virtualenv -p python3 .env
+Already using interpreter /usr/bin/python3
+Using base prefix <span style="color:#e6db74">&#39;/usr&#39;</span>
+New python executable in /root/ansible/.env/bin/python3
+Also creating executable in /root/ansible/.env/bin/python
+Installing setuptools, pkg_resources, pip, wheel...done.
+
+<span style="color:#75715e"># Activate the virtualenv</span>
+$ source .env/bin/activate
+
+<span style="color:#75715e"># Intall ansible in the virtualenv</span>
+<span style="color:#f92672">(</span>.env<span style="color:#f92672">)</span>$ pip install ansible
+
+<span style="color:#75715e"># Generate a basic ansible cfg that will work</span> 
+<span style="color:#75715e"># in the virtualenv</span>
+<span style="color:#f92672">(</span>.env<span style="color:#f92672">)</span>$ cat <span style="color:#e6db74">&lt;&lt;EOF | tee ansible.cfg
+</span><span style="color:#e6db74">[defaults]
+</span><span style="color:#e6db74">roles_path          = .env/roles
+</span><span style="color:#e6db74">inventory           = inventory
+</span><span style="color:#e6db74">retry_files_enabled = False
+</span><span style="color:#e6db74">host_key_checking   = False
+</span><span style="color:#e6db74">gathering           = smart
+</span><span style="color:#e6db74">stdout_callback     = debug
+</span><span style="color:#e6db74">callback_whitelist  = timer, profile_tasks
+</span><span style="color:#e6db74">[ssh_connection]
+</span><span style="color:#e6db74">pipelining          = True
+</span><span style="color:#e6db74">control_path        = ~/.ansible/cp/ansible-ssh-%%h-%%p-%%r
+</span><span style="color:#e6db74">ssh_args            = -o RequestTTY=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ControlMaster=auto -o ControlPersist=60s
+</span><span style="color:#e6db74">EOF</span>
+
+<span style="color:#75715e"># Install ansible docker role</span>
+<span style="color:#f92672">(</span>.env<span style="color:#f92672">)</span>$ ansible-galaxy role install fcastello.docker
+- downloading role <span style="color:#e6db74">&#39;docker&#39;</span>, owned by fcastello
+- downloading role from https://github.com/fcastello/ansible-docker/archive/0.0.4.tar.gz
+- extracting fcastello.docker to /home/francisco/ansible/.env/roles/fcastello.docker
+- fcastello.docker <span style="color:#f92672">(</span>0.0.4<span style="color:#f92672">)</span> was installed successfully
+
+<span style="color:#75715e"># Install ansible node exporter role</span>
+<span style="color:#f92672">(</span>.env<span style="color:#f92672">)</span>$ ansible-galaxy role install fcastello.node_exporter_docker
+- downloading role <span style="color:#e6db74">&#39;node_exporter_docker&#39;</span>, owned by fcastello
+- downloading role from https://github.com/fcastello/ansible-node-exporter-docker/archive/0.0.1.tar.gz
+- extracting fcastello.node_exporter_docker to /home/francisco/ansible/.env/roles/fcastello.node_exporter_docker
+- fcastello.node_exporter_docker <span style="color:#f92672">(</span>0.0.1<span style="color:#f92672">)</span> was installed successfully
+
+<span style="color:#75715e"># Create the playbook file which will install</span>
+<span style="color:#75715e"># everything needed</span>
+<span style="color:#f92672">(</span>.env<span style="color:#f92672">)</span>$ cat <span style="color:#e6db74">&lt;&lt;EOF | tee config.yml
+</span><span style="color:#e6db74">---
+</span><span style="color:#e6db74">- name: configure vm(s)
+</span><span style="color:#e6db74">  hosts: &#34;all&#34;
+</span><span style="color:#e6db74">  gather_facts: yes
+</span><span style="color:#e6db74">  become: yes
+</span><span style="color:#e6db74">  tasks:
+</span><span style="color:#e6db74">    - name: &#34;Install docker&#34;
+</span><span style="color:#e6db74">      import_role:
+</span><span style="color:#e6db74">        name: fcastello.docker
+</span><span style="color:#e6db74">    - name: &#34;Run node exporter&#34;
+</span><span style="color:#e6db74">      import_role:
+</span><span style="color:#e6db74">        name: fcastello.node_exporter_docker
+</span><span style="color:#e6db74">    - name: &#34;install iperf&#34;
+</span><span style="color:#e6db74">      apt:
+</span><span style="color:#e6db74">        name: iperf
+</span><span style="color:#e6db74">        state: present
+</span><span style="color:#e6db74">EOF</span>
+
+<span style="color:#75715e"># Run the ansible playbook on all vms</span>
+<span style="color:#f92672">(</span>.env<span style="color:#f92672">)</span>$ ansible-playbook config.yml
+PLAY <span style="color:#f92672">[</span>configure vm<span style="color:#f92672">(</span>s<span style="color:#f92672">)]</span> ******************************************************************************************************************************************************
+
+TASK <span style="color:#f92672">[</span>Gathering Facts<span style="color:#f92672">]</span> ******************************************************************************************************************************************************
+Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:08:23 +0000 <span style="color:#f92672">(</span>0:00:00.147<span style="color:#f92672">)</span>       0:00:00.147 *********
+ok: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
+ok: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
+ok: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
+
+TASK <span style="color:#f92672">[</span>fcastello.docker : install basic required software<span style="color:#f92672">]</span> *******************************************************************************************************************
+Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:08:30 +0000 <span style="color:#f92672">(</span>0:00:07.632<span style="color:#f92672">)</span>       0:00:07.779 *********
+changed: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
+changed: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
+changed: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
+
+TASK <span style="color:#f92672">[</span>fcastello.docker : Add docker gpg apt key<span style="color:#f92672">]</span> ****************************************************************************************************************************
+Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:16:30 +0000 <span style="color:#f92672">(</span>0:07:59.158<span style="color:#f92672">)</span>       0:08:06.939 *********
+changed: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
+changed: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
+changed: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
+
+TASK <span style="color:#f92672">[</span>fcastello.docker : get architecture<span style="color:#f92672">]</span> **********************************************************************************************************************************
+Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:16:35 +0000 <span style="color:#f92672">(</span>0:00:05.547<span style="color:#f92672">)</span>       0:08:12.486 *********
+changed: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
+changed: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
+changed: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
+
+TASK <span style="color:#f92672">[</span>fcastello.docker : Add Docker apt repository<span style="color:#f92672">]</span> *************************************************************************************************************************
+Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:16:36 +0000 <span style="color:#f92672">(</span>0:00:01.170<span style="color:#f92672">)</span>       0:08:13.656 *********
+changed: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
+changed: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
+changed: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
+
+TASK <span style="color:#f92672">[</span>fcastello.docker : Install docker-ce package<span style="color:#f92672">]</span> *************************************************************************************************************************
+Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:17:01 +0000 <span style="color:#f92672">(</span>0:00:24.326<span style="color:#f92672">)</span>       0:08:37.983 *********
+changed: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
+changed: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
+changed: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
+
+TASK <span style="color:#f92672">[</span>fcastello.node_exporter_docker : make sure python-docker package is present<span style="color:#f92672">]</span> ******************************************************************************************
+Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:19:07 +0000 <span style="color:#f92672">(</span>0:02:06.153<span style="color:#f92672">)</span>       0:10:44.136 *********
+ok: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
+ok: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
+ok: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
+
+TASK <span style="color:#f92672">[</span>fcastello.node_exporter_docker : make sure the diretory <span style="color:#66d9ef">for</span> text collectors exist<span style="color:#f92672">]</span> ************************************************************************************
+Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:19:12 +0000 <span style="color:#f92672">(</span>0:00:05.616<span style="color:#f92672">)</span>       0:10:49.752 *********
+changed: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
+changed: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
+changed: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
+
+TASK <span style="color:#f92672">[</span>fcastello.node_exporter_docker : run prometheus node exporter<span style="color:#f92672">]</span> ********************************************************************************************************
+Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:19:14 +0000 <span style="color:#f92672">(</span>0:00:01.295<span style="color:#f92672">)</span>       0:10:51.048 *********
+changed: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
+changed: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
+changed: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
+
+PLAY RECAP ******************************************************************************************************************************************************************
+10.0.100.157               : ok<span style="color:#f92672">=</span><span style="color:#ae81ff">9</span>    changed<span style="color:#f92672">=</span><span style="color:#ae81ff">7</span>    unreachable<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    failed<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    skipped<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    rescued<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    ignored<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>
+10.0.100.43                : ok<span style="color:#f92672">=</span><span style="color:#ae81ff">9</span>    changed<span style="color:#f92672">=</span><span style="color:#ae81ff">7</span>    unreachable<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    failed<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    skipped<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    rescued<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    ignored<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>
+10.0.100.99                : ok<span style="color:#f92672">=</span><span style="color:#ae81ff">9</span>    changed<span style="color:#f92672">=</span><span style="color:#ae81ff">7</span>    unreachable<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    failed<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    skipped<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    rescued<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    ignored<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>
+
+Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:19:32 +0000 <span style="color:#f92672">(</span>0:00:18.173<span style="color:#f92672">)</span>       0:11:09.221 *********
+<span style="color:#f92672">===============================================================================</span>
+fcastello.docker : install basic required software ----------------------------------------------------------------------------------------------------------------- 479.16s
+fcastello.docker : Install docker-ce package ----------------------------------------------------------------------------------------------------------------------- 126.15s
+fcastello.docker : Add Docker apt repository ------------------------------------------------------------------------------------------------------------------------ 24.33s
+fcastello.node_exporter_docker : run prometheus node exporter ------------------------------------------------------------------------------------------------------- 18.17s
+Gathering Facts ------------------------------------------------------------------------------------------------------------------------------------------------------ 7.63s
+fcastello.node_exporter_docker : make sure python-docker package is present ------------------------------------------------------------------------------------------ 5.62s
+fcastello.docker : Add docker gpg apt key ---------------------------------------------------------------------------------------------------------------------------- 5.55s
+fcastello.node_exporter_docker : make sure the diretory <span style="color:#66d9ef">for</span> text collectors exist ------------------------------------------------------------------------------------ 1.30s
+fcastello.docker : get architecture ---------------------------------------------------------------------------------------------------------------------------------- 1.17s
+Playbook run took <span style="color:#ae81ff">0</span> days, <span style="color:#ae81ff">0</span> hours, <span style="color:#ae81ff">11</span> minutes, <span style="color:#ae81ff">9</span> seconds
+</code></pre></div><p>Now we have our host and 3 vms to start playing around with the cpu and looking at metrics and explain what they are.</p>
+<h1 id="cpu-metrics">CPU metrics</h1>
+<p>To start viewing usage lets talk about what are the different components of cpu metrics. For that we can take a look at a screenshot for the <code>top</code> command.</p>
+<p><img src="../images/taming-the-cpu-metrics/top1.png" alt=""></p>
+<p>CPU metrics in the top command show the percentage spent in each one of this &ldquo;states&rdquo;, we will talk more about what they are.</p>
+<ul>
+<li><code>us</code> a.k.a user: this is the cpu time used by userspace processes. Most applications will show up within this percentage when they are using cpu.</li>
+<li><code>sy</code> a.k.a system: this is the cpu time spend by kernel processes, everytime there is interacion from user space processes, or I/O, or processing network traffic; anything that need to interact with the kernel will show up within this percentage.</li>
+<li><code>ni</code> a.k.a. nice: this is the cpu time spent by userspace processes that had been <code>niced</code>. Setting nice to a process will control the priority this process, this can be used to set priority lower when the process is invasive, or set to higher priority when the process need more guarateed cpu time, for example realtime applications. When a userspace process has been set with nice it will show in this metric.</li>
+<li><code>id</code> a.k.a. idle: this is the time where the cpu was idle, pretty much waiting to be used. In busy systems this will have a low value, and in not busy systems this will be high.</li>
+<li><code>wa</code> a.k.a. iowait: this is the time that the cpu was spent by waiting for I/O to happen. This value willl be high when there is a lot of access to disk or accessing hardware. But mostly will be when we are doing heavy reading/writing to disk.</li>
+<li><code>hi</code> a.k.a hardware interrupt or <code>si</code> a.k.a. software interrupt: This is the time the cpu spent processing interrupts, interrupts can be processed also by software with processes called softirqd or when the kernel spent time procesing a hardware interrupt. Either <code>hi</code> and <code>si</code> will mean that there is interaction with hardware happening. A normal case would be that this will spike when having high network traffic as the network card will generate lots of interrupts and it will affect the cpu usage.</li>
+<li><code>st</code> a.k.a. steal: this is the time spent waiting to get cpu time. This value will only show up when running in virtualized environments. The steal value means that someone else (a.k.a another virtual machine most likely) was using the cpu in this time, this happens when multiple virtual machines are sharing the same cores. It&rsquo;s a very interesteing metric to watch, specially when we are running vm&rsquo;s in the cloud or when we run virtual machines. Helps identify if the undelying host is oversubscribed or identify &ldquo;noisy neighbors&rdquo;.</li>
+</ul>
+<p>Next I will do some tests to try to spike each one of the values and show some situations that we might find in cpu metrics which will help us understand more the usage in the server we are watching. I will also show some sittuations that I recorded in my home lab doing other tests.<br>
+Most tests were perfomed in the vms that we created at the start of the post and they were added to a prometheus/grafana setup using the node exporter we installed there, which is out of the scope of this blog post.</p>
+<h2 id="idle-server">Idle server</h2>
+<p>On of the easiest situations to catch is to know that our server is idle, or doing nothing. This is particularly usefull when I want to find servers that have been overprovisioned and are being underused. Catching servers with high <code>idle</code> metrics will help us either get smaller vms if we are running in the cloud, saving us some money or to know this server can be used for more applications and opimizing the usage of servers.</p>
+<p><img src="../images/taming-the-cpu-metrics/idle1.png" alt=""></p>
+<p>We can see the cpu usage of one of the newly created vms named testvm1. In this graph we can see most of the area is painted in blue, showing that most of the percentage time of the cpu as spend in <code>idle</code> which means that this vm is doing nothing at the time of shown in the graph.</p>
+<h2 id="userspace-usage">Userspace usage</h2>
+<p>Other common use case we catch with cpu metrics is to see applications running in userspace that use the cpu. This is normal and we should expect to see this percentage go higher when applications are busier.
+To generate userspace usage in one of the vms, for that will will run a container to stress test the cpu</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># log in to testvm1</span>
+$ multipass shell testvm1
+
+<span style="color:#75715e"># Run docker container that will hog 1 cpu</span>
+ubuntu@testvm1:~$ sudo docker run -it --name cpustress --rm containerstack/cpustress --cpu <span style="color:#ae81ff">1</span> --timeout 90s --metrics-brief
+Unable to find image <span style="color:#e6db74">&#39;containerstack/cpustress:latest&#39;</span> locally
+latest: Pulling from containerstack/cpustress
+c76b39ada3ed: Pull complete
+badc43fe7dea: Pull complete
+Digest: sha256:a72da3632d53fc69a5f60715a1b594b56e1a7d94c40963efbd4cdc37ca37d77e
+Status: Downloaded newer image <span style="color:#66d9ef">for</span> containerstack/cpustress:latest
+stress-ng: info: <span style="color:#f92672">[</span>1<span style="color:#f92672">]</span> dispatching hogs: <span style="color:#ae81ff">1</span> cpudocker run -it --name cpustress --rm containerstack/cpustress --cpu <span style="color:#ae81ff">1</span> --timeout 90s --metrics-brief
+stress-ng: info: <span style="color:#f92672">[</span>1<span style="color:#f92672">]</span> successful run completed in 90.05s
+stress-ng: info: <span style="color:#f92672">[</span>1<span style="color:#f92672">]</span> stressor      bogo ops real time  usr time  sys time   bogo ops/s   bogo ops/s
+stress-ng: info: <span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>                          <span style="color:#f92672">(</span>secs<span style="color:#f92672">)</span>    <span style="color:#f92672">(</span>secs<span style="color:#f92672">)</span>    <span style="color:#f92672">(</span>secs<span style="color:#f92672">)</span>   <span style="color:#f92672">(</span>real time<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>usr+sys time<span style="color:#f92672">)</span>
+stress-ng: info: <span style="color:#f92672">[</span>1<span style="color:#f92672">]</span> cpu              <span style="color:#ae81ff">12992</span>     90.05     88.83      0.01       144.28       146.24
+</code></pre></div><p>We ran a cpu stress test for 90 seconds and we can see the screenshots of the metrics.</p>
+<p><img src="../images/taming-the-cpu-metrics/user1.png" alt=""></p>
+<p>In the graph we can see during the stress test of the cpu, the testvm1 spiked the user space usage, shown as the yellow area, off course the stress test took all available cpu at the time of the test, but we can see a tiny spike in the green area which shows the time spent in kernel space processes, this is because even userspace processes can have interaction with the kernel depending on the tasks the process is doing.</p>
+<p><img src="../images/taming-the-cpu-metrics/user2.png" alt=""></p>
+<p>I show a screenshot of the top command when the stress test was running and it shows the percentages the process was running, however top shows the instant values and not the history.<br>
+Now let&rsquo;s take a look at the underlyng host running testvm1</p>
+<p><img src="../images/taming-the-cpu-metrics/user3.png" alt=""></p>
+<p>This last graph shows the cpu usage of the host running the vms, as we can see the yellow area spiked to 50% when the stress test was being run. This is due to the fact that the vm was assinged only 1 vcpu and the physical host has 2 cores.</p>
+<h2 id="high-io">High I/O</h2>
+<p>In this section I will show something I gathered from other tests I was running in a raspberry pi kubernetes cluster, this was handy as I recently was playing with that cluster and I already had the data to show this kind of situations.<br>
+So this test was a raspberry pi running a kubernetes node and that snapshot of the graph was taken at the time when I was scaling a deployment from 5 to 50 pods. This generated a lot of metrics there which I will explain.</p>
+<p><img src="../images/taming-the-cpu-metrics/io1.png" alt=""></p>
+<p>This graph gets more interesting as we have many things happening there.</p>
+<ul>
+<li>Red area: is the percentage the cpu spent in iowait. Which means it was waiting to for read/writes to the disk, in this case makes sense as it was probably downloading container images and writing them to the disk. The value seems very high, but considering that the raspberry pi is writing to an sd card which is slow this value makes sense. In my experience, on systems where this value goes above 20% or 30% you will experience some performance issues, off course it depends on what the server is running and the applications tolerance to latency.</li>
+<li>Blue area: idle time, I am not going to explain this one as it was already explained before</li>
+<li>Yellow area: userspace percentage, also not going to explain as it was already explained.</li>
+<li>Green area: this is processes running in kernel space, in this case it made sense as kubernetes was probably doing a lot of operations at the kernel level to start and schedule containers on the node. Also when having high I/O also there is a spike in kernel space processes as all reads/writes pass through the kernel.</li>
+<li>Light Blue Area: this is the time spent by processes that were <code>niced</code> which means that either were assingned higher or lower prioritie than the rest of the processes. In this case it makes sense as probably at the moment kubernetes was running a process that needed more priority than others, or the other way around. In fact this will give as a hint to investgate further what those process were and how to optimize if they were causing issues.</li>
+</ul>
+<h2 id="high-interrupts">High interrupts</h2>
+<p>In this case to test a scenario that generates a high amount of interrupts I will run a network traffic stress test between testvm1 and testvm2, for that we will use <code>iperf</code> tool already installed with the ansible playbook.</p>
+<p>On testvm1 start iperf as server</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ubuntu@testvm1:~$ iperf -s
+------------------------------------------------------------
+Server listening on TCP port <span style="color:#ae81ff">5001</span>
+TCP window size:  <span style="color:#ae81ff">128</span> KByte <span style="color:#f92672">(</span>default<span style="color:#f92672">)</span>
+------------------------------------------------------------
+</code></pre></div><p>On the testvm2 run iperf as client</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ubuntu@testvm2:~$ iperf -c testvm1 -t <span style="color:#ae81ff">90</span>
+------------------------------------------------------------
+Client connecting to 10.0.100.1, TCP port <span style="color:#ae81ff">5001</span>
+TCP window size: 85.0 KByte <span style="color:#f92672">(</span>default<span style="color:#f92672">)</span>
+------------------------------------------------------------
+<span style="color:#f92672">[</span>  3<span style="color:#f92672">]</span> local 10.0.100.43 port <span style="color:#ae81ff">42832</span> connected with 10.0.100.1 port <span style="color:#ae81ff">5001</span>
+<span style="color:#f92672">[</span> ID<span style="color:#f92672">]</span> Interval       Transfer     Bandwidth
+<span style="color:#f92672">[</span>  3<span style="color:#f92672">]</span>  0.0-90.0 sec  92.8 GBytes  8.86 Gbits/sec
+</code></pre></div><p>This will generate a lot of interrupts for the network card, even if it&rsquo;s a virtual card the network card&rsquo;s driver will generate interrupts.<br>
+Let&rsquo;s look at the graph.</p>
+<p><img src="../images/taming-the-cpu-metrics/interrupts1.png" alt=""></p>
+<p>In this graph we can see spikes when the network stress test was being performed. I will go into details on the values that makes sense for this use case and not explain what has already been explained.</p>
+<ul>
+<li>Light purple area: time spend by the softirq system in the kernel. This is the time percentage that cpu took to process irqs generated by the network card due to the hight traffic that was generated by the network stress test.</li>
+<li>Green area: there is also a spike in the kernel space processes and this is due to the network traffic also generates a lot of other kernel space processes to use the CPU</li>
+<li>Yellow area: even though the test was performed by a userspace process, it didn&rsquo;t use the cpu much but the network traffic the userspace process spiked irqs and kernel space processing for handling the network packets.</li>
+<li>Dark purple area: this is the steal time in the cpu and it will be explained in the next section.</li>
+</ul>
+<h2 id="noisy-neighbors">Noisy Neighbors</h2>
+<p>In this case I will show a test that will show in cpu metrics if we have &ldquo;noisy neighbors&rdquo; running on the same physical host. This means that we can see if other vms are affecting our vm by looking at the cpu percentages.</p>
+<p>For this test I will run the cpu stress test for 90 seconds in testvm1, testvm2 and testvm3</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Log in to all vms and run the following</span>
+<span style="color:#75715e"># run the docker container to stress the cpu</span>
+$ sudo docker run -it --name cpustress --rm containerstack/cpustress --cpu <span style="color:#ae81ff">1</span> --timeout 90s --metrics-brief
+</code></pre></div><p>Following I will show the graphs for all 3 vms.</p>
+<p><img src="../images/taming-the-cpu-metrics/steal1.png" alt=""></p>
+<p><img src="../images/taming-the-cpu-metrics/steal2.png" alt=""></p>
+<p><img src="../images/taming-the-cpu-metrics/steal3.png" alt=""></p>
+<p>As we can see the cpu usage pattern in the 3 vms was very similar. But there is an interesitng part.</p>
+<ul>
+<li>Yellow area: this time we can see that the userspace percentage never got to 100% like the one was shown in the userspace section. This is due to the fact that there were 3 vms trying to use 100% of their vcpus but the underlying host has only 2 cores, which translates to each vm having
+less cpu time for them as the physical cores were shared among the 3 vms.</li>
+<li>Purple area: in each graph this shows the percent of time other vms has stolen cpu from this vm. Which means time spent waiting to get cpu time that is being used by other vm or process in the physical host.</li>
+</ul>
+<p>This is a particular scenario were it is useful to know if my vm is being affected by other vms running on the same host. When we are running in virtualized environments this might indicate that the underlying physical host is oversubscribed.</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>There are many situations where the cpu might become a bottleneck, cpu metrics are quite revealing and will give us a hint what to look for next to find the issue that is caussing performance problems. I wanted to show in this post with examples of common problems I have seen in production systems and I wanted to reproduce them and explain how to get an interpretation out of the metrics. I explained a few situations that will catch most performance problems when it comes to cpu, and sometimes not even cpu but the metrics will &ldquo;tell&rdquo; us where else to look. For example high iowait in cpu is telling us to look more what is happeing with i/o, specially on disks, maybe we will need faster disks or optimize the application for disk access. Also catching the interrups because of network traffic might indicate us to start tunning the kernel for better network performance. Or the if we see cpu steal spiking might mean that we need a bigger host or that we are running too many vms on the host.<br>
+Anyway, there are millions of combinations of what we can see in the cpu metrics, I wanted to reproduce common problems I faced in the past and most look similar to what I saw in production systems.<br>
+Remeber to really understand the metrics before jumping into conclusions. Many times I miss where the issue is because the lack of understanding the metrics I am looking at, so take a few minutes and read the documetation on the metrics and that will help finding issues faster and more accurately.</p>
+
+    </div>
+</div><div id="social-media-share" class="has-text-centered">
+	<p><i>Sharing is caring!</i></p>
+	<br>
+	
+	<div class="share-buttons">
+	    <a  href="https://www.facebook.com/sharer/sharer.php?u=http%3a%2f%2fpancho.dev%2fposts%2ftaming-the-cpu-metrics%2f"
+	        onclick="socialMediaPopUp(this.href, '', 500, 500); return false;"
+	        title="Share on Facebook. Opens in a new window.">
+	        <img src=/img/icons/45px/facebook.png>
+	    </a>
+
+	    <a  href="https://twitter.com/intent/tweet?text=Taming%20the%20Cpu%20Metrics&url=http%3a%2f%2fpancho.dev%2fposts%2ftaming-the-cpu-metrics%2f"
+	        onclick="socialMediaPopUp(this.href, '', 500, 500); return false;"
+	        title="Share on Twitter. Opens in a new window." >
+	        <img src=/img/icons/45px/twitter.png>
+	    </a>
+
+		<a  href="http://www.reddit.com/submit?url=http%3a%2f%2fpancho.dev%2fposts%2ftaming-the-cpu-metrics%2f"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on Reddit. Opens in a new window." >
+	        <img src=/img/icons/45px/reddit.png>
+	    </a>
+
+	    <a  href="http://pinterest.com/pin/create/button/?url=http%3a%2f%2fpancho.dev%2fposts%2ftaming-the-cpu-metrics%2f"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on Pinterest. Opens in a new window." >
+	        <img src=/img/icons/45px/pinterest.png>
+	    </a>
+
+	    <a  href="http://www.tumblr.com/share/link?url=http%3a%2f%2fpancho.dev%2fposts%2ftaming-the-cpu-metrics%2f"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on Tumblr. Opens in a new window." >
+	        <img src=/img/icons/45px/tumblr.png>
+	    </a>
+
+		<a  href="https://www.linkedin.com/shareArticle?mini=true&url=http%3a%2f%2fpancho.dev%2fposts%2ftaming-the-cpu-metrics%2f
+			&title=Taming%20the%20Cpu%20Metrics&summary=In%20a%20past%20blog%20post%20I%20talked%20about%20The%20misunderstood%20load%20average%20in%20linux%20hosts%2c%20while%20load%20average%20is%20a%20good%20metric%20to%20watch%20in%20linux%20systems%20to%20catch%20generic%20performance%20problems%2c%20it%20does%20not%20reveal%20what%20the%20issue%20might%20be.%20This%20time%20I%20will%20dig%20more%20into%20cpu%20metrics%20collected%20from%20a%20linux%20system%20and%20explain%20them%2c%20for%20this%20purpose%20I%20will%20use%20multipass%20vms%2c%20and%20will%20be%20showing%20metrics%20from%20grafana%20screnshots%20which%20take%20the%20data%20from%20prometheus%20and%20prometheus%20node%20exporter%20%28this%20is%20actually%20out%20of%20the%20scope%20of%20this%20post%29.&source=rafed123.github.io"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on LinkedIn. Opens in a new window." >
+	        <img src=/img/icons/45px/linkedin.png>
+	    </a>
+
+	    <a  href="mailto:?subject=Taming%20the%20Cpu%20Metrics&amp;body=Check out this site http%3a%2f%2fpancho.dev%2fposts%2ftaming-the-cpu-metrics%2f"
+	        title="Share via Email. Opens in a new window." >
+	        <img src=/img/icons/45px/mail.png>
+	    </a>
+	</div>
+</div>
+
+
+<br>
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    (function () {
+        
+        
+        if (window.location.hostname == "localhost")
+            return;
+
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        var disqus_shortname = 'disqus-code';
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+        </div>
+    </div>
+<script async src="https://cse.google.com/cse.js?cx=google-search-code"></script>
+<gcse:searchresults-only></gcse:searchresults-only>
+
+
+<footer class="footer has-background-dark">
+    <div class="content has-text-centered has-text-white">
+        <p>
+            © 2020 Ramium. Powered by
+            <a class="has-text-light" href="https://github.com/gohugoio/hugo" target="_blank">
+            Hugo</a>. Theme
+            <a class="has-text-light" href="https://github.com/rafed123/ramium/" target="_blank">
+                Ramium.
+            </a>
+        </p>
+    </div>
+</footer>
+</body>
+
+</html>
