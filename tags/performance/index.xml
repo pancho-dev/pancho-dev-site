@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>performance on pancho.dev</title>
+    <link>http://pancho.dev/tags/performance/</link>
+    <description>Recent content in performance on pancho.dev</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 11 Jul 2020 15:08:51 -0300</lastBuildDate>
+    
+	<atom:link href="http://pancho.dev/tags/performance/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Taming the Cpu Metrics</title>
+      <link>http://pancho.dev/posts/taming-the-cpu-metrics/</link>
+      <pubDate>Sat, 11 Jul 2020 15:08:51 -0300</pubDate>
+      
+      <guid>http://pancho.dev/posts/taming-the-cpu-metrics/</guid>
+      <description>In a past blog post I talked about The misunderstood load average in linux hosts, while load average is a good metric to watch in linux systems to catch generic performance problems, it does not reveal what the issue might be. This time I will dig more into cpu metrics collected from a linux system and explain them, for this purpose I will use multipass vms, and will be showing metrics from grafana screnshots which take the data from prometheus and prometheus node exporter (this is actually out of the scope of this post).</description>
+    </item>
+    
+    <item>
+      <title>The misunderstood load average in linux hosts</title>
+      <link>http://pancho.dev/posts/linux-load-average/</link>
+      <pubDate>Sun, 07 Jun 2020 20:02:27 -0300</pubDate>
+      
+      <guid>http://pancho.dev/posts/linux-load-average/</guid>
+      <description>Ever wondered when someone runs the command uptime in a linux host what the values in the load average: section mean? well I have wondered about it many times in my carreer. And this should be a simple question to ask a seasoned linux administrator or developer, right? well it&amp;rsquo;s not entirely true, as the load average value in a linux hosts probably is the most misunderstood term and often associated with the wrong concepts.</description>
+    </item>
+    
+  </channel>
+</rss>

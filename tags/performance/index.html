@@ -2,29 +2,29 @@
 <html lang="en-us">
 
 <head><title>
-    Posts | 
+    Performance | 
     
     pancho.dev</title>
 
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="List of all articles in section- Posts">
+<meta name="description" content="List of all articles related to performance">
 
 
 
-<meta property="og:title" content="Posts" />
+<meta property="og:title" content="performance" />
 <meta property="og:description" content="A description for the meta tag of the site" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="http://pancho.dev/posts/" />
+<meta property="og:url" content="http://pancho.dev/tags/performance/" />
 <meta property="og:updated_time" content="2020-07-11T15:08:51-03:00" />
 
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Posts"/>
+<meta name="twitter:title" content="performance"/>
 <meta name="twitter:description" content="A description for the meta tag of the site"/>
 
-<meta itemprop="name" content="Posts">
+<meta itemprop="name" content="performance">
 <meta itemprop="description" content="A description for the meta tag of the site">
-<link rel="canonical" href="http://pancho.dev/posts/" />
+<link rel="canonical" href="http://pancho.dev/tags/performance/" />
 
 <link rel="icon" type="image/png" href="http://pancho.dev/image/favicon.ico">
 
@@ -101,14 +101,13 @@ if (!doNotTrack) {
         <div id="page-body" class="column is-7">
 
 <div class="content">
-    <h1 class="title is-3">Posts</h1>
+    <h1>Performance</h1>
 </div>
 
-
 <div class="blog-brief">
-    <a href="/posts/multinode-k8s-ignite-k3s/">
+    <a href="/posts/taming-the-cpu-metrics/">
         <h3 class="title is-4">
-            Multinode K8s Cluster Using Ignite and K3s
+            Taming the Cpu Metrics
         </h3>
     </a>
 
@@ -117,8 +116,8 @@ if (!doNotTrack) {
 
             
             <div class="level-item">
-                <a href="/posts/multinode-k8s-ignite-k3s/">
-                    <p class="subtitle info date">May 17, 2020
+                <a href="/posts/taming-the-cpu-metrics/">
+                    <p class="subtitle info date">Jul 11, 2020
                     </p>
                 </a>
             </div>
@@ -126,9 +125,9 @@ if (!doNotTrack) {
 
 
             <div class="level-item">
-                <a href="/posts/multinode-k8s-ignite-k3s/">
+                <a href="/posts/taming-the-cpu-metrics/">
                     <p class="subtitle info">
-                        13 mins read
+                        18 mins read
                     </p>
                 </a>
             </div>
@@ -137,7 +136,7 @@ if (!doNotTrack) {
             
             <a class="tag is-rounded" href="/tags/linux">Linux</a>
             
-            <a class="tag is-rounded" href="/tags/kubernetes">Kubernetes</a>
+            <a class="tag is-rounded" href="/tags/performance">Performance</a>
             
         </div>
     </div>
@@ -146,10 +145,9 @@ if (!doNotTrack) {
         
 
         <div>
-            <a href="/posts/multinode-k8s-ignite-k3s/">
+            <a href="/posts/taming-the-cpu-metrics/">
                 <p class="summary">
-                    Sometimes if you are working with kubernetes, or developing applications that require a multinode setup to test some functionality running a multinode cluster is a must, in some cases you could use kind which you can spin up multinode/multimaster clusters on docker, however there might be scenarios were you still need to test or develop functions that need the real feel of a cluster with multiple nodes.
-In the past I have run this in my local environment running vms with vagrant and virtualbox, that worked very well, and I still use it for some special scenarios.
+                    In a past blog post I talked about The misunderstood load average in linux hosts, while load average is a good metric to watch in linux systems to catch generic performance problems, it does not reveal what the issue might be. This time I will dig more into cpu metrics collected from a linux system and explain them, for this purpose I will use multipass vms, and will be showing metrics from grafana screnshots which take the data from prometheus and prometheus node exporter (this is actually out of the scope of this post).
                     
                 </p>
             </a>
@@ -160,7 +158,66 @@ In the past I have run this in my local environment running vms with vagrant and
         <div class="level-left">
         </div>
         <div class="level-right">
-            <a href="/posts/multinode-k8s-ignite-k3s/">Continue reading <i class="fa fa-angle-double-right"
+            <a href="/posts/taming-the-cpu-metrics/">Continue reading <i class="fa fa-angle-double-right"
+                    aria-hidden="true"></i></a>
+        </div>
+    </div>
+    <hr>
+</div><div class="blog-brief">
+    <a href="/posts/linux-load-average/">
+        <h3 class="title is-4">
+            The Misunderstood Load Average in Linux Hosts
+        </h3>
+    </a>
+
+    <div class="level is-mobile details">
+        <div class="level-left">
+
+            
+            <div class="level-item">
+                <a href="/posts/linux-load-average/">
+                    <p class="subtitle info date">Jun 7, 2020
+                    </p>
+                </a>
+            </div>
+            
+
+
+            <div class="level-item">
+                <a href="/posts/linux-load-average/">
+                    <p class="subtitle info">
+                        16 mins read
+                    </p>
+                </a>
+            </div>
+        </div>
+        <div class="level-right is-hidden-touch">
+            
+            <a class="tag is-rounded" href="/tags/linux">Linux</a>
+            
+            <a class="tag is-rounded" href="/tags/performance">Performance</a>
+            
+        </div>
+    </div>
+
+    <div>
+        
+
+        <div>
+            <a href="/posts/linux-load-average/">
+                <p class="summary">
+                    Ever wondered when someone runs the command uptime in a linux host what the values in the load average: section mean? well I have wondered about it many times in my carreer. And this should be a simple question to ask a seasoned linux administrator or developer, right? well it’s not entirely true, as the load average value in a linux hosts probably is the most misunderstood term and often associated with the wrong concepts.
+                    
+                </p>
+            </a>
+        </div>
+    </div>
+
+    <div class="level is-mobile continue-reading">
+        <div class="level-left">
+        </div>
+        <div class="level-right">
+            <a href="/posts/linux-load-average/">Continue reading <i class="fa fa-angle-double-right"
                     aria-hidden="true"></i></a>
         </div>
     </div>
@@ -183,49 +240,9 @@ In the past I have run this in my local environment running vms with vagrant and
 
 
 
-<section class="section">
-    <nav class="pagination is-centered">
-
-        
-            <a class="pagination-previous is-dark" href="/posts/">Previous</a>
-        
-
-        
-            <a class="pagination-next" disabled>Next page</a>
-        
 
 
-        <ul class="pagination-list">
 
-        
-
-            
-            
-
-                <li><a href="/posts/" class="pagination-link">1</a></li>
-
-                
-                
-
-            
-
-        
-
-            
-            
-
-                <li><a href="/posts/page/2/" class="pagination-link is-current">2</a></li>
-
-                
-                
-
-            
-
-        
-
-        </ul>
-    </nav>
-</section>
 
         </div>
     </div>

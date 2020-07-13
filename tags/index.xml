@@ -6,9 +6,55 @@
     <description>Recent content in Tags on pancho.dev</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
+    <lastBuildDate>Sat, 11 Jul 2020 15:08:51 -0300</lastBuildDate>
     
 	<atom:link href="http://pancho.dev/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>linux</title>
+      <link>http://pancho.dev/tags/linux/</link>
+      <pubDate>Sat, 11 Jul 2020 15:08:51 -0300</pubDate>
+      
+      <guid>http://pancho.dev/tags/linux/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>performance</title>
+      <link>http://pancho.dev/tags/performance/</link>
+      <pubDate>Sat, 11 Jul 2020 15:08:51 -0300</pubDate>
+      
+      <guid>http://pancho.dev/tags/performance/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>development</title>
+      <link>http://pancho.dev/tags/development/</link>
+      <pubDate>Sat, 27 Jun 2020 14:35:31 -0300</pubDate>
+      
+      <guid>http://pancho.dev/tags/development/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>python</title>
+      <link>http://pancho.dev/tags/python/</link>
+      <pubDate>Sat, 27 Jun 2020 14:35:31 -0300</pubDate>
+      
+      <guid>http://pancho.dev/tags/python/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>kubernetes</title>
+      <link>http://pancho.dev/tags/kubernetes/</link>
+      <pubDate>Sat, 13 Jun 2020 11:37:56 -0300</pubDate>
+      
+      <guid>http://pancho.dev/tags/kubernetes/</guid>
+      <description></description>
+    </item>
     
   </channel>
 </rss>

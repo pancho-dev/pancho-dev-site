@@ -31,7 +31,7 @@
 
 
 
-<meta itemprop="keywords" content="" />
+<meta itemprop="keywords" content="linux,performance," />
 <link rel="canonical" href="http://pancho.dev/posts/taming-the-cpu-metrics/" />
 
 <link rel="icon" type="image/png" href="http://pancho.dev/image/favicon.ico">
@@ -103,24 +103,6 @@ if (!doNotTrack) {
       
 
       
-      <div class="navbar-item">
-        <form id="cse-search-box-form-id" onsubmit="return executeQuery();" role="search">
-          <div class="field has-addons">
-            <div class="control is-expanded">
-              <input id="cse-search-input-box-id" size=15 class="input" type="text" autocomplete="off"
-                placeholder="&#xf1a0; Google search" style="font-family:Arial, FontAwesome">
-            </div>
-
-            <div class="control">
-              <button type="submit" class="button is-black">
-                <i class="fa fa-search"></i>
-                </a>
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
-      
     </div>
   </div>
 </nav><div class="columns is-centered">
@@ -147,11 +129,19 @@ if (!doNotTrack) {
         <div class="level-right is-hidden-touch">
             <div class="tags">
                 
+                <a class="tag is-dark is-rounded" href="/tags/linux">Linux</a>
+                
+                <a class="tag is-dark is-rounded" href="/tags/performance">Performance</a>
+                
             </div>
         </div>
     </div>
 
     <div class="tags is-hidden-desktop">
+        
+        <a class="tag is-dark is-rounded" href="/tags/linux">Linux</a>
+        
+        <a class="tag is-dark is-rounded" href="/tags/performance">Performance</a>
         
     </div>
 
@@ -512,7 +502,7 @@ Remeber to really understand the metrics before jumping into conclusions. Many t
             return;
 
         var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        var disqus_shortname = 'disqus-code';
+        var disqus_shortname = '';
         dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
         (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
     })();
@@ -522,9 +512,6 @@ Remeber to really understand the metrics before jumping into conclusions. Many t
 
         </div>
     </div>
-<script async src="https://cse.google.com/cse.js?cx=google-search-code"></script>
-<gcse:searchresults-only></gcse:searchresults-only>
-
 
 <footer class="footer has-background-dark">
     <div class="content has-text-centered has-text-white">
