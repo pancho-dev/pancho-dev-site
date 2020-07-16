@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head><title>
+    Who Stole My Cpu? | 
+    
+    pancho.dev</title>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="In a previous post I talked about Taming the cpu metrics, while that post was an overview of cpu metrics I tought it was a good topic to enphasize on the cpu steal metric in linux hosts. This is something I recently found and didn&rsquo;t know it even existed, but it can be very useful when running in virtualized environments and helping us tune either the vm, or the physical host that runs the vms.
+    ">
+
+
+<meta property="og:title" content="Who Stole My Cpu?" />
+<meta property="og:description" content="In a previous post I talked about Taming the cpu metrics, while that post was an overview of cpu metrics I tought it was a good topic to enphasize on the cpu steal metric in linux hosts. This is something I recently found and didn&rsquo;t know it even existed, but it can be very useful when running in virtualized environments and helping us tune either the vm, or the physical host that runs the vms." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://pancho.dev/posts/who-stole-my-cpu/" />
+<meta property="article:published_time" content="2020-07-16T15:51:59-03:00" />
+<meta property="article:modified_time" content="2020-07-16T15:51:59-03:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Who Stole My Cpu?"/>
+<meta name="twitter:description" content="In a previous post I talked about Taming the cpu metrics, while that post was an overview of cpu metrics I tought it was a good topic to enphasize on the cpu steal metric in linux hosts. This is something I recently found and didn&rsquo;t know it even existed, but it can be very useful when running in virtualized environments and helping us tune either the vm, or the physical host that runs the vms."/>
+
+<meta itemprop="name" content="Who Stole My Cpu?">
+<meta itemprop="description" content="In a previous post I talked about Taming the cpu metrics, while that post was an overview of cpu metrics I tought it was a good topic to enphasize on the cpu steal metric in linux hosts. This is something I recently found and didn&rsquo;t know it even existed, but it can be very useful when running in virtualized environments and helping us tune either the vm, or the physical host that runs the vms.">
+<meta itemprop="datePublished" content="2020-07-16T15:51:59-03:00" />
+<meta itemprop="dateModified" content="2020-07-16T15:51:59-03:00" />
+<meta itemprop="wordCount" content="1067">
+
+
+
+<meta itemprop="keywords" content="linux,performance,cloud,virtualization," />
+<link rel="canonical" href="http://pancho.dev/posts/who-stole-my-cpu/" />
+
+<link rel="icon" type="image/png" href="http://pancho.dev/image/favicon.ico">
+
+<link rel="stylesheet" href="/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/bulma.min.css">
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-920705-12', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+<script src=/js/ramium.js></script>
+<link rel="stylesheet" href=/css/ramium.css>
+
+
+
+
+
+</head>
+
+<body><nav class="navbar is-dark" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a class="navbar-item" href=/>
+      
+      <strong>pancho.dev </strong>
+      
+    </a>
+
+    <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false"
+      data-target="navbarBasicExample">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+
+  <div id="navbarBasicExample" class="navbar-menu">
+    <div class="navbar-start">
+      
+      
+      <a class="navbar-item" href="/">Home</a>
+      
+      
+      
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">Blog</a>
+        <div class="navbar-dropdown">
+          
+          <a class="navbar-item" href="/posts/">All Posts</a>
+          
+        </div>
+      </div>
+      
+      
+    </div>
+
+    <div class="navbar-end">
+      
+
+      
+    </div>
+  </div>
+</nav><div class="columns is-centered">
+        <div id="page-body" class="column is-7">
+
+<div class="content blog">
+    <h1>Who Stole My Cpu?</h1>
+
+    <div id="infobar" class="level is-mobile">
+        <div class="level-left">
+            
+            <div class="level-item">
+                <p class="subtitle info date">Jul 16, 2020
+                </p>
+            </div>
+            
+
+            <div class="level-item">
+                <p class="subtitle info">
+                    6 mins read
+                </p>
+            </div>
+        </div>
+        <div class="level-right is-hidden-touch">
+            <div class="tags">
+                
+                <a class="tag is-dark is-rounded" href="/tags/linux">Linux</a>
+                
+                <a class="tag is-dark is-rounded" href="/tags/performance">Performance</a>
+                
+                <a class="tag is-dark is-rounded" href="/tags/cloud">Cloud</a>
+                
+                <a class="tag is-dark is-rounded" href="/tags/virtualization">Virtualization</a>
+                
+            </div>
+        </div>
+    </div>
+
+    <div class="tags is-hidden-desktop">
+        
+        <a class="tag is-dark is-rounded" href="/tags/linux">Linux</a>
+        
+        <a class="tag is-dark is-rounded" href="/tags/performance">Performance</a>
+        
+        <a class="tag is-dark is-rounded" href="/tags/cloud">Cloud</a>
+        
+        <a class="tag is-dark is-rounded" href="/tags/virtualization">Virtualization</a>
+        
+    </div>
+
+    <div class="blog-text">
+        
+
+        <p>In a previous post I talked about <a href="/posts/taming-the-cpu-metrics/">Taming the cpu metrics</a>, while that post was an overview of cpu metrics I tought it was a good topic to enphasize on the cpu <code>steal</code> metric in linux hosts. This is something I recently found and didn&rsquo;t know it even existed, but it can be very useful when running in virtualized environments and helping us tune either the vm, or the physical host that runs the vms. It is something engineers probably overlook and probably don&rsquo;t even know, if I have known this a couple of months ago would have saved me some troubleshooing time.</p>
+<h1 id="so-what-is-the-steal-value-in-cpu-metrics">So, what is the steal value in cpu metrics?</h1>
+<p>The steal value for cpu metrics in linux show the percentage of time the virtual cpus (vcpus) are waiting for physical cpu time, this would be because the physical cpu is being used by other vms or processes in the physical host and the physical cpus are being shared by vms/processes. And it is the <code>st</code> value in the cpu section of the <code>top</code> command.</p>
+<p><img src="../images/who-stole-my-cpu/top1.png" alt=""></p>
+<p>So now let&rsquo;s talk more in detail about this metric. I my previous post <a href="/posts/taming-the-cpu-metrics/">Taming the cpu metrics</a> I reproduced some scenarios, and one of them reproduced spiking the steal values. So let&rsquo;s look a a cpu metrics graph.</p>
+<p><img src="../images/who-stole-my-cpu/steal1.png" alt=""></p>
+<p>To give more context, this graph comes from the test where in my home linux server lab, I ran 3 vms and ran a cpu load test in all 3 vms, making them try to use 100% of their own vcpu. However the physical host had only 2 physical cpus and as we can see in the metrics the purple area is the percentage of the time the vm was waiting for physical cpu time. So all 3 vms were getting throttled by the fact that other vms were trying to use the same resource.</p>
+<h1 id="why-is-this-important">Why is this important?</h1>
+<p>Lot of todays technology is backed by either on premise virtual machines running on VMWare, KVM, or XEN; or running in virtual machines in public cloud, or some hybrid scenario. So knowing what is the performance impact for an application or server running on a virtualized environment is something good to know. The steal value of the cpu is one metrics to watch for when looking for optimizing virtualized workloads.<br>
+When running a vm when we see this value go higher, the reason would be that there could be a <code>noisy neighbor</code> running in the physical host which is affecting the vm we are looking at. This is helpfull to catch a vm hogging on resouces and affecting other vms.<br>
+When I see this value spiking in most vms running on the same physiscal host, it might indicate that the host is oversubscribed and we need to split the workload in more servers if we can&rsquo;t tolerate the performance hit.<br>
+An intersting fact is that running on public clouds vms this value would show different in similar vms running similar workloads and this might be due to the fact that the vms run in a shared environment and even if the vcpus are dedicated some other vms might affect my vm a bit. So there will always be a performance loss when running a vm and we need to be aware of that when we designing applications to run in a virtual environment.</p>
+<p><img src="../images/who-stole-my-cpu/steal2.png" alt=""></p>
+<p>This graph shows a real vm running in a well known public cloud, the snapshot shows the cpu usage when I was performing a load test, while we see a lot going on in this graph as userspace, kernelspace and softirq taking most of the cpu time, there is around 4% that is spend in steal (waiting for real cpu) the dark purple area, so this shows a bit of the performnace hit when running in the cloud and this type of vm, having this is inevitable when running vms, so I always have in mind this performance hit when running in a virtualized environment. More or less I have run workloads in google cloud, AWS, Azure and IBM cloud, and I have seen the same behavior in all of them, some more some less but it&rsquo;s always going to be there.<br>
+Another situation where this is going to be helpful to catch when the vm cpu is getting throttled, this happens in public clouds when running &ldquo;burstable&rdquo; vm types, this is how I actually learnt about the steal metric, I was running heavy workloads and by mistake one of the vms was created with similar specs but with a burstable type, and I saw perfomance issues in one of them, when I was digging the metrics I found a  spike in the steal value, which I didn&rsquo;t know what it was so I started digging a bit more, and then realized the vm was set up as burtable type that was exceeding the permited usage. So beware when running burstable instances in the public clouds as it will save some money because they are cheaper, but will give us some headache on performance and sometimes is not that easy to replace the vm type. Just some example of vms that are burstable would be T-series instances in AWS, B-Series instances in Azure, and Google cloud would be the instance types marked as shared vcpu.</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>Steal cpu metric will help us catch noisy neighbors, oversubscribed physical hosts running vms, or to catch if the vm is getting throttled in the cloud. But having longer term metrics will be also help when calculating the impact of running in a virtualized environment.<br>
+Unfortunately this is not the only metrics that we can use to calculate the impact of running in a virtualized environment, but is is useful. There are other things to have in mind when using virtual manchines, one very importan thing is to have metrics stored for future reference and making informed decisions when designing or sizing a project.<br>
+This is pretty much a followup of previous posts where I talk about performance, however this are just memoirs from my personal experience and they are far from having a magic formula that will tell how to tune or optimize perfomance.<br>
+Perfomance tuning servers/applications is an art of it&rsquo;s own, where variables and constraints need to be balanced for finding the sweetspot of resources versus money spent to run an applications and fulfill the requirements of latency and availability.</p>
+
+    </div>
+</div><div id="social-media-share" class="has-text-centered">
+	<p><i>Sharing is caring!</i></p>
+	<br>
+	
+	<div class="share-buttons">
+	    <a  href="https://www.facebook.com/sharer/sharer.php?u=http%3a%2f%2fpancho.dev%2fposts%2fwho-stole-my-cpu%2f"
+	        onclick="socialMediaPopUp(this.href, '', 500, 500); return false;"
+	        title="Share on Facebook. Opens in a new window.">
+	        <img src=/img/icons/45px/facebook.png>
+	    </a>
+
+	    <a  href="https://twitter.com/intent/tweet?text=Who%20Stole%20My%20Cpu%3f&url=http%3a%2f%2fpancho.dev%2fposts%2fwho-stole-my-cpu%2f"
+	        onclick="socialMediaPopUp(this.href, '', 500, 500); return false;"
+	        title="Share on Twitter. Opens in a new window." >
+	        <img src=/img/icons/45px/twitter.png>
+	    </a>
+
+		<a  href="http://www.reddit.com/submit?url=http%3a%2f%2fpancho.dev%2fposts%2fwho-stole-my-cpu%2f"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on Reddit. Opens in a new window." >
+	        <img src=/img/icons/45px/reddit.png>
+	    </a>
+
+	    <a  href="http://pinterest.com/pin/create/button/?url=http%3a%2f%2fpancho.dev%2fposts%2fwho-stole-my-cpu%2f"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on Pinterest. Opens in a new window." >
+	        <img src=/img/icons/45px/pinterest.png>
+	    </a>
+
+	    <a  href="http://www.tumblr.com/share/link?url=http%3a%2f%2fpancho.dev%2fposts%2fwho-stole-my-cpu%2f"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on Tumblr. Opens in a new window." >
+	        <img src=/img/icons/45px/tumblr.png>
+	    </a>
+
+		<a  href="https://www.linkedin.com/shareArticle?mini=true&url=http%3a%2f%2fpancho.dev%2fposts%2fwho-stole-my-cpu%2f
+			&title=Who%20Stole%20My%20Cpu%3f&summary=In%20a%20previous%20post%20I%20talked%20about%20Taming%20the%20cpu%20metrics%2c%20while%20that%20post%20was%20an%20overview%20of%20cpu%20metrics%20I%20tought%20it%20was%20a%20good%20topic%20to%20enphasize%20on%20the%20cpu%20steal%20metric%20in%20linux%20hosts.%20This%20is%20something%20I%20recently%20found%20and%20didn%26rsquo%3bt%20know%20it%20even%20existed%2c%20but%20it%20can%20be%20very%20useful%20when%20running%20in%20virtualized%20environments%20and%20helping%20us%20tune%20either%20the%20vm%2c%20or%20the%20physical%20host%20that%20runs%20the%20vms.&source=rafed123.github.io"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on LinkedIn. Opens in a new window." >
+	        <img src=/img/icons/45px/linkedin.png>
+	    </a>
+
+	    <a  href="mailto:?subject=Who%20Stole%20My%20Cpu%3f&amp;body=Check out this site http%3a%2f%2fpancho.dev%2fposts%2fwho-stole-my-cpu%2f"
+	        title="Share via Email. Opens in a new window." >
+	        <img src=/img/icons/45px/mail.png>
+	    </a>
+	</div>
+</div>
+
+
+<br>
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    (function () {
+        
+        
+        if (window.location.hostname == "localhost")
+            return;
+
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        var disqus_shortname = '';
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+        </div>
+    </div>
+
+<footer class="footer has-background-dark">
+    <div class="content has-text-centered has-text-white">
+        <p>
+            © 2020 Ramium. Powered by
+            <a class="has-text-light" href="https://github.com/gohugoio/hugo" target="_blank">
+            Hugo</a>. Theme
+            <a class="has-text-light" href="https://github.com/rafed123/ramium/" target="_blank">
+                Ramium.
+            </a>
+        </p>
+    </div>
+</footer>
+</body>
+
+</html>

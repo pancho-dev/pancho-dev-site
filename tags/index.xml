@@ -6,15 +6,24 @@
     <description>Recent content in Tags on pancho.dev</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 11 Jul 2020 15:08:51 -0300</lastBuildDate>
+    <lastBuildDate>Thu, 16 Jul 2020 15:51:59 -0300</lastBuildDate>
     
 	<atom:link href="http://pancho.dev/tags/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
+      <title>cloud</title>
+      <link>http://pancho.dev/tags/cloud/</link>
+      <pubDate>Thu, 16 Jul 2020 15:51:59 -0300</pubDate>
+      
+      <guid>http://pancho.dev/tags/cloud/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>linux</title>
       <link>http://pancho.dev/tags/linux/</link>
-      <pubDate>Sat, 11 Jul 2020 15:08:51 -0300</pubDate>
+      <pubDate>Thu, 16 Jul 2020 15:51:59 -0300</pubDate>
       
       <guid>http://pancho.dev/tags/linux/</guid>
       <description></description>
@@ -23,9 +32,18 @@
     <item>
       <title>performance</title>
       <link>http://pancho.dev/tags/performance/</link>
-      <pubDate>Sat, 11 Jul 2020 15:08:51 -0300</pubDate>
+      <pubDate>Thu, 16 Jul 2020 15:51:59 -0300</pubDate>
       
       <guid>http://pancho.dev/tags/performance/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>virtualization</title>
+      <link>http://pancho.dev/tags/virtualization/</link>
+      <pubDate>Thu, 16 Jul 2020 15:51:59 -0300</pubDate>
+      
+      <guid>http://pancho.dev/tags/virtualization/</guid>
       <description></description>
     </item>
     

@@ -6,10 +6,19 @@
     <description>Recent content in performance on pancho.dev</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 11 Jul 2020 15:08:51 -0300</lastBuildDate>
+    <lastBuildDate>Thu, 16 Jul 2020 15:51:59 -0300</lastBuildDate>
     
 	<atom:link href="http://pancho.dev/tags/performance/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Who Stole My Cpu?</title>
+      <link>http://pancho.dev/posts/who-stole-my-cpu/</link>
+      <pubDate>Thu, 16 Jul 2020 15:51:59 -0300</pubDate>
+      
+      <guid>http://pancho.dev/posts/who-stole-my-cpu/</guid>
+      <description>In a previous post I talked about Taming the cpu metrics, while that post was an overview of cpu metrics I tought it was a good topic to enphasize on the cpu steal metric in linux hosts. This is something I recently found and didn&amp;rsquo;t know it even existed, but it can be very useful when running in virtualized environments and helping us tune either the vm, or the physical host that runs the vms.</description>
+    </item>
     
     <item>
       <title>Taming the Cpu Metrics</title>

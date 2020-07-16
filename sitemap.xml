@@ -3,8 +3,19 @@
       
       
 	  <url>
+	    <loc>http://pancho.dev/tags/cloud/</loc>
+	    <lastmod>2020-07-16</lastmod>
+        
+
+        
+	  </url>
+	  
+  
+      
+      
+	  <url>
 	    <loc>http://pancho.dev/tags/linux/</loc>
-	    <lastmod>2020-07-11</lastmod>
+	    <lastmod>2020-07-16</lastmod>
         
 
         
@@ -15,7 +26,7 @@
       
 	  <url>
 	    <loc>http://pancho.dev/tags/performance/</loc>
-	    <lastmod>2020-07-11</lastmod>
+	    <lastmod>2020-07-16</lastmod>
         
 
         
@@ -26,7 +37,7 @@
       
 	  <url>
 	    <loc>http://pancho.dev/posts/</loc>
-	    <lastmod>2020-07-11</lastmod>
+	    <lastmod>2020-07-16</lastmod>
         
 
         
@@ -37,7 +48,29 @@
       
 	  <url>
 	    <loc>http://pancho.dev/tags/</loc>
-	    <lastmod>2020-07-11</lastmod>
+	    <lastmod>2020-07-16</lastmod>
+        
+
+        
+	  </url>
+	  
+  
+      
+      
+	  <url>
+	    <loc>http://pancho.dev/tags/virtualization/</loc>
+	    <lastmod>2020-07-16</lastmod>
+        
+
+        
+	  </url>
+	  
+  
+      
+      
+	  <url>
+	    <loc>http://pancho.dev/posts/who-stole-my-cpu/</loc>
+	    <lastmod>2020-07-16</lastmod>
         
 
         
