@@ -6,10 +6,19 @@
     <description>Recent content in Posts on pancho.dev</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 02 Aug 2020 13:07:20 -0300</lastBuildDate>
+    <lastBuildDate>Mon, 03 Aug 2020 14:05:25 -0300</lastBuildDate>
     
 	<atom:link href="http://pancho.dev/posts/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Lightning post - Testing a reverse http proxy</title>
+      <link>http://pancho.dev/posts/testing-a-proxy/</link>
+      <pubDate>Mon, 03 Aug 2020 14:05:25 -0300</pubDate>
+      
+      <guid>http://pancho.dev/posts/testing-a-proxy/</guid>
+      <description>Did you eve had trouble with a proxy config? Found that is not simple to test a proxy locally?. Why this? simple, I found many times deploying a proxy configuration to production, even a small change like adding a new path, a redirection or just updating ssl certs, can lead to a disruption or an outage because sometimes it&amp;rsquo;s hard to properly test it before pushing the configuration. So I found a couple od tricks that can help test locally in our laptops or machine before even pushing the code or config giving a safer path to deploy a proxy config.</description>
+    </item>
     
     <item>
       <title>What is a lightning post?</title>

@@ -3,8 +3,52 @@
       
       
 	  <url>
+	    <loc>http://pancho.dev/tags/development/</loc>
+	    <lastmod>2020-08-03</lastmod>
+        
+
+        
+	  </url>
+	  
+  
+      
+      
+	  <url>
+	    <loc>http://pancho.dev/posts/testing-a-proxy/</loc>
+	    <lastmod>2020-08-03</lastmod>
+        
+
+        
+	  </url>
+	  
+  
+      
+      
+	  <url>
 	    <loc>http://pancho.dev/posts/</loc>
-	    <lastmod>2020-08-02</lastmod>
+	    <lastmod>2020-08-03</lastmod>
+        
+
+        
+	  </url>
+	  
+  
+      
+      
+	  <url>
+	    <loc>http://pancho.dev/tags/proxy/</loc>
+	    <lastmod>2020-08-03</lastmod>
+        
+
+        
+	  </url>
+	  
+  
+      
+      
+	  <url>
+	    <loc>http://pancho.dev/tags/</loc>
+	    <lastmod>2020-08-03</lastmod>
         
 
         
@@ -58,17 +102,6 @@
       
       
 	  <url>
-	    <loc>http://pancho.dev/tags/</loc>
-	    <lastmod>2020-07-16</lastmod>
-        
-
-        
-	  </url>
-	  
-  
-      
-      
-	  <url>
 	    <loc>http://pancho.dev/tags/virtualization/</loc>
 	    <lastmod>2020-07-16</lastmod>
         
@@ -93,17 +126,6 @@
 	  <url>
 	    <loc>http://pancho.dev/posts/taming-the-cpu-metrics/</loc>
 	    <lastmod>2020-07-11</lastmod>
-        
-
-        
-	  </url>
-	  
-  
-      
-      
-	  <url>
-	    <loc>http://pancho.dev/tags/development/</loc>
-	    <lastmod>2020-06-27</lastmod>
         
 
         
