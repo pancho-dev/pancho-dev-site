@@ -3,6 +3,28 @@
       
       
 	  <url>
+	    <loc>http://pancho.dev/posts/</loc>
+	    <lastmod>2020-08-02</lastmod>
+        
+
+        
+	  </url>
+	  
+  
+      
+      
+	  <url>
+	    <loc>http://pancho.dev/posts/lightning-post/</loc>
+	    <lastmod>2020-08-02</lastmod>
+        
+
+        
+	  </url>
+	  
+  
+      
+      
+	  <url>
 	    <loc>http://pancho.dev/tags/cloud/</loc>
 	    <lastmod>2020-07-16</lastmod>
         
@@ -26,17 +48,6 @@
       
 	  <url>
 	    <loc>http://pancho.dev/tags/performance/</loc>
-	    <lastmod>2020-07-16</lastmod>
-        
-
-        
-	  </url>
-	  
-  
-      
-      
-	  <url>
-	    <loc>http://pancho.dev/posts/</loc>
 	    <lastmod>2020-07-16</lastmod>
         
 

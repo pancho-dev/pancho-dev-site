@@ -6,10 +6,19 @@
     <description>Recent content in Posts on pancho.dev</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 16 Jul 2020 15:51:59 -0300</lastBuildDate>
+    <lastBuildDate>Sun, 02 Aug 2020 13:07:20 -0300</lastBuildDate>
     
 	<atom:link href="http://pancho.dev/posts/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>What is a lightning post?</title>
+      <link>http://pancho.dev/posts/lightning-post/</link>
+      <pubDate>Sun, 02 Aug 2020 13:07:20 -0300</pubDate>
+      
+      <guid>http://pancho.dev/posts/lightning-post/</guid>
+      <description>After about 2 months of launching this blog I realized that creating blog content is a time consuming task. While the whole purpose of my blog is to share some of my experiences and it&amp;rsquo;s my own way to contribute to the open source community (most of what I talk about here is open source tech), I figured that I wanted to keep adding content every week, but some weeks it&amp;rsquo;s much harder than other weeks to create a full blown blog post, I write this in my free time so between work and personal life it&amp;rsquo;s hard to keep full blown projects every week.</description>
+    </item>
     
     <item>
       <title>Who Stole My Cpu?</title>
