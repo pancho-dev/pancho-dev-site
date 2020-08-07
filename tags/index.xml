@@ -6,10 +6,28 @@
     <description>Recent content in Tags on pancho.dev</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 03 Aug 2020 14:05:25 -0300</lastBuildDate>
+    <lastBuildDate>Thu, 06 Aug 2020 20:30:48 -0300</lastBuildDate>
     
 	<atom:link href="http://pancho.dev/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>containers</title>
+      <link>http://pancho.dev/tags/containers/</link>
+      <pubDate>Thu, 06 Aug 2020 20:30:48 -0300</pubDate>
+      
+      <guid>http://pancho.dev/tags/containers/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>docker</title>
+      <link>http://pancho.dev/tags/docker/</link>
+      <pubDate>Thu, 06 Aug 2020 20:30:48 -0300</pubDate>
+      
+      <guid>http://pancho.dev/tags/docker/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>development</title>
