@@ -3,8 +3,8 @@
       
       
 	  <url>
-	    <loc>http://pancho.dev/tags/development/</loc>
-	    <lastmod>2020-08-03</lastmod>
+	    <loc>http://pancho.dev/posts/docker-save-restore/</loc>
+	    <lastmod>2020-08-06</lastmod>
         
 
         
@@ -15,6 +15,17 @@
       
 	  <url>
 	    <loc>http://pancho.dev/posts/</loc>
+	    <lastmod>2020-08-06</lastmod>
+        
+
+        
+	  </url>
+	  
+  
+      
+      
+	  <url>
+	    <loc>http://pancho.dev/tags/development/</loc>
 	    <lastmod>2020-08-03</lastmod>
         
 
