@@ -149,6 +149,14 @@ My idea is to share this projects which might save others some time for their pr
 
 
 
+
+
+
+
+
+
+
+
 <div class="columns is-centered has-text-centered">
     <div class="column is-10">
         <div class="content">
@@ -156,6 +164,12 @@ My idea is to share this projects which might save others some time for their pr
                 <h1>Read articles by tags</h1>
             </a>
             <p class="tags-summary">
+                
+                <a href="/tags/aws">
+                    <span class="tag is-dark is-large is-rounded">
+                        Aws
+                    </span>
+                </a>
                 
                 <a href="/tags/cloud">
                     <span class="tag is-dark is-large is-rounded">
@@ -178,6 +192,12 @@ My idea is to share this projects which might save others some time for their pr
                 <a href="/tags/docker">
                     <span class="tag is-dark is-large is-rounded">
                         Docker
+                    </span>
+                </a>
+                
+                <a href="/tags/golang">
+                    <span class="tag is-dark is-large is-rounded">
+                        Golang
                     </span>
                 </a>
                 
@@ -211,6 +231,18 @@ My idea is to share this projects which might save others some time for their pr
                     </span>
                 </a>
                 
+                <a href="/tags/s3">
+                    <span class="tag is-dark is-large is-rounded">
+                        S3
+                    </span>
+                </a>
+                
+                <a href="/tags/storage">
+                    <span class="tag is-dark is-large is-rounded">
+                        Storage
+                    </span>
+                </a>
+                
                 <a href="/tags/virtualization">
                     <span class="tag is-dark is-large is-rounded">
                         Virtualization
@@ -236,6 +268,73 @@ My idea is to share this projects which might save others some time for their pr
             </a>
         </div>
         <div class="blog-brief">
+    <a href="/posts/watch_out_cloud_storage/">
+        <h3 class="title is-4">
+            Watch Out With Cloud Storage API Calls!!!
+        </h3>
+    </a>
+
+    <div class="level is-mobile details">
+        <div class="level-left">
+
+            
+            <div class="level-item">
+                <a href="/posts/watch_out_cloud_storage/">
+                    <p class="subtitle info date">Oct 24, 2020
+                    </p>
+                </a>
+            </div>
+            
+
+
+            <div class="level-item">
+                <a href="/posts/watch_out_cloud_storage/">
+                    <p class="subtitle info">
+                        11 mins read
+                    </p>
+                </a>
+            </div>
+        </div>
+        <div class="level-right is-hidden-touch">
+            
+            <a class="tag is-rounded" href="/tags/aws">AWS</a>
+            
+            <a class="tag is-rounded" href="/tags/cloud">Cloud</a>
+            
+            <a class="tag is-rounded" href="/tags/storage">Storage</a>
+            
+            <a class="tag is-rounded" href="/tags/s3">S3</a>
+            
+            <a class="tag is-rounded" href="/tags/golang">Golang</a>
+            
+            <a class="tag is-rounded" href="/tags/python">Python</a>
+            
+        </div>
+    </div>
+
+    <div>
+        
+
+        <div>
+            <a href="/posts/watch_out_cloud_storage/">
+                <p class="summary">
+                    One of the most popular services from cloud providers is cloud storage, to be more specific AWS S3, Google Cloud Storage, Azure Storage or any similar service from other cloud providers. This service is very convenient for developers and SREs or System Admins, it solves the problem of managing disks, storage devices , storage servers, etc at a very low cost for storing files, depending on the cloud provider, some of them even offer a staggering 99.
+                    
+                </p>
+            </a>
+        </div>
+    </div>
+
+    <div class="level is-mobile continue-reading">
+        <div class="level-left">
+        </div>
+        <div class="level-right">
+            <a href="/posts/watch_out_cloud_storage/">Continue reading <i class="fa fa-angle-double-right"
+                    aria-hidden="true"></i></a>
+        </div>
+    </div>
+    <hr>
+</div><div class="blog-brief">
     <a href="/posts/docker-save-restore/">
         <h3 class="title is-4">
             Lightning Post: Don&#39;t Have a Docker Registry? Save and Load to the Rescue
@@ -468,65 +567,6 @@ How to save a docker image for reuse in other host? There is a handy command tha
         </div>
         <div class="level-right">
             <a href="/posts/who-stole-my-cpu/">Continue reading <i class="fa fa-angle-double-right"
-                    aria-hidden="true"></i></a>
-        </div>
-    </div>
-    <hr>
-</div><div class="blog-brief">
-    <a href="/posts/taming-the-cpu-metrics/">
-        <h3 class="title is-4">
-            Taming the Cpu Metrics
-        </h3>
-    </a>
-
-    <div class="level is-mobile details">
-        <div class="level-left">
-
-            
-            <div class="level-item">
-                <a href="/posts/taming-the-cpu-metrics/">
-                    <p class="subtitle info date">Jul 11, 2020
-                    </p>
-                </a>
-            </div>
-            
-
-
-            <div class="level-item">
-                <a href="/posts/taming-the-cpu-metrics/">
-                    <p class="subtitle info">
-                        18 mins read
-                    </p>
-                </a>
-            </div>
-        </div>
-        <div class="level-right is-hidden-touch">
-            
-            <a class="tag is-rounded" href="/tags/linux">Linux</a>
-            
-            <a class="tag is-rounded" href="/tags/performance">Performance</a>
-            
-        </div>
-    </div>
-
-    <div>
-        
-
-        <div>
-            <a href="/posts/taming-the-cpu-metrics/">
-                <p class="summary">
-                    In a past blog post I talked about The misunderstood load average in linux hosts, while load average is a good metric to watch in linux systems to catch generic performance problems, it does not reveal what the issue might be. This time I will dig more into cpu metrics collected from a linux system and explain them, for this purpose I will use multipass vms, and will be showing metrics from grafana screenshots which take the data from prometheus and prometheus node exporter (this is actually out of the scope of this post).
-                    
-                </p>
-            </a>
-        </div>
-    </div>
-
-    <div class="level is-mobile continue-reading">
-        <div class="level-left">
-        </div>
-        <div class="level-right">
-            <a href="/posts/taming-the-cpu-metrics/">Continue reading <i class="fa fa-angle-double-right"
                     aria-hidden="true"></i></a>
         </div>
     </div>

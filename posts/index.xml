@@ -6,10 +6,19 @@
     <description>Recent content in Posts on pancho.dev</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 06 Aug 2020 20:30:48 -0300</lastBuildDate>
+    <lastBuildDate>Sat, 24 Oct 2020 11:30:35 -0300</lastBuildDate>
     
 	<atom:link href="http://pancho.dev/posts/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Watch out with cloud storage API calls!!!</title>
+      <link>http://pancho.dev/posts/watch_out_cloud_storage/</link>
+      <pubDate>Sat, 24 Oct 2020 11:30:35 -0300</pubDate>
+      
+      <guid>http://pancho.dev/posts/watch_out_cloud_storage/</guid>
+      <description>One of the most popular services from cloud providers is cloud storage, to be more specific AWS S3, Google Cloud Storage, Azure Storage or any similar service from other cloud providers. This service is very convenient for developers and SREs or System Admins, it solves the problem of managing disks, storage devices , storage servers, etc at a very low cost for storing files, depending on the cloud provider, some of them even offer a staggering 99.</description>
+    </item>
     
     <item>
       <title>Lightning Post: Don&#39;t have a Docker registry? save and load to the rescue</title>

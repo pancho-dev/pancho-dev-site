@@ -3,6 +3,105 @@
       
       
 	  <url>
+	    <loc>http://pancho.dev/tags/aws/</loc>
+	    <lastmod>2020-10-24</lastmod>
+        
+
+        
+	  </url>
+	  
+  
+      
+      
+	  <url>
+	    <loc>http://pancho.dev/tags/cloud/</loc>
+	    <lastmod>2020-10-24</lastmod>
+        
+
+        
+	  </url>
+	  
+  
+      
+      
+	  <url>
+	    <loc>http://pancho.dev/tags/golang/</loc>
+	    <lastmod>2020-10-24</lastmod>
+        
+
+        
+	  </url>
+	  
+  
+      
+      
+	  <url>
+	    <loc>http://pancho.dev/posts/</loc>
+	    <lastmod>2020-10-24</lastmod>
+        
+
+        
+	  </url>
+	  
+  
+      
+      
+	  <url>
+	    <loc>http://pancho.dev/tags/python/</loc>
+	    <lastmod>2020-10-24</lastmod>
+        
+
+        
+	  </url>
+	  
+  
+      
+      
+	  <url>
+	    <loc>http://pancho.dev/tags/s3/</loc>
+	    <lastmod>2020-10-24</lastmod>
+        
+
+        
+	  </url>
+	  
+  
+      
+      
+	  <url>
+	    <loc>http://pancho.dev/tags/storage/</loc>
+	    <lastmod>2020-10-24</lastmod>
+        
+
+        
+	  </url>
+	  
+  
+      
+      
+	  <url>
+	    <loc>http://pancho.dev/tags/</loc>
+	    <lastmod>2020-10-24</lastmod>
+        
+
+        
+	  </url>
+	  
+  
+      
+      
+	  <url>
+	    <loc>http://pancho.dev/posts/watch_out_cloud_storage/</loc>
+	    <lastmod>2020-10-24</lastmod>
+        
+
+        
+	  </url>
+	  
+  
+      
+      
+	  <url>
 	    <loc>http://pancho.dev/tags/containers/</loc>
 	    <lastmod>2020-08-06</lastmod>
         
@@ -26,28 +125,6 @@
       
 	  <url>
 	    <loc>http://pancho.dev/posts/docker-save-restore/</loc>
-	    <lastmod>2020-08-06</lastmod>
-        
-
-        
-	  </url>
-	  
-  
-      
-      
-	  <url>
-	    <loc>http://pancho.dev/posts/</loc>
-	    <lastmod>2020-08-06</lastmod>
-        
-
-        
-	  </url>
-	  
-  
-      
-      
-	  <url>
-	    <loc>http://pancho.dev/tags/</loc>
 	    <lastmod>2020-08-06</lastmod>
         
 
@@ -93,17 +170,6 @@
 	  <url>
 	    <loc>http://pancho.dev/posts/lightning-post/</loc>
 	    <lastmod>2020-08-02</lastmod>
-        
-
-        
-	  </url>
-	  
-  
-      
-      
-	  <url>
-	    <loc>http://pancho.dev/tags/cloud/</loc>
-	    <lastmod>2020-07-16</lastmod>
         
 
         
@@ -159,17 +225,6 @@
 	  <url>
 	    <loc>http://pancho.dev/posts/taming-the-cpu-metrics/</loc>
 	    <lastmod>2020-07-11</lastmod>
-        
-
-        
-	  </url>
-	  
-  
-      
-      
-	  <url>
-	    <loc>http://pancho.dev/tags/python/</loc>
-	    <lastmod>2020-06-27</lastmod>
         
 
         
