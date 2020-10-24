@@ -8,13 +8,13 @@
 
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="This time I will talk about someting I found out very recently, and I found interesting to share this information as it might be handy for developers to use when the use case fits.
+<meta name="description" content="This time I will talk about something I found out very recently, and I found interesting to share this information as it might be handy for developers to use when the use case fits.
 So this time I will introduce the ulid. Spoiler alert, it&rsquo;s an ID or at least a data structure that can be used to represent an ID. So why do we have another way of expressing an ID, I won&rsquo;t get into too much details into that but yes there are many ways of defining ids, it can be numerical, using UUIDs, etc.
     ">
 
 
 <meta property="og:title" content="What&#39;s a ULID" />
-<meta property="og:description" content="This time I will talk about someting I found out very recently, and I found interesting to share this information as it might be handy for developers to use when the use case fits.
+<meta property="og:description" content="This time I will talk about something I found out very recently, and I found interesting to share this information as it might be handy for developers to use when the use case fits.
 So this time I will introduce the ulid. Spoiler alert, it&rsquo;s an ID or at least a data structure that can be used to represent an ID. So why do we have another way of expressing an ID, I won&rsquo;t get into too much details into that but yes there are many ways of defining ids, it can be numerical, using UUIDs, etc." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="http://pancho.dev/posts/whats-ulid/" />
@@ -23,11 +23,11 @@ So this time I will introduce the ulid. Spoiler alert, it&rsquo;s an ID or at le
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="What&#39;s a ULID"/>
-<meta name="twitter:description" content="This time I will talk about someting I found out very recently, and I found interesting to share this information as it might be handy for developers to use when the use case fits.
+<meta name="twitter:description" content="This time I will talk about something I found out very recently, and I found interesting to share this information as it might be handy for developers to use when the use case fits.
 So this time I will introduce the ulid. Spoiler alert, it&rsquo;s an ID or at least a data structure that can be used to represent an ID. So why do we have another way of expressing an ID, I won&rsquo;t get into too much details into that but yes there are many ways of defining ids, it can be numerical, using UUIDs, etc."/>
 
 <meta itemprop="name" content="What&#39;s a ULID">
-<meta itemprop="description" content="This time I will talk about someting I found out very recently, and I found interesting to share this information as it might be handy for developers to use when the use case fits.
+<meta itemprop="description" content="This time I will talk about something I found out very recently, and I found interesting to share this information as it might be handy for developers to use when the use case fits.
 So this time I will introduce the ulid. Spoiler alert, it&rsquo;s an ID or at least a data structure that can be used to represent an ID. So why do we have another way of expressing an ID, I won&rsquo;t get into too much details into that but yes there are many ways of defining ids, it can be numerical, using UUIDs, etc.">
 <meta itemprop="datePublished" content="2020-06-27T14:35:31-03:00" />
 <meta itemprop="dateModified" content="2020-06-27T14:35:31-03:00" />
@@ -152,10 +152,10 @@ if (!doNotTrack) {
     <div class="blog-text">
         
 
-        <p>This time I will talk about someting I found out very recently, and I found interesting to share this information as it might be handy for developers to use when the use case fits.<br>
-So this time I will introduce the <code>ulid</code>. Spoiler alert, it&rsquo;s an ID or at least a data structure that can be used to represent an ID. So why do we have another way of expressing an ID, I won&rsquo;t get into too much details into that but yes there are many ways of defining ids, it can be numerical, using UUIDs, etc. So my motivation is that I found useful the properies of ulid for some specific use cases.</p>
+        <p>This time I will talk about something I found out very recently, and I found interesting to share this information as it might be handy for developers to use when the use case fits.<br>
+So this time I will introduce the <code>ulid</code>. Spoiler alert, it&rsquo;s an ID or at least a data structure that can be used to represent an ID. So why do we have another way of expressing an ID, I won&rsquo;t get into too much details into that but yes there are many ways of defining ids, it can be numerical, using UUIDs, etc. So my motivation is that I found useful the properties of ulid for some specific use cases.</p>
 <h3 id="background">Background</h3>
-<p>I just want to give some background how I came across ulid and why I found it handy to use. I regularly find myself browsing through code from open source projects, even if I am not familiar with the language the projects are written, I always take a peek at the code. I have this obsesion to know how things work under the hood, which has helped me to solve many tricky issues operating open source software.<br>
+<p>I just want to give some background how I came across ulid and why I found it handy to use. I regularly find myself browsing through code from open source projects, even if I am not familiar with the language the projects are written, I always take a peek at the code. I have this obsession to know how things work under the hood, which has helped me to solve many tricky issues operating open source software.<br>
 So one day I was looking at <a href="https://prometheus.io/">Prometheus</a> data folder and I found the following</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">
 <span style="color:#75715e"># Looking at files and folders in the Prometheus data folder</span>
@@ -192,43 +192,43 @@ drwxr-xr-x <span style="color:#ae81ff">2</span> nobody nogroup 4.0K Jun <span st
 -rw-r--r-- <span style="color:#ae81ff">1</span> nobody nogroup 845K Jun <span style="color:#ae81ff">27</span> 17:00 index
 -rw-r--r-- <span style="color:#ae81ff">1</span> nobody nogroup  <span style="color:#ae81ff">279</span> Jun <span style="color:#ae81ff">27</span> 17:00 meta.json
 -rw-r--r-- <span style="color:#ae81ff">1</span> nobody nogroup    <span style="color:#ae81ff">9</span> Jun <span style="color:#ae81ff">27</span> 17:00 tombstones
-</code></pre></div><p>Ever since I looked into that folder I wondered about the logic behind the design. Then some day I was looking trought the Prometheus code and I came across the term ulid. Off course I quickly googled the term and found out what it was, then the whole directory structure stated to make sense. I won&rsquo;t get into details of that as it is a subject matter that probably could get 2 or 3 blog posts itself. But I will get into details what ulid are and it might give developers some perspective to solve some problems in a clever way like promtetheus developers did.</p>
+</code></pre></div><p>Ever since I looked into that folder I wondered about the logic behind the design. Then some day I was looking thought the Prometheus code and I came across the term ulid. Off course I quickly googled the term and found out what it was, then the whole directory structure stated to make sense. I won&rsquo;t get into details of that as it is a subject matter that probably could get 2 or 3 blog posts itself. But I will get into details what ulid are and it might give developers some perspective to solve some problems in a clever way like Prometheus developers did.</p>
 <h1 id="what-is-it-then">What is it then?</h1>
-<p>The term is ulid and it&rsquo;s long name is <code>Universally Unique Lexicographically Sortable Identifier</code>. <a href="https://github.com/ulid/spec">ulid spec</a> is hosted in github if you would like to know more in details.<br>
+<p>The term is ulid and it&rsquo;s long name is <code>Universally Unique Lexicographically Sortable Identifier</code>. <a href="https://github.com/ulid/spec">ulid spec</a> is hosted in GitHub if you would like to know more in details.<br>
 But in plain words it is a 128 bit ID, represented in a string using <a href="https://en.wikipedia.org/wiki/Base32#Crockford's_Base32">Crockford&rsquo;s Base32 encoding</a>.<br>
-It is compossed by a timestamp which is the fist 48bits and a secuence of random 80 bits giving a 26 character string.<br>
+It is composed by a timestamp which is the fist 48bits and a sequence of random 80 bits giving a 26 character string.<br>
 We can see how the representation is split</p>
 <pre><code> 01AN4Z07BY      79KA1307SR9X4MV3
 
 |----------|    |----------------|
  Timestamp          Randomness
    48bits             80bits
-</code></pre><p>The timestamp is 48 bits unix timestamp with milisecond precision encoded in Base32, which will generate monotonically the ids. When there are 2 IDs being generated in the same milisecond there should be 80 bits of randomness to prevent collisions in the ID, which has a very little chance that 2 IDs will collide and making them unique. Also the spec mentions how to keep the randomness part sortable, however this will depend how it is implemented in the library we are using and we need to research how the library provides the source of randomness, I have seen some libraries providing a function or method to pass the random function if you don&rsquo;t trust that the library implementation is a good source of randomness. Since the first 48bits is a timestamp and the way it&rsquo;s encoded it makes the ID&rsquo;s lexicographically sortable which give some unique benefits. Another benefit is that it doesn&rsquo;t contain special characters making it web and url safe.<br>
-This make a perfecly good alternative to UUID which is one of the most popular formats, giving some extra properties along the way.</p>
+</code></pre><p>The timestamp is 48 bits unix timestamp with millisecond precision encoded in Base32, which will generate monotonically the ids. When there are 2 IDs being generated in the same millisecond there should be 80 bits of randomness to prevent collisions in the ID, which has a very little chance that 2 IDs will collide and making them unique. Also the spec mentions how to keep the randomness part sortable, however this will depend how it is implemented in the library we are using and we need to research how the library provides the source of randomness, I have seen some libraries providing a function or method to pass the random function if you don&rsquo;t trust that the library implementation is a good source of randomness. Since the first 48bits is a timestamp and the way it&rsquo;s encoded it makes the ID&rsquo;s lexicographically sortable which give some unique benefits. Another benefit is that it doesn&rsquo;t contain special characters making it web and url safe.<br>
+This make a perfectly good alternative to UUID which is one of the most popular formats, giving some extra properties along the way.</p>
 <h3 id="benefits">Benefits</h3>
 <h4 id="lexicographically-sortable">Lexicographically sortable</h4>
-<p>This is the main benefit, making the IDs sortable through time. Not only that you can sort by the order of creation but the ulid has the timestamp enconded in it when it was created, this might come handy when creating an object or event you can use the ulid to also store the creation time.<br>
-The timestamp precision is milisecond which could be used for most use cases.</p>
+<p>This is the main benefit, making the IDs sortable through time. Not only that you can sort by the order of creation but the ulid has the timestamp encoded in it when it was created, this might come handy when creating an object or event you can use the ulid to also store the creation time.<br>
+The timestamp precision is millisecond which could be used for most use cases.</p>
 <h4 id="unique">Unique</h4>
-<p>Like UUIDs, ulid are unique. The random component gives 80 bit of randomness per milisecond, which means there are 1.21e+24 possible IDs per milisecond making it very unlikely to have collisions.</p>
+<p>Like UUIDs, ulid are unique. The random component gives 80 bit of randomness per millisecond, which means there are 1.21e+24 possible IDs per millisecond making it very unlikely to have collisions.</p>
 <h4 id="uuid-compatible">UUID Compatible</h4>
 <p>Both UUID and ulid are represented by 128 bit, making them compatible when storing them at rest. This is an advantage to leverage existing methods to store UUIDs, for example some databases support UUID as a data type or they can be extended to support storing UUID as data type, which makes it convenient to reuse the UUID data types to store ulid.</p>
 <h4 id="web-safe">Web Safe</h4>
 <p>Since it&rsquo;s a string without special characters, they can be used safely in urls or even html, also there are 26 characters compared to the 36 chars from UUIDs.</p>
-<h3 id="disavantages">Disavantages</h3>
-<h4 id="milisecond-precision">Milisecond precision</h4>
-<p>The sortability is only guaranteed with a milisecond precision, while the spec recommends how to implement it to provide some guarantees on sortability, it is not bulletproof and it depends on implementation.<br>
-If the use case requires hard guarantees with sub milisecond precision, ulid won&rsquo;t help much. But most use cases for web applications milisecond precision is good enough.</p>
-<h4 id="timestamp-embeded-on-the-id">Timestamp embeded on the ID</h4>
-<p>This is an advantage and a disadvantage at the same time. Why? It depends on the use case. While it is great to have the timestamp embeded in the ID and handy for some use cases, when you need a pure random ID having something like the timestamp could be an anti pattern. We need to be careful with this feature as it might expose sensitive information in the ID so we need to be aware of the use case before using it.</p>
+<h3 id="disadvantages">Disadvantages</h3>
+<h4 id="millisecond-precision">Millisecond precision</h4>
+<p>The sortability is only guaranteed with a millisecond precision, while the spec recommends how to implement it to provide some guarantees on sortability, it is not bulletproof and it depends on implementation.<br>
+If the use case requires hard guarantees with sub millisecond precision, ulid won&rsquo;t help much. But most use cases for web applications millisecond precision is good enough.</p>
+<h4 id="timestamp-embedded-on-the-id">Timestamp embedded on the ID</h4>
+<p>This is an advantage and a disadvantage at the same time. Why? It depends on the use case. While it is great to have the timestamp embedded in the ID and handy for some use cases, when you need a pure random ID having something like the timestamp could be an anti pattern. We need to be careful with this feature as it might expose sensitive information in the ID so we need to be aware of the use case before using it.</p>
 <h4 id="no-rfc">No RFC</h4>
 <p>There are no standards defining ulids, this is just a spec that is hosted in github, which means that someone created the concept and shared it to the world. While UUIDs are an industry standard and they have their own <a href="https://www.ietf.org/rfc/rfc4122.txt">rfc4122</a>, UUIDs can be used for interoperability between vendors. While ulid doesn&rsquo;t have an RFC which might be a problem when you need to interoperate with vendors. Although, a ulid can be converted and represented as a UUID when needed.</p>
 <h4 id="implementations-might-diverge">Implementations might diverge</h4>
-<p>This is related to the previous disadvantage, since this is a spec and not backed by an industry standard, implemetation is subject to interpretation and some implementations might have slightly different behavior than other. Off course having an RFC is not guarantee that implementations will be the same, in general RFC are topics already discussed by a group of people/vendors/companies making it a standard and making it easy for interoperate.</p>
+<p>This is related to the previous disadvantage, since this is a spec and not backed by an industry standard, implementation is subject to interpretation and some implementations might have slightly different behavior than other. Off course having an RFC is not guarantee that implementations will be the same, in general RFC are topics already discussed by a group of people/vendors/companies making it a standard and making it easy for interoperate.</p>
 <h4 id="no-tools-to-manipulate-ulids">No tools to manipulate ulids</h4>
-<p>There are libraries for all major languajes, but ulid is still missing tools to manipulate ulids in the operating systems, all major operating systems like Mac or linux already have some kind of tool for generating UUIDs like <code>uuidgen</code> or something similar. I haven&rsquo;t found tools to generate ulids out of the box without having to install a programing laguage and the library to generate the ulid.</p>
+<p>There are libraries for all major languages, but ulid is still missing tools to manipulate ulids in the operating systems, all major operating systems like Mac or linux already have some kind of tool for generating UUIDs like <code>uuidgen</code> or something similar. I haven&rsquo;t found tools to generate ulids out of the box without having to install a programing language and the library to generate the ulid.</p>
 <h3 id="use-cases">Use cases</h3>
-<p>This is not an exhaustive list of use cases, but some common use cases it can be used for. Most use cases are related to the objects/events which need to be sorted through time when precision doesn&rsquo;t require sub milisecond.<br>
+<p>This is not an exhaustive list of use cases, but some common use cases it can be used for. Most use cases are related to the objects/events which need to be sorted through time when precision doesn&rsquo;t require sub millisecond.<br>
 Some examples:</p>
 <ul>
 <li>blog posts</li>
@@ -238,9 +238,9 @@ Some examples:</p>
 <li>Events in a distributed system</li>
 <li>Time series blocks (Prometheus use case)</li>
 </ul>
-<p>I wanted to point out a use case that catches my attention and probably would have saved some problems with race contitions when sending messages in an async messaging plattform and still have events that need to be ordered. In an distributed system sending messages/events to other systems and attaching a ulid to the message would help prevent or detect race conditions, it won&rsquo;t guarantee that my messages arrived in order but at least I would know that I got a message older than a message that I already received. Helping detect and remediate the situation that might have generated a race condition. Well this is not a bulletproof approach but whould helped to detect some of this situations.</p>
+<p>I wanted to point out a use case that catches my attention and probably would have saved some problems with race conditions when sending messages in an async messaging platform and still have events that need to be ordered. In an distributed system sending messages/events to other systems and attaching a ulid to the message would help prevent or detect race conditions, it won&rsquo;t guarantee that my messages arrived in order but at least I would know that I got a message older than a message that I already received. Helping detect and remediate the situation that might have generated a race condition. Well this is not a bulletproof approach but would helped to detect some of this situations.</p>
 <h4 id="example">Example</h4>
-<p>As an example I would show how to generate a ulid in python but other languajes should be pretty similar. The example I used <code>python-ulid</code> and <code>iPython</code> interpreter.</p>
+<p>As an example I would show how to generate a ulid in python but other languages should be pretty similar. The example I used <code>python-ulid</code> and <code>iPython</code> interpreter.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">Python <span style="color:#ae81ff">3.7</span><span style="color:#f92672">.</span><span style="color:#ae81ff">5</span> (default, Nov  <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">2019</span>, <span style="color:#ae81ff">02</span>:<span style="color:#ae81ff">16</span>:<span style="color:#ae81ff">32</span>)
 Type <span style="color:#e6db74">&#39;copyright&#39;</span>, <span style="color:#e6db74">&#39;credits&#39;</span> <span style="color:#f92672">or</span> <span style="color:#e6db74">&#39;license&#39;</span> <span style="color:#66d9ef">for</span> more information
 IPython <span style="color:#ae81ff">7.16</span><span style="color:#f92672">.</span><span style="color:#ae81ff">1</span> <span style="color:#f92672">--</span> An enhanced Interactive Python<span style="color:#f92672">.</span> Type <span style="color:#e6db74">&#39;?&#39;</span> <span style="color:#66d9ef">for</span> help<span style="color:#f92672">.</span>
@@ -299,7 +299,7 @@ In [<span style="color:#ae81ff">8</span>]: ulid<span style="color:#f92672">.</sp
 Out[<span style="color:#ae81ff">8</span>]: ULID(<span style="color:#ae81ff">01</span>EBVV37GHRTGN0PKZ0VBS3SPM)
 </code></pre></div><h1 id="conclusion">Conclusion</h1>
 <p>With this post I wanted to share something I learnt by digging how things work under the hood, and I wanted to share it because this might give other developers more tricks to solve issues in a different way or make their implementations much easier or simpler.<br>
-I know ulid won&rsquo;t replace UUIDs because of the fact that both probably compliment each other and one covers use cases the other doesn&rsquo;t. As I mentioned a few times already it would depend on the use cases. I would still use UUIDs when I need them to be completely random and being random is a must or need. But I would use ulid when the use case is not sensitive to having the timestamp embeded in the ID, then I would choose to generate them with ulid generator, you never know when it would be useful, and if the ulid was generated and then stored as UUID you can always recover the timestamp from the UUID if you stored it as UUID. Since they are compatible there would be some benefits to generating the UUID from a ulid generator and  convert to UUID.<br>
+I know ulid won&rsquo;t replace UUIDs because of the fact that both probably compliment each other and one covers use cases the other doesn&rsquo;t. As I mentioned a few times already it would depend on the use cases. I would still use UUIDs when I need them to be completely random and being random is a must or need. But I would use ulid when the use case is not sensitive to having the timestamp embedded in the ID, then I would choose to generate them with ulid generator, you never know when it would be useful, and if the ulid was generated and then stored as UUID you can always recover the timestamp from the UUID if you stored it as UUID. Since they are compatible there would be some benefits to generating the UUID from a ulid generator and  convert to UUID.<br>
 And as I already mentioned I would definitely use it for use cases where we need some object ID ordered in time or sortable, when we need to also the timestamp of an event I would also choose the ulid.</p>
 
     </div>
@@ -339,7 +339,7 @@ And as I already mentioned I would definitely use it for use cases where we need
 	    </a>
 
 		<a  href="https://www.linkedin.com/shareArticle?mini=true&url=http%3a%2f%2fpancho.dev%2fposts%2fwhats-ulid%2f
-			&title=What%27s%20a%20ULID&summary=This%20time%20I%20will%20talk%20about%20someting%20I%20found%20out%20very%20recently%2c%20and%20I%20found%20interesting%20to%20share%20this%20information%20as%20it%20might%20be%20handy%20for%20developers%20to%20use%20when%20the%20use%20case%20fits.%0aSo%20this%20time%20I%20will%20introduce%20the%20ulid.%20Spoiler%20alert%2c%20it%26rsquo%3bs%20an%20ID%20or%20at%20least%20a%20data%20structure%20that%20can%20be%20used%20to%20represent%20an%20ID.%20So%20why%20do%20we%20have%20another%20way%20of%20expressing%20an%20ID%2c%20I%20won%26rsquo%3bt%20get%20into%20too%20much%20details%20into%20that%20but%20yes%20there%20are%20many%20ways%20of%20defining%20ids%2c%20it%20can%20be%20numerical%2c%20using%20UUIDs%2c%20etc.&source=rafed123.github.io"
+			&title=What%27s%20a%20ULID&summary=This%20time%20I%20will%20talk%20about%20something%20I%20found%20out%20very%20recently%2c%20and%20I%20found%20interesting%20to%20share%20this%20information%20as%20it%20might%20be%20handy%20for%20developers%20to%20use%20when%20the%20use%20case%20fits.%0aSo%20this%20time%20I%20will%20introduce%20the%20ulid.%20Spoiler%20alert%2c%20it%26rsquo%3bs%20an%20ID%20or%20at%20least%20a%20data%20structure%20that%20can%20be%20used%20to%20represent%20an%20ID.%20So%20why%20do%20we%20have%20another%20way%20of%20expressing%20an%20ID%2c%20I%20won%26rsquo%3bt%20get%20into%20too%20much%20details%20into%20that%20but%20yes%20there%20are%20many%20ways%20of%20defining%20ids%2c%20it%20can%20be%20numerical%2c%20using%20UUIDs%2c%20etc.&source=rafed123.github.io"
 	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
 	        title="Share on LinkedIn. Opens in a new window." >
 	        <img src=/img/icons/45px/linkedin.png>

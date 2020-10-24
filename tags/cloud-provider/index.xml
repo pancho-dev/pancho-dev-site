@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>cloud provider on pancho.dev</title>
+    <link>http://pancho.dev/tags/cloud-provider/</link>
+    <description>Recent content in cloud provider on pancho.dev</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 24 Oct 2020 11:30:35 -0300</lastBuildDate>
+    
+	<atom:link href="http://pancho.dev/tags/cloud-provider/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Watch out with cloud storage API calls!!!</title>
+      <link>http://pancho.dev/posts/watch_out_cloud_storage/</link>
+      <pubDate>Sat, 24 Oct 2020 11:30:35 -0300</pubDate>
+      
+      <guid>http://pancho.dev/posts/watch_out_cloud_storage/</guid>
+      <description>One of the most popular services from cloud providers is cloud storage, to be more specific AWS S3, Google Cloud Storage, Azure Storage or any similar service from other cloud providers. This service is very convenient for developers and SREs or System Admins, it solves the problem of managing disks, storage devices , storage servers, etc at a very low cost for storing files, depending on the cloud provider, some of them even offer a staggering 99.</description>
+    </item>
+    
+  </channel>
+</rss>
