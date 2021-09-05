@@ -15,22 +15,19 @@
 <meta property="og:title" content="The misunderstood load average in linux hosts" />
 <meta property="og:description" content="Ever wondered when someone runs the command uptime in a linux host what the values in the load average: section mean? well I have wondered about it many times in my career. And this should be a simple question to ask a seasoned linux administrator or developer, right? well it&rsquo;s not entirely true, as the load average value in a linux hosts probably is the most misunderstood term and often associated with the wrong concepts." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="http://pancho.dev/posts/linux-load-average/" />
+<meta property="og:url" content="http://pancho.dev/posts/linux-load-average/" /><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2020-06-07T20:02:27-03:00" />
 <meta property="article:modified_time" content="2020-06-07T20:02:27-03:00" />
+
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="The misunderstood load average in linux hosts"/>
 <meta name="twitter:description" content="Ever wondered when someone runs the command uptime in a linux host what the values in the load average: section mean? well I have wondered about it many times in my career. And this should be a simple question to ask a seasoned linux administrator or developer, right? well it&rsquo;s not entirely true, as the load average value in a linux hosts probably is the most misunderstood term and often associated with the wrong concepts."/>
 
 <meta itemprop="name" content="The misunderstood load average in linux hosts">
-<meta itemprop="description" content="Ever wondered when someone runs the command uptime in a linux host what the values in the load average: section mean? well I have wondered about it many times in my career. And this should be a simple question to ask a seasoned linux administrator or developer, right? well it&rsquo;s not entirely true, as the load average value in a linux hosts probably is the most misunderstood term and often associated with the wrong concepts.">
-<meta itemprop="datePublished" content="2020-06-07T20:02:27-03:00" />
+<meta itemprop="description" content="Ever wondered when someone runs the command uptime in a linux host what the values in the load average: section mean? well I have wondered about it many times in my career. And this should be a simple question to ask a seasoned linux administrator or developer, right? well it&rsquo;s not entirely true, as the load average value in a linux hosts probably is the most misunderstood term and often associated with the wrong concepts."><meta itemprop="datePublished" content="2020-06-07T20:02:27-03:00" />
 <meta itemprop="dateModified" content="2020-06-07T20:02:27-03:00" />
 <meta itemprop="wordCount" content="2940">
-
-
-
 <meta itemprop="keywords" content="linux,performance," />
 <link rel="canonical" href="http://pancho.dev/posts/linux-load-average/" />
 
@@ -159,7 +156,7 @@ I could be speaking a long time about what it&rsquo;s not, but I wanted to empha
 I have my own definition for the term, which can be found in many articles on the internet, load average in a linux system <code>is the average amount of processes waiting for cpu time</code>. As can be seen, in my own simple definition involves CPU in it, but wait, didn&rsquo;t I say load average is not CPU, yes I did, but even if I said so, a high load average might not be related to CPU issues, it can be many other things, and I think that is why people get confused by the term. In the end, a process will always be waiting for it&rsquo;s turn to use CPU, and there are other situations that a process might be waiting for the CPU and the cpu will be idle anyway. Confusing, isn&rsquo;t it. Well yes. I will try to explain this situations from a practical standpoint that will make sense why I said it&rsquo;s not only CPU.</p>
 <h1 id="what-does-the-values-mean">What does the values mean?</h1>
 <p>First lets look at the output of <code>uptime</code> command, load average can also be found in <code>top</code> command at the top right corner.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ uptime
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ uptime
  23:07:56 up <span style="color:#ae81ff">21</span> days, 23:59,  <span style="color:#ae81ff">1</span> user,  load average: 0.51, 0.25, 0.22
 </code></pre></div><p>As a quick explanation. <code>load average: 0.51, 0.25, 0.22</code> the first value is the average last minute, the second value is the average of the last 5 minutes and the third is the average of the last 15 minutes. In this example it means that in the last minute there were 0.51 processes in average waiting for CPU time and the last 5 minutes there as an average of 0.25 processes waiting for cpu time, same for the 15 minute value has an average of 0.22 processes waiting for cpu time.<br>
 Still this explanation doesn&rsquo;t say much. And this is one of the most controversial topics about this values. First we need to ask as ourselves, what is what we want to know? This values can catch situations where performance is starting to be an issue. And defining when this values mean our system has performance issues is the key. And there is no magic formula or answer for all systems. And any senior engineer would respond, it depends.</p>

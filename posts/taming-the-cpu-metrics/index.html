@@ -15,22 +15,19 @@
 <meta property="og:title" content="Taming the Cpu Metrics" />
 <meta property="og:description" content="In a past blog post I talked about The misunderstood load average in linux hosts, while load average is a good metric to watch in linux systems to catch generic performance problems, it does not reveal what the issue might be. This time I will dig more into cpu metrics collected from a linux system and explain them, for this purpose I will use multipass vms, and will be showing metrics from grafana screenshots which take the data from prometheus and prometheus node exporter (this is actually out of the scope of this post)." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="http://pancho.dev/posts/taming-the-cpu-metrics/" />
+<meta property="og:url" content="http://pancho.dev/posts/taming-the-cpu-metrics/" /><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2020-07-11T15:08:51-03:00" />
 <meta property="article:modified_time" content="2020-07-11T15:08:51-03:00" />
+
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Taming the Cpu Metrics"/>
 <meta name="twitter:description" content="In a past blog post I talked about The misunderstood load average in linux hosts, while load average is a good metric to watch in linux systems to catch generic performance problems, it does not reveal what the issue might be. This time I will dig more into cpu metrics collected from a linux system and explain them, for this purpose I will use multipass vms, and will be showing metrics from grafana screenshots which take the data from prometheus and prometheus node exporter (this is actually out of the scope of this post)."/>
 
 <meta itemprop="name" content="Taming the Cpu Metrics">
-<meta itemprop="description" content="In a past blog post I talked about The misunderstood load average in linux hosts, while load average is a good metric to watch in linux systems to catch generic performance problems, it does not reveal what the issue might be. This time I will dig more into cpu metrics collected from a linux system and explain them, for this purpose I will use multipass vms, and will be showing metrics from grafana screenshots which take the data from prometheus and prometheus node exporter (this is actually out of the scope of this post).">
-<meta itemprop="datePublished" content="2020-07-11T15:08:51-03:00" />
+<meta itemprop="description" content="In a past blog post I talked about The misunderstood load average in linux hosts, while load average is a good metric to watch in linux systems to catch generic performance problems, it does not reveal what the issue might be. This time I will dig more into cpu metrics collected from a linux system and explain them, for this purpose I will use multipass vms, and will be showing metrics from grafana screenshots which take the data from prometheus and prometheus node exporter (this is actually out of the scope of this post)."><meta itemprop="datePublished" content="2020-07-11T15:08:51-03:00" />
 <meta itemprop="dateModified" content="2020-07-11T15:08:51-03:00" />
 <meta itemprop="wordCount" content="3204">
-
-
-
 <meta itemprop="keywords" content="linux,performance," />
 <link rel="canonical" href="http://pancho.dev/posts/taming-the-cpu-metrics/" />
 
@@ -158,7 +155,7 @@ if (!doNotTrack) {
 <li>jq, for parsing json output to generate ansible inventory</li>
 </ul>
 <p>Preparing vms for running tests.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Start vms with multipass</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Start vms with multipass</span>
 <span style="color:#75715e"># you need to specify the username you will use</span>
 <span style="color:#75715e"># for ansible and the public key for passwrodless</span>
 <span style="color:#75715e"># authentication</span>
@@ -206,7 +203,7 @@ $ source .env/bin/activate
 <span style="color:#75715e"># Intall ansible in the virtualenv</span>
 <span style="color:#f92672">(</span>.env<span style="color:#f92672">)</span>$ pip install ansible
 
-<span style="color:#75715e"># Generate a basic ansible cfg that will work</span> 
+<span style="color:#75715e"># Generate a basic ansible cfg that will work </span>
 <span style="color:#75715e"># in the virtualenv</span>
 <span style="color:#f92672">(</span>.env<span style="color:#f92672">)</span>$ cat <span style="color:#e6db74">&lt;&lt;EOF | tee ansible.cfg
 </span><span style="color:#e6db74">[defaults]
@@ -356,7 +353,7 @@ Most tests were performed in the vms that we created at the start of the post an
 <h2 id="userspace-usage">Userspace usage</h2>
 <p>Other common use case we catch with cpu metrics is to see applications running in userspace that use the cpu. This is normal and we should expect to see this percentage go higher when applications are busier.
 To generate userspace usage in one of the vms, for that will will run a container to stress test the cpu</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># log in to testvm1</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># log in to testvm1</span>
 $ multipass shell testvm1
 
 <span style="color:#75715e"># Run docker container that will hog 1 cpu</span>
@@ -395,13 +392,13 @@ So this test was a raspberry pi running a kubernetes node and that snapshot of t
 <h2 id="high-interrupts">High interrupts</h2>
 <p>In this case to test a scenario that generates a high amount of interrupts I will run a network traffic stress test between testvm1 and testvm2, for that we will use <code>iperf</code> tool already installed with the ansible playbook.</p>
 <p>On testvm1 start iperf as server</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ubuntu@testvm1:~$ iperf -s
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ubuntu@testvm1:~$ iperf -s
 ------------------------------------------------------------
 Server listening on TCP port <span style="color:#ae81ff">5001</span>
 TCP window size:  <span style="color:#ae81ff">128</span> KByte <span style="color:#f92672">(</span>default<span style="color:#f92672">)</span>
 ------------------------------------------------------------
 </code></pre></div><p>On the testvm2 run iperf as client</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ubuntu@testvm2:~$ iperf -c testvm1 -t <span style="color:#ae81ff">90</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ubuntu@testvm2:~$ iperf -c testvm1 -t <span style="color:#ae81ff">90</span>
 ------------------------------------------------------------
 Client connecting to 10.0.100.1, TCP port <span style="color:#ae81ff">5001</span>
 TCP window size: 85.0 KByte <span style="color:#f92672">(</span>default<span style="color:#f92672">)</span>
@@ -422,7 +419,7 @@ Let&rsquo;s look at the graph.</p>
 <h2 id="noisy-neighbors">Noisy Neighbors</h2>
 <p>In this case I will show a test that will show in cpu metrics if we have &ldquo;noisy neighbors&rdquo; running on the same physical host. This means that we can see if other vms are affecting our vm by looking at the cpu percentages.</p>
 <p>For this test I will run the cpu stress test for 90 seconds in testvm1, testvm2 and testvm3</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Log in to all vms and run the following</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Log in to all vms and run the following</span>
 <span style="color:#75715e"># run the docker container to stress the cpu</span>
 $ sudo docker run -it --name cpustress --rm containerstack/cpustress --cpu <span style="color:#ae81ff">1</span> --timeout 90s --metrics-brief
 </code></pre></div><p>Following I will show the graphs for all 3 vms.</p>

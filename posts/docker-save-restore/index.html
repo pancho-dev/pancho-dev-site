@@ -17,9 +17,10 @@ How to save a docker image for reuse in other host? There is a handy command tha
 <meta property="og:description" content="Whenever someone is working with docker and need to move images between hosts without the need for rebuilding them or hosting a private registry. This lightning post will show us 2 commands that will help us to easy move container images between hosts.
 How to save a docker image for reuse in other host? There is a handy command that helps save a docker image that is already in the system or already built, there are situations where builds take a long time and building the images in multiple hosts is time consuming, so we can save the image and copy it to other host and import it for reuse." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="http://pancho.dev/posts/docker-save-restore/" />
+<meta property="og:url" content="http://pancho.dev/posts/docker-save-restore/" /><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2020-08-06T20:30:48-03:00" />
 <meta property="article:modified_time" content="2020-08-06T20:30:48-03:00" />
+
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Lightning Post: Don&#39;t have a Docker registry? save and load to the rescue"/>
@@ -28,13 +29,9 @@ How to save a docker image for reuse in other host? There is a handy command tha
 
 <meta itemprop="name" content="Lightning Post: Don&#39;t have a Docker registry? save and load to the rescue">
 <meta itemprop="description" content="Whenever someone is working with docker and need to move images between hosts without the need for rebuilding them or hosting a private registry. This lightning post will show us 2 commands that will help us to easy move container images between hosts.
-How to save a docker image for reuse in other host? There is a handy command that helps save a docker image that is already in the system or already built, there are situations where builds take a long time and building the images in multiple hosts is time consuming, so we can save the image and copy it to other host and import it for reuse.">
-<meta itemprop="datePublished" content="2020-08-06T20:30:48-03:00" />
+How to save a docker image for reuse in other host? There is a handy command that helps save a docker image that is already in the system or already built, there are situations where builds take a long time and building the images in multiple hosts is time consuming, so we can save the image and copy it to other host and import it for reuse."><meta itemprop="datePublished" content="2020-08-06T20:30:48-03:00" />
 <meta itemprop="dateModified" content="2020-08-06T20:30:48-03:00" />
 <meta itemprop="wordCount" content="693">
-
-
-
 <meta itemprop="keywords" content="docker,containers," />
 <link rel="canonical" href="http://pancho.dev/posts/docker-save-restore/" />
 
@@ -156,22 +153,22 @@ if (!doNotTrack) {
 <h1 id="how-to-save-a-docker-image-for-reuse-in-other-host">How to save a docker image for reuse in other host?</h1>
 <p>There is a handy command that helps save a docker image that is already in the system or already built, there are situations where builds take a long time and building the images in multiple hosts is time consuming, so we can save the image and copy it to other host and import it for reuse.<br>
 To save a docker image:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Pull an ubuntu image, just for demo purpose but it can be any image</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Pull an ubuntu image, just for demo purpose but it can be any image</span>
 $ sudo docker pull ubuntu
 
 <span style="color:#75715e"># Then save the image to a tar.gz file.</span>
 <span style="color:#75715e"># once finished this file can be moved to other</span>
-<span style="color:#75715e"># host running docker or backed up if we</span> 
+<span style="color:#75715e"># host running docker or backed up if we </span>
 <span style="color:#75715e"># don&#39;t have a registry</span>
 $ sudo docker save ubuntu | gzip &gt; test.tar.gz
 </code></pre></div><h1 id="how-to-restore-an-image">How to restore an image?</h1>
 <p>Once we saved the image as tar.gz then it&rsquo;s easy to copy by scp or other means, and restore the same image there for future use.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Load the file that was created with save</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Load the file that was created with save</span>
 $ sudo gzcat test.tar.gz | sudo docker load
 </code></pre></div><p>This will restore the image in a new host or from a backup.</p>
 <h1 id="bonus-track">Bonus Track</h1>
 <p>There are other commands that can be useful to export and import containers instead of images. While <code>docker save</code> and <code>docker load</code> are used to handle and copy container images. There might be times where we need to copy a container, it can be a container instance that has some data or modifications in it and we want to move it somewhere else. IMPORTANT: always differentiate both use cases as one is for images and other is for container.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">
 <span style="color:#75715e"># Create a copy of a container in tar-gz file</span>
 $ sudo docker export testcontainer | gzip &gt; testcontainer.tar.gz
 

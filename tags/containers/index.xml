@@ -6,11 +6,7 @@
     <description>Recent content in containers on pancho.dev</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 06 Aug 2020 20:30:48 -0300</lastBuildDate>
-    
-	<atom:link href="http://pancho.dev/tags/containers/index.xml" rel="self" type="application/rss+xml" />
-    
-    
+    <lastBuildDate>Thu, 06 Aug 2020 20:30:48 -0300</lastBuildDate><atom:link href="http://pancho.dev/tags/containers/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Lightning Post: Don&#39;t have a Docker registry? save and load to the rescue</title>
       <link>http://pancho.dev/posts/docker-save-restore/</link>

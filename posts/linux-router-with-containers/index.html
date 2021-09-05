@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head><title>
+    Linux Router With Containers | 
+    
+    pancho.dev</title>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="One of my passions in technology is networking, another passion is open source and linux. So sometimes I come across networking software or just to play around with linux standard networking tools like iptables, tc or iproute2, or even play with open source implementations of routing protocols using Quagga/Bird/FRR/go-bgp.
+I always found hard when testing this tools to get a proper setup on my laptop. Off course there are some tools that already help us in this regard like GNS3.
+    ">
+
+
+<meta property="og:title" content="Linux Router With Containers" />
+<meta property="og:description" content="One of my passions in technology is networking, another passion is open source and linux. So sometimes I come across networking software or just to play around with linux standard networking tools like iptables, tc or iproute2, or even play with open source implementations of routing protocols using Quagga/Bird/FRR/go-bgp.
+I always found hard when testing this tools to get a proper setup on my laptop. Off course there are some tools that already help us in this regard like GNS3." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://pancho.dev/posts/linux-router-with-containers/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-09-04T19:52:08-03:00" />
+<meta property="article:modified_time" content="2021-09-04T19:52:08-03:00" />
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Linux Router With Containers"/>
+<meta name="twitter:description" content="One of my passions in technology is networking, another passion is open source and linux. So sometimes I come across networking software or just to play around with linux standard networking tools like iptables, tc or iproute2, or even play with open source implementations of routing protocols using Quagga/Bird/FRR/go-bgp.
+I always found hard when testing this tools to get a proper setup on my laptop. Off course there are some tools that already help us in this regard like GNS3."/>
+
+<meta itemprop="name" content="Linux Router With Containers">
+<meta itemprop="description" content="One of my passions in technology is networking, another passion is open source and linux. So sometimes I come across networking software or just to play around with linux standard networking tools like iptables, tc or iproute2, or even play with open source implementations of routing protocols using Quagga/Bird/FRR/go-bgp.
+I always found hard when testing this tools to get a proper setup on my laptop. Off course there are some tools that already help us in this regard like GNS3."><meta itemprop="datePublished" content="2021-09-04T19:52:08-03:00" />
+<meta itemprop="dateModified" content="2021-09-04T19:52:08-03:00" />
+<meta itemprop="wordCount" content="2233">
+<meta itemprop="keywords" content="docker,network,linux," />
+<link rel="canonical" href="http://pancho.dev/posts/linux-router-with-containers/" />
+
+<link rel="icon" type="image/png" href="http://pancho.dev/image/favicon.ico">
+
+<link rel="stylesheet" href="/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/bulma.min.css">
+
+
+
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+	ga('create', 'UA-920705-12', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+<script async src='https://www.google-analytics.com/analytics.js'></script>
+
+
+
+<script src=/js/ramium.js></script>
+<link rel="stylesheet" href=/css/ramium.css>
+
+
+
+
+
+</head>
+
+<body><nav class="navbar is-dark" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a class="navbar-item" href=/>
+      
+      <strong>pancho.dev </strong>
+      
+    </a>
+
+    <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false"
+      data-target="navbarBasicExample">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+
+  <div id="navbarBasicExample" class="navbar-menu">
+    <div class="navbar-start">
+      
+      
+      <a class="navbar-item" href="/">Home</a>
+      
+      
+      
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">Blog</a>
+        <div class="navbar-dropdown">
+          
+          <a class="navbar-item" href="/posts/">All Posts</a>
+          
+        </div>
+      </div>
+      
+      
+    </div>
+
+    <div class="navbar-end">
+      
+
+      
+    </div>
+  </div>
+</nav><div class="columns is-centered">
+        <div id="page-body" class="column is-7">
+
+<div class="content blog">
+    <h1>Linux Router With Containers</h1>
+
+    <div id="infobar" class="level is-mobile">
+        <div class="level-left">
+            
+            <div class="level-item">
+                <p class="subtitle info date">Sep 4, 2021
+                </p>
+            </div>
+            
+
+            <div class="level-item">
+                <p class="subtitle info">
+                    12 mins read
+                </p>
+            </div>
+        </div>
+        <div class="level-right is-hidden-touch">
+            <div class="tags">
+                
+                <a class="tag is-dark is-rounded" href="/tags/docker">Docker</a>
+                
+                <a class="tag is-dark is-rounded" href="/tags/network">Network</a>
+                
+                <a class="tag is-dark is-rounded" href="/tags/linux">Linux</a>
+                
+            </div>
+        </div>
+    </div>
+
+    <div class="tags is-hidden-desktop">
+        
+        <a class="tag is-dark is-rounded" href="/tags/docker">Docker</a>
+        
+        <a class="tag is-dark is-rounded" href="/tags/network">Network</a>
+        
+        <a class="tag is-dark is-rounded" href="/tags/linux">Linux</a>
+        
+    </div>
+
+    <div class="blog-text">
+        
+
+        <p>One of my passions in technology is networking, another passion is open source and linux. So sometimes I come across networking software or just to play around with linux standard networking tools like iptables, tc or iproute2, or even play with open source implementations of routing protocols using Quagga/Bird/FRR/go-bgp.<br>
+I always found hard when testing this tools to get a proper setup on my laptop. Off course there are some tools that already help us in this regard like GNS3. However, using GNS3 I need to provide virtual machine images and configure all of them to save specific topologies. I wanted something that I can use quick and simple without the need of installing and keeping vms images on my laptop. Another requirement I had was to keep it as light as possible and wasy to reproduce, keep as much as possible of it as code.<br>
+First thing I though of was set up vagrant linux vms with extra network interfaces and use ansible to configure the virtualized linux routers.<br>
+Then I thought, why not do it in docker?</p>
+<h1 id="docker-and-a-linux-router-interesting">Docker and a linux router? Interesting!</h1>
+<p>So first I wanted to find how to do the link networking of container to create topologies that will help me test the scenarios I want.<br>
+When using docker standard tools it is possible to attach a container to multiple networks, you can use <code>docker network create</code> to create new networks and then run the container with the <code>--net</code> flag to specify the network you want. To get mutliple networks attached to a docker container (I tested with networks in bridge mode) you can attach secondary networks to a container with <code>docker network connect [OPTIONS] NETWORK CONTAINER</code> after the container was created.<br>
+But this last approach still made makes some noise in my head where the containers were linked through a bridge on the host network namespace and containers by default get configs like default GW and all of that. That reason made me think of a different strategy to actually manipulate the network namespaces myself to actually have the topology I really want. Then posibilities of doing complex topologies opens up.<br>
+Just starting a container with <code>docker run --net none ......</code> starts a container with an isolated network namespace and only a loopback interface, then I have a blank page to attach interfaces and link them with other containers without the need to use bridges in the host networking.<br>
+A last thing which is pretty good is that, we can take this approach with any container image so each container can be started with an official FRR, go-bgp or bird container image to do more complex cases and routing protocols with very lightweight containers running on the host. And also very easy to clean up the environment after we are finished with the tests. This setup makes it pretty easy to recreate a topology saving extremely precious time to actually do networking research rathen than spending time creaing a topology again.<br>
+I will explain how to do it with a simple example with just ubuntu image containers and a simple topology and static routes as a proof of concept, however we could technically add as many interfaces and connections to other containers as we want.</p>
+<h1 id="topology">Topology</h1>
+<p>The example I will be showing has the following topology, a simple router in between 2 containers with static routes.</p>
+<pre><code> -----------------------
+|    (container C1)     |
+| eth0 192.168.10.2/24] |
+ -----------------------
+           ^
+           |
+           v
+ ---------------------- 
+| eth0 192.168.10.1/24 |
+|   (container R1)     |
+| eth1 192.168.11.1/24 |
+ ---------------------- 
+           ^
+           |
+           v
+ -----------------------
+| eth0 192.168.11.2/24] |
+|    (container C2)     |
+ -----------------------
+</code></pre><p>In this example there are some limitations and requiremens. We need root access to the linux host to manipulate the kernel network namespaces. So this is a limitation if you are on a Mac using Docker for Mac because we don&rsquo;t have access to the VM running docker, if you are using a Mac you could still start a linux vm and install docker on it.</p>
+<h1 id="setup">Setup</h1>
+<ul>
+<li>Ubuntu 20.04 LTS for ARM</li>
+<li>Running on Raspberry Pi 4 with 8G RAM (however with a 1G RAM would be more than enough)</li>
+<li>Docker CE 20.10.8</li>
+</ul>
+<p>I tested this on a raspberry pi to just show it can be run in very resource constrained setup. Off course if running more complex software like FRR or BIRD might have more memory needs.</p>
+<h1 id="starting-the-containers">Starting the containers</h1>
+<p>In this setup we will end with 3 containers running 2 clients and 1 router. Also we will use a custom build container image based on ubuntu 20.04 I build which have multiple tools needed for network troubleshooting and this kind of tests. Here is the <a href="https://github.com/fcastello/ubuntu-nework">github repo link</a> and the image <a href="https://hub.docker.com/r/fcastello/ubuntu-network">dockerhub link</a></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run --privileged -d -t --net none --name c1 fcastello/ubuntu-network bash
+docker run --privileged -d -t --net none --name r1 fcastello/ubuntu-network bash
+docker run --privileged -d -t --net none --name c2 fcastello/ubuntu-network bash
+</code></pre></div><p>Containers:</p>
+<ul>
+<li>c1, client 1 container</li>
+<li>r1, router 1 container</li>
+<li>c2, client 2 container</li>
+</ul>
+<p>As we started the containers with <code>--net none</code> the containers have an isolated network namespace with no link to anything just yet. One thing to have in mind I started the containers with <code>--privileged</code> flag so if we actually want to <code>ip route</code> or <code>ip addr</code> command inside the container then it needs privileges to manipulate the kernel&rsquo;s routing tables. However in this example the flag is not needed as we will be manipulating the namespaces from the host and not the container. If you don&rsquo;t want to run as privileged, then you can add only the networking capabilities to the container you need rather than giving it all capabilities with privileged mode.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">root@rpi:~$ docker ps
+CONTAINER ID   IMAGE                        COMMAND                  CREATED        STATUS        PORTS     NAMES
+b083015e0797   fcastello/ubuntu-network     <span style="color:#e6db74">&#34;bash&#34;</span>                   <span style="color:#ae81ff">1</span> minute ago   Up <span style="color:#ae81ff">1</span> minute             c2
+831fbfe63ac1   fcastello/ubuntu-network     <span style="color:#e6db74">&#34;bash&#34;</span>                   <span style="color:#ae81ff">1</span> minute ago   Up <span style="color:#ae81ff">1</span> minute             r1
+199ffcf1ea10   fcastello/ubuntu-network     <span style="color:#e6db74">&#34;bash&#34;</span>                   <span style="color:#ae81ff">1</span> minute ago   Up <span style="color:#ae81ff">1</span> minute             c1
+</code></pre></div><h1 id="find-the-container-network-namespace-for-our-containers">Find the container network namespace for our containers</h1>
+<p>All commands done in the next steps should ideally be run in the same bash session as we are using variables to reuse values in later commands.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">
+<span style="color:#75715e"># Get the container id for each container (will be needed later)</span>
+c1_id<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>docker ps --format <span style="color:#e6db74">&#39;{{.ID}}&#39;</span> --filter name<span style="color:#f92672">=</span>c1<span style="color:#66d9ef">)</span>
+r1_id<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>docker ps --format <span style="color:#e6db74">&#39;{{.ID}}&#39;</span> --filter name<span style="color:#f92672">=</span>r1<span style="color:#66d9ef">)</span>
+c2_id<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>docker ps --format <span style="color:#e6db74">&#39;{{.ID}}&#39;</span> --filter name<span style="color:#f92672">=</span>c2<span style="color:#66d9ef">)</span>
+
+
+<span style="color:#75715e"># Get the containers pids which will be used to find their network namespace</span>
+c1_pid<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>docker inspect -f <span style="color:#e6db74">&#39;{{.State.Pid}}&#39;</span> <span style="color:#e6db74">${</span>c1_id<span style="color:#e6db74">}</span><span style="color:#66d9ef">)</span>
+r1_pid<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>docker inspect -f <span style="color:#e6db74">&#39;{{.State.Pid}}&#39;</span> <span style="color:#e6db74">${</span>r1_id<span style="color:#e6db74">}</span><span style="color:#66d9ef">)</span>
+c2_pid<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>docker inspect -f <span style="color:#e6db74">&#39;{{.State.Pid}}&#39;</span> <span style="color:#e6db74">${</span>c2_id<span style="color:#e6db74">}</span><span style="color:#66d9ef">)</span>
+
+<span style="color:#75715e"># create the /var/run/netns/ path if it doesn&#39;t already exist</span>
+mkdir -p /var/run/netns/
+
+
+<span style="color:#75715e"># Create a soft link to the containers network namespace to /var/run/netns/</span>
+ln -sfT /proc/$c1_pid/ns/net /var/run/netns/$c1_id
+ln -sfT /proc/$r1_pid/ns/net /var/run/netns/$r1_id
+ln -sfT /proc/$c2_pid/ns/net /var/run/netns/$c2_id
+
+
+<span style="color:#75715e"># Now lets show the ip addresses in each contaier namespace</span>
+<span style="color:#75715e"># C1</span>
+root@rpi:~$ ip netns exec $c1_id ip a
+1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu <span style="color:#ae81ff">65536</span> qdisc noqueue state UNKNOWN group default qlen <span style="color:#ae81ff">1000</span>
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+<span style="color:#75715e"># R1</span>
+root@rpi:~$ ip netns exec $r1_id ip a
+1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu <span style="color:#ae81ff">65536</span> qdisc noqueue state UNKNOWN group default qlen <span style="color:#ae81ff">1000</span>
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+<span style="color:#75715e"># C2</span>
+root@rpi:~$ ip netns exec $c2_id ip a
+1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu <span style="color:#ae81ff">65536</span> qdisc noqueue state UNKNOWN group default qlen <span style="color:#ae81ff">1000</span>
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+</code></pre></div><p>We have now set all links to have access to the containers namespaces already. Lets keep going.</p>
+<h1 id="create-the-virtual-ethernet-interfaces-and-assign-them-to-the-containers">Create the virtual ethernet interfaces and assign them to the containers</h1>
+<p>Some of this steps need to be done from the host which has access to cgroups and network namespaces for all containers.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Create the virtual ethernet devices for conecting C1 to R1</span>
+ip link add <span style="color:#e6db74">&#39;c1-eth0&#39;</span> type veth peer name <span style="color:#e6db74">&#39;r1-eth0&#39;</span>
+
+<span style="color:#75715e"># Create the virtual ethernet devices for conecting C2 to R1</span>
+ip link add <span style="color:#e6db74">&#39;c2-eth0&#39;</span> type veth peer name <span style="color:#e6db74">&#39;r1-eth1&#39;</span>
+
+<span style="color:#75715e"># We created the virtual ethernet pairs but they are still in the host network namespace</span>
+<span style="color:#75715e"># we need to move each virtual interface now to the corresponding containers namespace</span>
+
+<span style="color:#75715e"># move c1 interface to c1 container</span>
+ip link set <span style="color:#e6db74">&#39;c1-eth0&#39;</span> netns $c1_id
+
+<span style="color:#75715e"># move r1 interfaces to r1 container</span>
+<span style="color:#75715e"># note that r1 is a router which will</span>
+<span style="color:#75715e"># need at least 2 interfaces</span>
+ip link set <span style="color:#e6db74">&#39;r1-eth0&#39;</span> netns $r1_id
+ip link set <span style="color:#e6db74">&#39;r1-eth1&#39;</span> netns $r1_id
+
+<span style="color:#75715e"># move c2 interface to c2 container</span>
+ip link set <span style="color:#e6db74">&#39;c2-eth0&#39;</span> netns $c2_id
+
+<span style="color:#75715e"># Next step is not needed but it is nice to have more standard interface names</span>
+<span style="color:#75715e"># so we will rename interfaces inside the containers</span>
+
+<span style="color:#75715e"># rename c1 container interface from c1-eth0 to eth0</span>
+ip netns exec $c1_id ip link set <span style="color:#e6db74">&#39;c1-eth0&#39;</span> name <span style="color:#e6db74">&#39;eth0&#39;</span>
+
+<span style="color:#75715e"># rename r1 container interfaces from r1-eth0 to eth0 and r1-eth1 to eth1</span>
+ip netns exec $r1_id ip link set <span style="color:#e6db74">&#39;r1-eth0&#39;</span> name <span style="color:#e6db74">&#39;eth0&#39;</span>
+ip netns exec $r1_id ip link set <span style="color:#e6db74">&#39;r1-eth1&#39;</span> name <span style="color:#e6db74">&#39;eth1&#39;</span>
+
+<span style="color:#75715e"># rename c2 container interface form c2-eth0 to eth0</span>
+ip netns exec $c2_id ip link set <span style="color:#e6db74">&#39;c2-eth0&#39;</span> name <span style="color:#e6db74">&#39;eth0&#39;</span>
+
+
+<span style="color:#75715e"># bring up all interfaces in containers</span>
+ip netns exec $c1_id ip link set <span style="color:#e6db74">&#39;eth0&#39;</span> up
+ip netns exec $c1_id ip link set <span style="color:#e6db74">&#39;lo&#39;</span> up
+ip netns exec $r1_id ip link set <span style="color:#e6db74">&#39;eth0&#39;</span> up
+ip netns exec $r1_id ip link set <span style="color:#e6db74">&#39;eth1&#39;</span> up
+ip netns exec $r1_id ip link set <span style="color:#e6db74">&#39;lo&#39;</span> up
+ip netns exec $c2_id ip link set <span style="color:#e6db74">&#39;eth0&#39;</span> up
+ip netns exec $c2_id ip link set <span style="color:#e6db74">&#39;lo&#39;</span> up
+</code></pre></div><p>All containers now have interfaces set in them and they are linked toguether directly with no bridge in between</p>
+<h1 id="setting-ip-and-routes-on-the-containers">Setting ip and routes on the containers</h1>
+<p>Now we need to set ips and routes to be abel to exchange traffic between containers</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">
+<span style="color:#75715e"># lets set c1 container ip to 192.168.10.2</span>
+ip netns exec $c1_id ip addr add 192.168.10.2/24 dev eth0
+
+<span style="color:#75715e"># lets set r1 ips to 192.168.10.1 and 192.168.11.1</span>
+ip netns exec $r1_id ip addr add 192.168.10.1/24 dev eth0
+ip netns exec $r1_id ip addr add 192.168.11.1/24 dev eth1
+
+<span style="color:#75715e"># lets set c2 container ip to 192.168.11.2</span>
+ip netns exec $c2_id ip addr add 192.168.11.2/24 dev eth0
+
+
+<span style="color:#75715e"># now our containers have ips set.</span>
+<span style="color:#75715e"># Lets do some testing.</span>
+
+<span style="color:#75715e"># ping r1 from c1</span>
+root@rpi:~$ docker exec -it c1 ping -c <span style="color:#ae81ff">4</span> 192.168.10.1
+PING 192.168.10.1 <span style="color:#f92672">(</span>192.168.10.1<span style="color:#f92672">)</span>: <span style="color:#ae81ff">56</span> data bytes
+<span style="color:#ae81ff">64</span> bytes from 192.168.10.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.209 ms
+<span style="color:#ae81ff">64</span> bytes from 192.168.10.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.236 ms
+<span style="color:#ae81ff">64</span> bytes from 192.168.10.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.222 ms
+<span style="color:#ae81ff">64</span> bytes from 192.168.10.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.258 ms
+--- 192.168.10.1 ping statistics ---
+<span style="color:#ae81ff">4</span> packets transmitted, <span style="color:#ae81ff">4</span> packets received, 0% packet loss
+round-trip min/avg/max/stddev <span style="color:#f92672">=</span> 0.209/0.231/0.258/0.000 ms
+
+<span style="color:#75715e"># now ping r1 from c2</span>
+root@rpi:~$ docker exec -it c2 ping -c <span style="color:#ae81ff">4</span> 192.168.11.1
+PING 192.168.11.1 <span style="color:#f92672">(</span>192.168.11.1<span style="color:#f92672">)</span>: <span style="color:#ae81ff">56</span> data bytes
+<span style="color:#ae81ff">64</span> bytes from 192.168.11.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.200 ms
+<span style="color:#ae81ff">64</span> bytes from 192.168.11.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.234 ms
+<span style="color:#ae81ff">64</span> bytes from 192.168.11.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.212 ms
+<span style="color:#ae81ff">64</span> bytes from 192.168.11.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.221 ms
+--- 192.168.11.1 ping statistics ---
+<span style="color:#ae81ff">4</span> packets transmitted, <span style="color:#ae81ff">4</span> packets received, 0% packet loss
+round-trip min/avg/max/stddev <span style="color:#f92672">=</span> 0.200/0.217/0.234/0.000 ms
+
+
+<span style="color:#75715e"># From each c1 and c2 container we can ping the router ips that are in the same subnet,</span>
+<span style="color:#75715e"># but lets try to ping form c1 to c2</span>
+root@rpi:~$ docker exec -it c1 ping -c <span style="color:#ae81ff">4</span> 192.168.11.2
+PING 192.168.11.2 <span style="color:#f92672">(</span>192.168.11.2<span style="color:#f92672">)</span>: <span style="color:#ae81ff">56</span> data bytes
+ping: sending packet: Network is unreachable
+
+<span style="color:#75715e"># Not posible to ping from c1 to c2 because they are in different</span>
+<span style="color:#75715e"># subnets and not directly connected.</span>
+
+<span style="color:#75715e"># Let&#39;s add default routes to c1 and c2 containers that will go through r1</span>
+
+<span style="color:#75715e"># set default gw on c1 container</span>
+ip netns exec $c1_id ip route add default via 192.168.10.1 dev eth0
+
+<span style="color:#75715e"># set default gw on c2 container</span>
+ip netns exec $c2_id ip route add default via 192.168.11.1 dev eth0
+
+
+<span style="color:#75715e"># Now if we ping from c1 to c2</span>
+root@rpi:~$ docker exec -it c1 ping -c <span style="color:#ae81ff">4</span> 192.168.11.2
+PING 192.168.11.2 <span style="color:#f92672">(</span>192.168.11.2<span style="color:#f92672">)</span>: <span style="color:#ae81ff">56</span> data bytes
+<span style="color:#ae81ff">64</span> bytes from 192.168.11.2: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">63</span> time<span style="color:#f92672">=</span>0.226 ms
+<span style="color:#ae81ff">64</span> bytes from 192.168.11.2: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">63</span> time<span style="color:#f92672">=</span>0.262 ms
+<span style="color:#ae81ff">64</span> bytes from 192.168.11.2: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">63</span> time<span style="color:#f92672">=</span>0.267 ms
+<span style="color:#ae81ff">64</span> bytes from 192.168.11.2: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">63</span> time<span style="color:#f92672">=</span>0.235 ms
+--- 192.168.11.2 ping statistics ---
+<span style="color:#ae81ff">4</span> packets transmitted, <span style="color:#ae81ff">4</span> packets received, 0% packet loss
+round-trip min/avg/max/stddev <span style="color:#f92672">=</span> 0.226/0.247/0.267/0.000 ms
+</code></pre></div><p>Now we just finished creating a linux router between 2 containers. By creating a similar script we can create more complex topologies where we can do more advanced testing. Now let&rsquo;s clean it up.</p>
+<h1 id="clean-up">Clean up</h1>
+<p>For cleaning up the environment we just need to stop and remove the container and delete the namespace links</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Delete the containets</span>
+docker stop c1 c2 r1 <span style="color:#f92672">&amp;&amp;</span> docker rm c1 c2 r1
+
+<span style="color:#75715e"># Clean up the Network namespaces links</span>
+rm /var/run/netns/$c1_id
+rm /var/run/netns/$r1_id
+rm /var/run/netns/$c2_id
+</code></pre></div><h1 id="conclusion">Conclusion</h1>
+<p>I really enjoyed writing this blog post, I wanted to do this for a while but never found the time. Now that I know this is possible there might be more related posts in the future. Now I can create more complex topologies and mix it up a bit using routing protocols. I can think of plenty of use cases for this blog post from testing routing protocols to playing or testing iptables rules or playing with tc rules for traffic control between containers.<br>
+Best of all this is pretty lightweight and easy to clean up leaving my laptop (or the raspberry pi) very clean after I finish up.</p>
+
+    </div>
+</div><div id="social-media-share" class="has-text-centered">
+	<p><i>Sharing is caring!</i></p>
+	<br>
+	
+	<div class="share-buttons">
+	    <a  href="https://www.facebook.com/sharer/sharer.php?u=http%3a%2f%2fpancho.dev%2fposts%2flinux-router-with-containers%2f"
+	        onclick="socialMediaPopUp(this.href, '', 500, 500); return false;"
+	        title="Share on Facebook. Opens in a new window.">
+	        <img src=/img/icons/45px/facebook.png>
+	    </a>
+
+	    <a  href="https://twitter.com/intent/tweet?text=Linux%20Router%20With%20Containers&url=http%3a%2f%2fpancho.dev%2fposts%2flinux-router-with-containers%2f"
+	        onclick="socialMediaPopUp(this.href, '', 500, 500); return false;"
+	        title="Share on Twitter. Opens in a new window." >
+	        <img src=/img/icons/45px/twitter.png>
+	    </a>
+
+		<a  href="http://www.reddit.com/submit?url=http%3a%2f%2fpancho.dev%2fposts%2flinux-router-with-containers%2f"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on Reddit. Opens in a new window." >
+	        <img src=/img/icons/45px/reddit.png>
+	    </a>
+
+	    <a  href="http://pinterest.com/pin/create/button/?url=http%3a%2f%2fpancho.dev%2fposts%2flinux-router-with-containers%2f"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on Pinterest. Opens in a new window." >
+	        <img src=/img/icons/45px/pinterest.png>
+	    </a>
+
+	    <a  href="http://www.tumblr.com/share/link?url=http%3a%2f%2fpancho.dev%2fposts%2flinux-router-with-containers%2f"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on Tumblr. Opens in a new window." >
+	        <img src=/img/icons/45px/tumblr.png>
+	    </a>
+
+		<a  href="https://www.linkedin.com/shareArticle?mini=true&url=http%3a%2f%2fpancho.dev%2fposts%2flinux-router-with-containers%2f
+			&title=Linux%20Router%20With%20Containers&summary=One%20of%20my%20passions%20in%20technology%20is%20networking%2c%20another%20passion%20is%20open%20source%20and%20linux.%20So%20sometimes%20I%20come%20across%20networking%20software%20or%20just%20to%20play%20around%20with%20linux%20standard%20networking%20tools%20like%20iptables%2c%20tc%20or%20iproute2%2c%20or%20even%20play%20with%20open%20source%20implementations%20of%20routing%20protocols%20using%20Quagga%2fBird%2fFRR%2fgo-bgp.%0aI%20always%20found%20hard%20when%20testing%20this%20tools%20to%20get%20a%20proper%20setup%20on%20my%20laptop.%20Off%20course%20there%20are%20some%20tools%20that%20already%20help%20us%20in%20this%20regard%20like%20GNS3.&source=rafed123.github.io"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on LinkedIn. Opens in a new window." >
+	        <img src=/img/icons/45px/linkedin.png>
+	    </a>
+
+	    <a  href="mailto:?subject=Linux%20Router%20With%20Containers&amp;body=Check out this site http%3a%2f%2fpancho.dev%2fposts%2flinux-router-with-containers%2f"
+	        title="Share via Email. Opens in a new window." >
+	        <img src=/img/icons/45px/mail.png>
+	    </a>
+	</div>
+</div>
+
+
+<br>
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    (function () {
+        
+        
+        if (window.location.hostname == "localhost")
+            return;
+
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        var disqus_shortname = '';
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+        </div>
+    </div>
+
+<footer class="footer has-background-dark">
+    <div class="content has-text-centered has-text-white">
+        <p>
+            © 2020 Ramium. Powered by
+            <a class="has-text-light" href="https://github.com/gohugoio/hugo" target="_blank">
+            Hugo</a>. Theme
+            <a class="has-text-light" href="https://github.com/rafed123/ramium/" target="_blank">
+                Ramium.
+            </a>
+        </p>
+    </div>
+</footer>
+</body>
+
+</html>

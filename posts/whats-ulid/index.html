@@ -17,9 +17,10 @@ So this time I will introduce the ulid. Spoiler alert, it&rsquo;s an ID or at le
 <meta property="og:description" content="This time I will talk about something I found out very recently, and I found interesting to share this information as it might be handy for developers to use when the use case fits.
 So this time I will introduce the ulid. Spoiler alert, it&rsquo;s an ID or at least a data structure that can be used to represent an ID. So why do we have another way of expressing an ID, I won&rsquo;t get into too much details into that but yes there are many ways of defining ids, it can be numerical, using UUIDs, etc." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="http://pancho.dev/posts/whats-ulid/" />
+<meta property="og:url" content="http://pancho.dev/posts/whats-ulid/" /><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2020-06-27T14:35:31-03:00" />
 <meta property="article:modified_time" content="2020-06-27T14:35:31-03:00" />
+
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="What&#39;s a ULID"/>
@@ -28,13 +29,9 @@ So this time I will introduce the ulid. Spoiler alert, it&rsquo;s an ID or at le
 
 <meta itemprop="name" content="What&#39;s a ULID">
 <meta itemprop="description" content="This time I will talk about something I found out very recently, and I found interesting to share this information as it might be handy for developers to use when the use case fits.
-So this time I will introduce the ulid. Spoiler alert, it&rsquo;s an ID or at least a data structure that can be used to represent an ID. So why do we have another way of expressing an ID, I won&rsquo;t get into too much details into that but yes there are many ways of defining ids, it can be numerical, using UUIDs, etc.">
-<meta itemprop="datePublished" content="2020-06-27T14:35:31-03:00" />
+So this time I will introduce the ulid. Spoiler alert, it&rsquo;s an ID or at least a data structure that can be used to represent an ID. So why do we have another way of expressing an ID, I won&rsquo;t get into too much details into that but yes there are many ways of defining ids, it can be numerical, using UUIDs, etc."><meta itemprop="datePublished" content="2020-06-27T14:35:31-03:00" />
 <meta itemprop="dateModified" content="2020-06-27T14:35:31-03:00" />
 <meta itemprop="wordCount" content="2102">
-
-
-
 <meta itemprop="keywords" content="development,python," />
 <link rel="canonical" href="http://pancho.dev/posts/whats-ulid/" />
 
@@ -157,7 +154,7 @@ So this time I will introduce the <code>ulid</code>. Spoiler alert, it&rsquo;s a
 <h3 id="background">Background</h3>
 <p>I just want to give some background how I came across ulid and why I found it handy to use. I regularly find myself browsing through code from open source projects, even if I am not familiar with the language the projects are written, I always take a peek at the code. I have this obsession to know how things work under the hood, which has helped me to solve many tricky issues operating open source software.<br>
 So one day I was looking at <a href="https://prometheus.io/">Prometheus</a> data folder and I found the following</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">
 <span style="color:#75715e"># Looking at files and folders in the Prometheus data folder</span>
 $ ls -l
 total <span style="color:#ae81ff">84</span>
@@ -184,7 +181,7 @@ drwxr-xr-x <span style="color:#ae81ff">2</span> nobody nogroup  <span style="col
 -rw-r--r-- <span style="color:#ae81ff">1</span> nobody nogroup <span style="color:#ae81ff">20001</span> Jun <span style="color:#ae81ff">26</span> 14:28 queries.active
 drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">27</span> 17:00 wal
 
-<span style="color:#75715e"># Then looking into one of this weird folders. It is where the</span> 
+<span style="color:#75715e"># Then looking into one of this weird folders. It is where the </span>
 <span style="color:#75715e"># tsdb (time series database) structure is stored.</span>
 $ ls -lh 01EBVBHFM05VRE1B3QXGDTNE8B
 total 860K
@@ -241,9 +238,9 @@ Some examples:</p>
 <p>I wanted to point out a use case that catches my attention and probably would have saved some problems with race conditions when sending messages in an async messaging platform and still have events that need to be ordered. In an distributed system sending messages/events to other systems and attaching a ulid to the message would help prevent or detect race conditions, it won&rsquo;t guarantee that my messages arrived in order but at least I would know that I got a message older than a message that I already received. Helping detect and remediate the situation that might have generated a race condition. Well this is not a bulletproof approach but would helped to detect some of this situations.</p>
 <h4 id="example">Example</h4>
 <p>As an example I would show how to generate a ulid in python but other languages should be pretty similar. The example I used <code>python-ulid</code> and <code>iPython</code> interpreter.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">Python <span style="color:#ae81ff">3.7</span><span style="color:#f92672">.</span><span style="color:#ae81ff">5</span> (default, Nov  <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">2019</span>, <span style="color:#ae81ff">02</span>:<span style="color:#ae81ff">16</span>:<span style="color:#ae81ff">32</span>)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">Python <span style="color:#ae81ff">3.7.5</span> (default, Nov  <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">2019</span>, <span style="color:#ae81ff">02</span>:<span style="color:#ae81ff">16</span>:<span style="color:#ae81ff">32</span>)
 Type <span style="color:#e6db74">&#39;copyright&#39;</span>, <span style="color:#e6db74">&#39;credits&#39;</span> <span style="color:#f92672">or</span> <span style="color:#e6db74">&#39;license&#39;</span> <span style="color:#66d9ef">for</span> more information
-IPython <span style="color:#ae81ff">7.16</span><span style="color:#f92672">.</span><span style="color:#ae81ff">1</span> <span style="color:#f92672">--</span> An enhanced Interactive Python<span style="color:#f92672">.</span> Type <span style="color:#e6db74">&#39;?&#39;</span> <span style="color:#66d9ef">for</span> help<span style="color:#f92672">.</span>
+IPython <span style="color:#ae81ff">7.16.1</span> <span style="color:#f92672">--</span> An enhanced Interactive Python<span style="color:#f92672">.</span> Type <span style="color:#e6db74">&#39;?&#39;</span> <span style="color:#66d9ef">for</span> help<span style="color:#f92672">.</span>
 
 In [<span style="color:#ae81ff">1</span>]: <span style="color:#f92672">from</span> ulid <span style="color:#f92672">import</span> ULID
 
@@ -257,9 +254,9 @@ In [<span style="color:#ae81ff">4</span>]: ULID()
 Out[<span style="color:#ae81ff">4</span>]: ULID(<span style="color:#ae81ff">01</span>EBVTVQQ6K47WC9ZN9F3T6EBZ)
 </code></pre></div><p>As we can see the values generated where sortable in time.<br>
 Now we can generate a ulid and extract the timestamp from it</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">Python <span style="color:#ae81ff">3.7</span><span style="color:#f92672">.</span><span style="color:#ae81ff">5</span> (default, Nov  <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">2019</span>, <span style="color:#ae81ff">02</span>:<span style="color:#ae81ff">16</span>:<span style="color:#ae81ff">32</span>)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">Python <span style="color:#ae81ff">3.7.5</span> (default, Nov  <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">2019</span>, <span style="color:#ae81ff">02</span>:<span style="color:#ae81ff">16</span>:<span style="color:#ae81ff">32</span>)
 Type <span style="color:#e6db74">&#39;copyright&#39;</span>, <span style="color:#e6db74">&#39;credits&#39;</span> <span style="color:#f92672">or</span> <span style="color:#e6db74">&#39;license&#39;</span> <span style="color:#66d9ef">for</span> more information
-IPython <span style="color:#ae81ff">7.16</span><span style="color:#f92672">.</span><span style="color:#ae81ff">1</span> <span style="color:#f92672">--</span> An enhanced Interactive Python<span style="color:#f92672">.</span> Type <span style="color:#e6db74">&#39;?&#39;</span> <span style="color:#66d9ef">for</span> help<span style="color:#f92672">.</span>
+IPython <span style="color:#ae81ff">7.16.1</span> <span style="color:#f92672">--</span> An enhanced Interactive Python<span style="color:#f92672">.</span> Type <span style="color:#e6db74">&#39;?&#39;</span> <span style="color:#66d9ef">for</span> help<span style="color:#f92672">.</span>
 
 In [<span style="color:#ae81ff">1</span>]: <span style="color:#f92672">from</span> ulid <span style="color:#f92672">import</span> ULID
 
@@ -274,9 +271,9 @@ Out[<span style="color:#ae81ff">4</span>]: <span style="color:#ae81ff">159329328
 In [<span style="color:#ae81ff">5</span>]: ulid<span style="color:#f92672">.</span>datetime
 Out[<span style="color:#ae81ff">5</span>]: datetime<span style="color:#f92672">.</span>datetime(<span style="color:#ae81ff">2020</span>, <span style="color:#ae81ff">6</span>, <span style="color:#ae81ff">27</span>, <span style="color:#ae81ff">21</span>, <span style="color:#ae81ff">28</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">947000</span>, tzinfo<span style="color:#f92672">=</span>datetime<span style="color:#f92672">.</span>timezone<span style="color:#f92672">.</span>utc)
 </code></pre></div><p>And at last, I will show how easy is to swap from ulid to UUID, and UUID to ulid.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">Python <span style="color:#ae81ff">3.7</span><span style="color:#f92672">.</span><span style="color:#ae81ff">5</span> (default, Nov  <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">2019</span>, <span style="color:#ae81ff">02</span>:<span style="color:#ae81ff">16</span>:<span style="color:#ae81ff">32</span>)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">Python <span style="color:#ae81ff">3.7.5</span> (default, Nov  <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">2019</span>, <span style="color:#ae81ff">02</span>:<span style="color:#ae81ff">16</span>:<span style="color:#ae81ff">32</span>)
 Type <span style="color:#e6db74">&#39;copyright&#39;</span>, <span style="color:#e6db74">&#39;credits&#39;</span> <span style="color:#f92672">or</span> <span style="color:#e6db74">&#39;license&#39;</span> <span style="color:#66d9ef">for</span> more information
-IPython <span style="color:#ae81ff">7.16</span><span style="color:#f92672">.</span><span style="color:#ae81ff">1</span> <span style="color:#f92672">--</span> An enhanced Interactive Python<span style="color:#f92672">.</span> Type <span style="color:#e6db74">&#39;?&#39;</span> <span style="color:#66d9ef">for</span> help<span style="color:#f92672">.</span>
+IPython <span style="color:#ae81ff">7.16.1</span> <span style="color:#f92672">--</span> An enhanced Interactive Python<span style="color:#f92672">.</span> Type <span style="color:#e6db74">&#39;?&#39;</span> <span style="color:#66d9ef">for</span> help<span style="color:#f92672">.</span>
 
 In [<span style="color:#ae81ff">1</span>]: <span style="color:#f92672">from</span> ulid <span style="color:#f92672">import</span> ULID
 

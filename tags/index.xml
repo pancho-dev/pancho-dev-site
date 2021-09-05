@@ -6,10 +6,33 @@
     <description>Recent content in Tags on pancho.dev</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 24 Oct 2020 11:30:35 -0300</lastBuildDate>
+    <lastBuildDate>Sat, 04 Sep 2021 19:52:08 -0300</lastBuildDate><atom:link href="http://pancho.dev/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>docker</title>
+      <link>http://pancho.dev/tags/docker/</link>
+      <pubDate>Sat, 04 Sep 2021 19:52:08 -0300</pubDate>
+      
+      <guid>http://pancho.dev/tags/docker/</guid>
+      <description></description>
+    </item>
     
-	<atom:link href="http://pancho.dev/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>linux</title>
+      <link>http://pancho.dev/tags/linux/</link>
+      <pubDate>Sat, 04 Sep 2021 19:52:08 -0300</pubDate>
+      
+      <guid>http://pancho.dev/tags/linux/</guid>
+      <description></description>
+    </item>
     
+    <item>
+      <title>network</title>
+      <link>http://pancho.dev/tags/network/</link>
+      <pubDate>Sat, 04 Sep 2021 19:52:08 -0300</pubDate>
+      
+      <guid>http://pancho.dev/tags/network/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>AWS</title>
@@ -75,15 +98,6 @@
     </item>
     
     <item>
-      <title>docker</title>
-      <link>http://pancho.dev/tags/docker/</link>
-      <pubDate>Thu, 06 Aug 2020 20:30:48 -0300</pubDate>
-      
-      <guid>http://pancho.dev/tags/docker/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>development</title>
       <link>http://pancho.dev/tags/development/</link>
       <pubDate>Mon, 03 Aug 2020 14:05:25 -0300</pubDate>
@@ -98,15 +112,6 @@
       <pubDate>Mon, 03 Aug 2020 14:05:25 -0300</pubDate>
       
       <guid>http://pancho.dev/tags/proxy/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>linux</title>
-      <link>http://pancho.dev/tags/linux/</link>
-      <pubDate>Thu, 16 Jul 2020 15:51:59 -0300</pubDate>
-      
-      <guid>http://pancho.dev/tags/linux/</guid>
       <description></description>
     </item>
     
