@@ -166,7 +166,7 @@ A last thing which is pretty good is that, we can take this approach with any co
 I will explain how to do it with a simple example with just ubuntu image containers and a simple topology and static routes as a proof of concept, however we could technically add as many interfaces and connections to other containers as we want.</p>
 <h1 id="topology">Topology</h1>
 <p>The example I will be showing has the following topology, a simple router in between 2 containers with static routes.</p>
-<pre><code> -----------------------
+<pre tabindex="0"><code> -----------------------
 |    (container C1)     |
 | eth0 192.168.10.2/24] |
  -----------------------
@@ -195,190 +195,190 @@ I will explain how to do it with a simple example with just ubuntu image contain
 <p>I tested this on a raspberry pi to just show it can be run in very resource constrained setup. Off course if running more complex software like FRR or BIRD might have more memory needs.</p>
 <h1 id="starting-the-containers">Starting the containers</h1>
 <p>In this setup we will end with 3 containers running 2 clients and 1 router. Also we will use a custom build container image based on ubuntu 20.04 I build which have multiple tools needed for network troubleshooting and this kind of tests. Here is the <a href="https://github.com/fcastello/ubuntu-nework">github repo link</a> and the image <a href="https://hub.docker.com/r/fcastello/ubuntu-network">dockerhub link</a></p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run --privileged -d -t --net none --name c1 fcastello/ubuntu-network bash
-docker run --privileged -d -t --net none --name r1 fcastello/ubuntu-network bash
-docker run --privileged -d -t --net none --name c2 fcastello/ubuntu-network bash
-</code></pre></div><p>Containers:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>docker run --privileged -d -t --net none --name c1 fcastello/ubuntu-network bash
+</span></span><span style="display:flex;"><span>docker run --privileged -d -t --net none --name r1 fcastello/ubuntu-network bash
+</span></span><span style="display:flex;"><span>docker run --privileged -d -t --net none --name c2 fcastello/ubuntu-network bash
+</span></span></code></pre></div><p>Containers:</p>
 <ul>
 <li>c1, client 1 container</li>
 <li>r1, router 1 container</li>
 <li>c2, client 2 container</li>
 </ul>
 <p>As we started the containers with <code>--net none</code> the containers have an isolated network namespace with no link to anything just yet. One thing to have in mind I started the containers with <code>--privileged</code> flag so if we actually want to <code>ip route</code> or <code>ip addr</code> command inside the container then it needs privileges to manipulate the kernel&rsquo;s routing tables. However in this example the flag is not needed as we will be manipulating the namespaces from the host and not the container. If you don&rsquo;t want to run as privileged, then you can add only the networking capabilities to the container you need rather than giving it all capabilities with privileged mode.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">root@rpi:~$ docker ps
-CONTAINER ID   IMAGE                        COMMAND                  CREATED        STATUS        PORTS     NAMES
-b083015e0797   fcastello/ubuntu-network     <span style="color:#e6db74">&#34;bash&#34;</span>                   <span style="color:#ae81ff">1</span> minute ago   Up <span style="color:#ae81ff">1</span> minute             c2
-831fbfe63ac1   fcastello/ubuntu-network     <span style="color:#e6db74">&#34;bash&#34;</span>                   <span style="color:#ae81ff">1</span> minute ago   Up <span style="color:#ae81ff">1</span> minute             r1
-199ffcf1ea10   fcastello/ubuntu-network     <span style="color:#e6db74">&#34;bash&#34;</span>                   <span style="color:#ae81ff">1</span> minute ago   Up <span style="color:#ae81ff">1</span> minute             c1
-</code></pre></div><h1 id="find-the-container-network-namespace-for-our-containers">Find the container network namespace for our containers</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>root@rpi:~$ docker ps
+</span></span><span style="display:flex;"><span>CONTAINER ID   IMAGE                        COMMAND                  CREATED        STATUS        PORTS     NAMES
+</span></span><span style="display:flex;"><span>b083015e0797   fcastello/ubuntu-network     <span style="color:#e6db74">&#34;bash&#34;</span>                   <span style="color:#ae81ff">1</span> minute ago   Up <span style="color:#ae81ff">1</span> minute             c2
+</span></span><span style="display:flex;"><span>831fbfe63ac1   fcastello/ubuntu-network     <span style="color:#e6db74">&#34;bash&#34;</span>                   <span style="color:#ae81ff">1</span> minute ago   Up <span style="color:#ae81ff">1</span> minute             r1
+</span></span><span style="display:flex;"><span>199ffcf1ea10   fcastello/ubuntu-network     <span style="color:#e6db74">&#34;bash&#34;</span>                   <span style="color:#ae81ff">1</span> minute ago   Up <span style="color:#ae81ff">1</span> minute             c1
+</span></span></code></pre></div><h1 id="find-the-container-network-namespace-for-our-containers">Find the container network namespace for our containers</h1>
 <p>All commands done in the next steps should ideally be run in the same bash session as we are using variables to reuse values in later commands.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">
-<span style="color:#75715e"># Get the container id for each container (will be needed later)</span>
-c1_id<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>docker ps --format <span style="color:#e6db74">&#39;{{.ID}}&#39;</span> --filter name<span style="color:#f92672">=</span>c1<span style="color:#66d9ef">)</span>
-r1_id<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>docker ps --format <span style="color:#e6db74">&#39;{{.ID}}&#39;</span> --filter name<span style="color:#f92672">=</span>r1<span style="color:#66d9ef">)</span>
-c2_id<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>docker ps --format <span style="color:#e6db74">&#39;{{.ID}}&#39;</span> --filter name<span style="color:#f92672">=</span>c2<span style="color:#66d9ef">)</span>
-
-
-<span style="color:#75715e"># Get the containers pids which will be used to find their network namespace</span>
-c1_pid<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>docker inspect -f <span style="color:#e6db74">&#39;{{.State.Pid}}&#39;</span> <span style="color:#e6db74">${</span>c1_id<span style="color:#e6db74">}</span><span style="color:#66d9ef">)</span>
-r1_pid<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>docker inspect -f <span style="color:#e6db74">&#39;{{.State.Pid}}&#39;</span> <span style="color:#e6db74">${</span>r1_id<span style="color:#e6db74">}</span><span style="color:#66d9ef">)</span>
-c2_pid<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>docker inspect -f <span style="color:#e6db74">&#39;{{.State.Pid}}&#39;</span> <span style="color:#e6db74">${</span>c2_id<span style="color:#e6db74">}</span><span style="color:#66d9ef">)</span>
-
-<span style="color:#75715e"># create the /var/run/netns/ path if it doesn&#39;t already exist</span>
-mkdir -p /var/run/netns/
-
-
-<span style="color:#75715e"># Create a soft link to the containers network namespace to /var/run/netns/</span>
-ln -sfT /proc/$c1_pid/ns/net /var/run/netns/$c1_id
-ln -sfT /proc/$r1_pid/ns/net /var/run/netns/$r1_id
-ln -sfT /proc/$c2_pid/ns/net /var/run/netns/$c2_id
-
-
-<span style="color:#75715e"># Now lets show the ip addresses in each contaier namespace</span>
-<span style="color:#75715e"># C1</span>
-root@rpi:~$ ip netns exec $c1_id ip a
-1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu <span style="color:#ae81ff">65536</span> qdisc noqueue state UNKNOWN group default qlen <span style="color:#ae81ff">1000</span>
-    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
-    inet 127.0.0.1/8 scope host lo
-       valid_lft forever preferred_lft forever
-<span style="color:#75715e"># R1</span>
-root@rpi:~$ ip netns exec $r1_id ip a
-1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu <span style="color:#ae81ff">65536</span> qdisc noqueue state UNKNOWN group default qlen <span style="color:#ae81ff">1000</span>
-    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
-    inet 127.0.0.1/8 scope host lo
-       valid_lft forever preferred_lft forever
-<span style="color:#75715e"># C2</span>
-root@rpi:~$ ip netns exec $c2_id ip a
-1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu <span style="color:#ae81ff">65536</span> qdisc noqueue state UNKNOWN group default qlen <span style="color:#ae81ff">1000</span>
-    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
-    inet 127.0.0.1/8 scope host lo
-       valid_lft forever preferred_lft forever
-</code></pre></div><p>We have now set all links to have access to the containers namespaces already. Lets keep going.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Get the container id for each container (will be needed later)</span>
+</span></span><span style="display:flex;"><span>c1_id<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>docker ps --format <span style="color:#e6db74">&#39;{{.ID}}&#39;</span> --filter name<span style="color:#f92672">=</span>c1<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>r1_id<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>docker ps --format <span style="color:#e6db74">&#39;{{.ID}}&#39;</span> --filter name<span style="color:#f92672">=</span>r1<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>c2_id<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>docker ps --format <span style="color:#e6db74">&#39;{{.ID}}&#39;</span> --filter name<span style="color:#f92672">=</span>c2<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Get the containers pids which will be used to find their network namespace</span>
+</span></span><span style="display:flex;"><span>c1_pid<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>docker inspect -f <span style="color:#e6db74">&#39;{{.State.Pid}}&#39;</span> <span style="color:#e6db74">${</span>c1_id<span style="color:#e6db74">}</span><span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>r1_pid<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>docker inspect -f <span style="color:#e6db74">&#39;{{.State.Pid}}&#39;</span> <span style="color:#e6db74">${</span>r1_id<span style="color:#e6db74">}</span><span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>c2_pid<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>docker inspect -f <span style="color:#e6db74">&#39;{{.State.Pid}}&#39;</span> <span style="color:#e6db74">${</span>c2_id<span style="color:#e6db74">}</span><span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># create the /var/run/netns/ path if it doesn&#39;t already exist</span>
+</span></span><span style="display:flex;"><span>mkdir -p /var/run/netns/
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Create a soft link to the containers network namespace to /var/run/netns/</span>
+</span></span><span style="display:flex;"><span>ln -sfT /proc/$c1_pid/ns/net /var/run/netns/$c1_id
+</span></span><span style="display:flex;"><span>ln -sfT /proc/$r1_pid/ns/net /var/run/netns/$r1_id
+</span></span><span style="display:flex;"><span>ln -sfT /proc/$c2_pid/ns/net /var/run/netns/$c2_id
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Now lets show the ip addresses in each contaier namespace</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># C1</span>
+</span></span><span style="display:flex;"><span>root@rpi:~$ ip netns exec $c1_id ip a
+</span></span><span style="display:flex;"><span>1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu <span style="color:#ae81ff">65536</span> qdisc noqueue state UNKNOWN group default qlen <span style="color:#ae81ff">1000</span>
+</span></span><span style="display:flex;"><span>    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+</span></span><span style="display:flex;"><span>    inet 127.0.0.1/8 scope host lo
+</span></span><span style="display:flex;"><span>       valid_lft forever preferred_lft forever
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># R1</span>
+</span></span><span style="display:flex;"><span>root@rpi:~$ ip netns exec $r1_id ip a
+</span></span><span style="display:flex;"><span>1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu <span style="color:#ae81ff">65536</span> qdisc noqueue state UNKNOWN group default qlen <span style="color:#ae81ff">1000</span>
+</span></span><span style="display:flex;"><span>    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+</span></span><span style="display:flex;"><span>    inet 127.0.0.1/8 scope host lo
+</span></span><span style="display:flex;"><span>       valid_lft forever preferred_lft forever
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># C2</span>
+</span></span><span style="display:flex;"><span>root@rpi:~$ ip netns exec $c2_id ip a
+</span></span><span style="display:flex;"><span>1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu <span style="color:#ae81ff">65536</span> qdisc noqueue state UNKNOWN group default qlen <span style="color:#ae81ff">1000</span>
+</span></span><span style="display:flex;"><span>    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+</span></span><span style="display:flex;"><span>    inet 127.0.0.1/8 scope host lo
+</span></span><span style="display:flex;"><span>       valid_lft forever preferred_lft forever
+</span></span></code></pre></div><p>We have now set all links to have access to the containers namespaces already. Lets keep going.</p>
 <h1 id="create-the-virtual-ethernet-interfaces-and-assign-them-to-the-containers">Create the virtual ethernet interfaces and assign them to the containers</h1>
 <p>Some of this steps need to be done from the host which has access to cgroups and network namespaces for all containers.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Create the virtual ethernet devices for conecting C1 to R1</span>
-ip link add <span style="color:#e6db74">&#39;c1-eth0&#39;</span> type veth peer name <span style="color:#e6db74">&#39;r1-eth0&#39;</span>
-
-<span style="color:#75715e"># Create the virtual ethernet devices for conecting C2 to R1</span>
-ip link add <span style="color:#e6db74">&#39;c2-eth0&#39;</span> type veth peer name <span style="color:#e6db74">&#39;r1-eth1&#39;</span>
-
-<span style="color:#75715e"># We created the virtual ethernet pairs but they are still in the host network namespace</span>
-<span style="color:#75715e"># we need to move each virtual interface now to the corresponding containers namespace</span>
-
-<span style="color:#75715e"># move c1 interface to c1 container</span>
-ip link set <span style="color:#e6db74">&#39;c1-eth0&#39;</span> netns $c1_id
-
-<span style="color:#75715e"># move r1 interfaces to r1 container</span>
-<span style="color:#75715e"># note that r1 is a router which will</span>
-<span style="color:#75715e"># need at least 2 interfaces</span>
-ip link set <span style="color:#e6db74">&#39;r1-eth0&#39;</span> netns $r1_id
-ip link set <span style="color:#e6db74">&#39;r1-eth1&#39;</span> netns $r1_id
-
-<span style="color:#75715e"># move c2 interface to c2 container</span>
-ip link set <span style="color:#e6db74">&#39;c2-eth0&#39;</span> netns $c2_id
-
-<span style="color:#75715e"># Next step is not needed but it is nice to have more standard interface names</span>
-<span style="color:#75715e"># so we will rename interfaces inside the containers</span>
-
-<span style="color:#75715e"># rename c1 container interface from c1-eth0 to eth0</span>
-ip netns exec $c1_id ip link set <span style="color:#e6db74">&#39;c1-eth0&#39;</span> name <span style="color:#e6db74">&#39;eth0&#39;</span>
-
-<span style="color:#75715e"># rename r1 container interfaces from r1-eth0 to eth0 and r1-eth1 to eth1</span>
-ip netns exec $r1_id ip link set <span style="color:#e6db74">&#39;r1-eth0&#39;</span> name <span style="color:#e6db74">&#39;eth0&#39;</span>
-ip netns exec $r1_id ip link set <span style="color:#e6db74">&#39;r1-eth1&#39;</span> name <span style="color:#e6db74">&#39;eth1&#39;</span>
-
-<span style="color:#75715e"># rename c2 container interface form c2-eth0 to eth0</span>
-ip netns exec $c2_id ip link set <span style="color:#e6db74">&#39;c2-eth0&#39;</span> name <span style="color:#e6db74">&#39;eth0&#39;</span>
-
-
-<span style="color:#75715e"># bring up all interfaces in containers</span>
-ip netns exec $c1_id ip link set <span style="color:#e6db74">&#39;eth0&#39;</span> up
-ip netns exec $c1_id ip link set <span style="color:#e6db74">&#39;lo&#39;</span> up
-ip netns exec $r1_id ip link set <span style="color:#e6db74">&#39;eth0&#39;</span> up
-ip netns exec $r1_id ip link set <span style="color:#e6db74">&#39;eth1&#39;</span> up
-ip netns exec $r1_id ip link set <span style="color:#e6db74">&#39;lo&#39;</span> up
-ip netns exec $c2_id ip link set <span style="color:#e6db74">&#39;eth0&#39;</span> up
-ip netns exec $c2_id ip link set <span style="color:#e6db74">&#39;lo&#39;</span> up
-</code></pre></div><p>All containers now have interfaces set in them and they are linked toguether directly with no bridge in between</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Create the virtual ethernet devices for conecting C1 to R1</span>
+</span></span><span style="display:flex;"><span>ip link add <span style="color:#e6db74">&#39;c1-eth0&#39;</span> type veth peer name <span style="color:#e6db74">&#39;r1-eth0&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Create the virtual ethernet devices for conecting C2 to R1</span>
+</span></span><span style="display:flex;"><span>ip link add <span style="color:#e6db74">&#39;c2-eth0&#39;</span> type veth peer name <span style="color:#e6db74">&#39;r1-eth1&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># We created the virtual ethernet pairs but they are still in the host network namespace</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># we need to move each virtual interface now to the corresponding containers namespace</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># move c1 interface to c1 container</span>
+</span></span><span style="display:flex;"><span>ip link set <span style="color:#e6db74">&#39;c1-eth0&#39;</span> netns $c1_id
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># move r1 interfaces to r1 container</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># note that r1 is a router which will</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># need at least 2 interfaces</span>
+</span></span><span style="display:flex;"><span>ip link set <span style="color:#e6db74">&#39;r1-eth0&#39;</span> netns $r1_id
+</span></span><span style="display:flex;"><span>ip link set <span style="color:#e6db74">&#39;r1-eth1&#39;</span> netns $r1_id
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># move c2 interface to c2 container</span>
+</span></span><span style="display:flex;"><span>ip link set <span style="color:#e6db74">&#39;c2-eth0&#39;</span> netns $c2_id
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Next step is not needed but it is nice to have more standard interface names</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># so we will rename interfaces inside the containers</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># rename c1 container interface from c1-eth0 to eth0</span>
+</span></span><span style="display:flex;"><span>ip netns exec $c1_id ip link set <span style="color:#e6db74">&#39;c1-eth0&#39;</span> name <span style="color:#e6db74">&#39;eth0&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># rename r1 container interfaces from r1-eth0 to eth0 and r1-eth1 to eth1</span>
+</span></span><span style="display:flex;"><span>ip netns exec $r1_id ip link set <span style="color:#e6db74">&#39;r1-eth0&#39;</span> name <span style="color:#e6db74">&#39;eth0&#39;</span>
+</span></span><span style="display:flex;"><span>ip netns exec $r1_id ip link set <span style="color:#e6db74">&#39;r1-eth1&#39;</span> name <span style="color:#e6db74">&#39;eth1&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># rename c2 container interface form c2-eth0 to eth0</span>
+</span></span><span style="display:flex;"><span>ip netns exec $c2_id ip link set <span style="color:#e6db74">&#39;c2-eth0&#39;</span> name <span style="color:#e6db74">&#39;eth0&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># bring up all interfaces in containers</span>
+</span></span><span style="display:flex;"><span>ip netns exec $c1_id ip link set <span style="color:#e6db74">&#39;eth0&#39;</span> up
+</span></span><span style="display:flex;"><span>ip netns exec $c1_id ip link set <span style="color:#e6db74">&#39;lo&#39;</span> up
+</span></span><span style="display:flex;"><span>ip netns exec $r1_id ip link set <span style="color:#e6db74">&#39;eth0&#39;</span> up
+</span></span><span style="display:flex;"><span>ip netns exec $r1_id ip link set <span style="color:#e6db74">&#39;eth1&#39;</span> up
+</span></span><span style="display:flex;"><span>ip netns exec $r1_id ip link set <span style="color:#e6db74">&#39;lo&#39;</span> up
+</span></span><span style="display:flex;"><span>ip netns exec $c2_id ip link set <span style="color:#e6db74">&#39;eth0&#39;</span> up
+</span></span><span style="display:flex;"><span>ip netns exec $c2_id ip link set <span style="color:#e6db74">&#39;lo&#39;</span> up
+</span></span></code></pre></div><p>All containers now have interfaces set in them and they are linked toguether directly with no bridge in between</p>
 <h1 id="setting-ip-and-routes-on-the-containers">Setting ip and routes on the containers</h1>
 <p>Now we need to set ips and routes to be abel to exchange traffic between containers</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">
-<span style="color:#75715e"># lets set c1 container ip to 192.168.10.2</span>
-ip netns exec $c1_id ip addr add 192.168.10.2/24 dev eth0
-
-<span style="color:#75715e"># lets set r1 ips to 192.168.10.1 and 192.168.11.1</span>
-ip netns exec $r1_id ip addr add 192.168.10.1/24 dev eth0
-ip netns exec $r1_id ip addr add 192.168.11.1/24 dev eth1
-
-<span style="color:#75715e"># lets set c2 container ip to 192.168.11.2</span>
-ip netns exec $c2_id ip addr add 192.168.11.2/24 dev eth0
-
-
-<span style="color:#75715e"># now our containers have ips set.</span>
-<span style="color:#75715e"># Lets do some testing.</span>
-
-<span style="color:#75715e"># ping r1 from c1</span>
-root@rpi:~$ docker exec -it c1 ping -c <span style="color:#ae81ff">4</span> 192.168.10.1
-PING 192.168.10.1 <span style="color:#f92672">(</span>192.168.10.1<span style="color:#f92672">)</span>: <span style="color:#ae81ff">56</span> data bytes
-<span style="color:#ae81ff">64</span> bytes from 192.168.10.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.209 ms
-<span style="color:#ae81ff">64</span> bytes from 192.168.10.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.236 ms
-<span style="color:#ae81ff">64</span> bytes from 192.168.10.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.222 ms
-<span style="color:#ae81ff">64</span> bytes from 192.168.10.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.258 ms
---- 192.168.10.1 ping statistics ---
-<span style="color:#ae81ff">4</span> packets transmitted, <span style="color:#ae81ff">4</span> packets received, 0% packet loss
-round-trip min/avg/max/stddev <span style="color:#f92672">=</span> 0.209/0.231/0.258/0.000 ms
-
-<span style="color:#75715e"># now ping r1 from c2</span>
-root@rpi:~$ docker exec -it c2 ping -c <span style="color:#ae81ff">4</span> 192.168.11.1
-PING 192.168.11.1 <span style="color:#f92672">(</span>192.168.11.1<span style="color:#f92672">)</span>: <span style="color:#ae81ff">56</span> data bytes
-<span style="color:#ae81ff">64</span> bytes from 192.168.11.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.200 ms
-<span style="color:#ae81ff">64</span> bytes from 192.168.11.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.234 ms
-<span style="color:#ae81ff">64</span> bytes from 192.168.11.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.212 ms
-<span style="color:#ae81ff">64</span> bytes from 192.168.11.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.221 ms
---- 192.168.11.1 ping statistics ---
-<span style="color:#ae81ff">4</span> packets transmitted, <span style="color:#ae81ff">4</span> packets received, 0% packet loss
-round-trip min/avg/max/stddev <span style="color:#f92672">=</span> 0.200/0.217/0.234/0.000 ms
-
-
-<span style="color:#75715e"># From each c1 and c2 container we can ping the router ips that are in the same subnet,</span>
-<span style="color:#75715e"># but lets try to ping form c1 to c2</span>
-root@rpi:~$ docker exec -it c1 ping -c <span style="color:#ae81ff">4</span> 192.168.11.2
-PING 192.168.11.2 <span style="color:#f92672">(</span>192.168.11.2<span style="color:#f92672">)</span>: <span style="color:#ae81ff">56</span> data bytes
-ping: sending packet: Network is unreachable
-
-<span style="color:#75715e"># Not posible to ping from c1 to c2 because they are in different</span>
-<span style="color:#75715e"># subnets and not directly connected.</span>
-
-<span style="color:#75715e"># Let&#39;s add default routes to c1 and c2 containers that will go through r1</span>
-
-<span style="color:#75715e"># set default gw on c1 container</span>
-ip netns exec $c1_id ip route add default via 192.168.10.1 dev eth0
-
-<span style="color:#75715e"># set default gw on c2 container</span>
-ip netns exec $c2_id ip route add default via 192.168.11.1 dev eth0
-
-
-<span style="color:#75715e"># Now if we ping from c1 to c2</span>
-root@rpi:~$ docker exec -it c1 ping -c <span style="color:#ae81ff">4</span> 192.168.11.2
-PING 192.168.11.2 <span style="color:#f92672">(</span>192.168.11.2<span style="color:#f92672">)</span>: <span style="color:#ae81ff">56</span> data bytes
-<span style="color:#ae81ff">64</span> bytes from 192.168.11.2: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">63</span> time<span style="color:#f92672">=</span>0.226 ms
-<span style="color:#ae81ff">64</span> bytes from 192.168.11.2: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">63</span> time<span style="color:#f92672">=</span>0.262 ms
-<span style="color:#ae81ff">64</span> bytes from 192.168.11.2: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">63</span> time<span style="color:#f92672">=</span>0.267 ms
-<span style="color:#ae81ff">64</span> bytes from 192.168.11.2: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">63</span> time<span style="color:#f92672">=</span>0.235 ms
---- 192.168.11.2 ping statistics ---
-<span style="color:#ae81ff">4</span> packets transmitted, <span style="color:#ae81ff">4</span> packets received, 0% packet loss
-round-trip min/avg/max/stddev <span style="color:#f92672">=</span> 0.226/0.247/0.267/0.000 ms
-</code></pre></div><p>Now we just finished creating a linux router between 2 containers. By creating a similar script we can create more complex topologies where we can do more advanced testing. Now let&rsquo;s clean it up.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># lets set c1 container ip to 192.168.10.2</span>
+</span></span><span style="display:flex;"><span>ip netns exec $c1_id ip addr add 192.168.10.2/24 dev eth0
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># lets set r1 ips to 192.168.10.1 and 192.168.11.1</span>
+</span></span><span style="display:flex;"><span>ip netns exec $r1_id ip addr add 192.168.10.1/24 dev eth0
+</span></span><span style="display:flex;"><span>ip netns exec $r1_id ip addr add 192.168.11.1/24 dev eth1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># lets set c2 container ip to 192.168.11.2</span>
+</span></span><span style="display:flex;"><span>ip netns exec $c2_id ip addr add 192.168.11.2/24 dev eth0
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># now our containers have ips set.</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Lets do some testing.</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># ping r1 from c1</span>
+</span></span><span style="display:flex;"><span>root@rpi:~$ docker exec -it c1 ping -c <span style="color:#ae81ff">4</span> 192.168.10.1
+</span></span><span style="display:flex;"><span>PING 192.168.10.1 <span style="color:#f92672">(</span>192.168.10.1<span style="color:#f92672">)</span>: <span style="color:#ae81ff">56</span> data bytes
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">64</span> bytes from 192.168.10.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.209 ms
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">64</span> bytes from 192.168.10.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.236 ms
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">64</span> bytes from 192.168.10.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.222 ms
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">64</span> bytes from 192.168.10.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.258 ms
+</span></span><span style="display:flex;"><span>--- 192.168.10.1 ping statistics ---
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">4</span> packets transmitted, <span style="color:#ae81ff">4</span> packets received, 0% packet loss
+</span></span><span style="display:flex;"><span>round-trip min/avg/max/stddev <span style="color:#f92672">=</span> 0.209/0.231/0.258/0.000 ms
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># now ping r1 from c2</span>
+</span></span><span style="display:flex;"><span>root@rpi:~$ docker exec -it c2 ping -c <span style="color:#ae81ff">4</span> 192.168.11.1
+</span></span><span style="display:flex;"><span>PING 192.168.11.1 <span style="color:#f92672">(</span>192.168.11.1<span style="color:#f92672">)</span>: <span style="color:#ae81ff">56</span> data bytes
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">64</span> bytes from 192.168.11.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.200 ms
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">64</span> bytes from 192.168.11.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.234 ms
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">64</span> bytes from 192.168.11.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.212 ms
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">64</span> bytes from 192.168.11.1: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">64</span> time<span style="color:#f92672">=</span>0.221 ms
+</span></span><span style="display:flex;"><span>--- 192.168.11.1 ping statistics ---
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">4</span> packets transmitted, <span style="color:#ae81ff">4</span> packets received, 0% packet loss
+</span></span><span style="display:flex;"><span>round-trip min/avg/max/stddev <span style="color:#f92672">=</span> 0.200/0.217/0.234/0.000 ms
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># From each c1 and c2 container we can ping the router ips that are in the same subnet,</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># but lets try to ping form c1 to c2</span>
+</span></span><span style="display:flex;"><span>root@rpi:~$ docker exec -it c1 ping -c <span style="color:#ae81ff">4</span> 192.168.11.2
+</span></span><span style="display:flex;"><span>PING 192.168.11.2 <span style="color:#f92672">(</span>192.168.11.2<span style="color:#f92672">)</span>: <span style="color:#ae81ff">56</span> data bytes
+</span></span><span style="display:flex;"><span>ping: sending packet: Network is unreachable
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Not posible to ping from c1 to c2 because they are in different</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># subnets and not directly connected.</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Let&#39;s add default routes to c1 and c2 containers that will go through r1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># set default gw on c1 container</span>
+</span></span><span style="display:flex;"><span>ip netns exec $c1_id ip route add default via 192.168.10.1 dev eth0
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># set default gw on c2 container</span>
+</span></span><span style="display:flex;"><span>ip netns exec $c2_id ip route add default via 192.168.11.1 dev eth0
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Now if we ping from c1 to c2</span>
+</span></span><span style="display:flex;"><span>root@rpi:~$ docker exec -it c1 ping -c <span style="color:#ae81ff">4</span> 192.168.11.2
+</span></span><span style="display:flex;"><span>PING 192.168.11.2 <span style="color:#f92672">(</span>192.168.11.2<span style="color:#f92672">)</span>: <span style="color:#ae81ff">56</span> data bytes
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">64</span> bytes from 192.168.11.2: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">63</span> time<span style="color:#f92672">=</span>0.226 ms
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">64</span> bytes from 192.168.11.2: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">63</span> time<span style="color:#f92672">=</span>0.262 ms
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">64</span> bytes from 192.168.11.2: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">63</span> time<span style="color:#f92672">=</span>0.267 ms
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">64</span> bytes from 192.168.11.2: icmp_seq<span style="color:#f92672">=</span><span style="color:#ae81ff">3</span> ttl<span style="color:#f92672">=</span><span style="color:#ae81ff">63</span> time<span style="color:#f92672">=</span>0.235 ms
+</span></span><span style="display:flex;"><span>--- 192.168.11.2 ping statistics ---
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">4</span> packets transmitted, <span style="color:#ae81ff">4</span> packets received, 0% packet loss
+</span></span><span style="display:flex;"><span>round-trip min/avg/max/stddev <span style="color:#f92672">=</span> 0.226/0.247/0.267/0.000 ms
+</span></span></code></pre></div><p>Now we just finished creating a linux router between 2 containers. By creating a similar script we can create more complex topologies where we can do more advanced testing. Now let&rsquo;s clean it up.</p>
 <h1 id="clean-up">Clean up</h1>
 <p>For cleaning up the environment we just need to stop and remove the container and delete the namespace links</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Delete the containets</span>
-docker stop c1 c2 r1 <span style="color:#f92672">&amp;&amp;</span> docker rm c1 c2 r1
-
-<span style="color:#75715e"># Clean up the Network namespaces links</span>
-rm /var/run/netns/$c1_id
-rm /var/run/netns/$r1_id
-rm /var/run/netns/$c2_id
-</code></pre></div><h1 id="conclusion">Conclusion</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Delete the containets</span>
+</span></span><span style="display:flex;"><span>docker stop c1 c2 r1 <span style="color:#f92672">&amp;&amp;</span> docker rm c1 c2 r1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Clean up the Network namespaces links</span>
+</span></span><span style="display:flex;"><span>rm /var/run/netns/$c1_id
+</span></span><span style="display:flex;"><span>rm /var/run/netns/$r1_id
+</span></span><span style="display:flex;"><span>rm /var/run/netns/$c2_id
+</span></span></code></pre></div><h1 id="conclusion">Conclusion</h1>
 <p>I really enjoyed writing this blog post, I wanted to do this for a while but never found the time. Now that I know this is possible there might be more related posts in the future. Now I can create more complex topologies and mix it up a bit using routing protocols. I can think of plenty of use cases for this blog post from testing routing protocols to playing or testing iptables rules or playing with tc rules for traffic control between containers.<br>
 Best of all this is pretty lightweight and easy to clean up leaving my laptop (or the raspberry pi) very clean after I finish up.</p>
 

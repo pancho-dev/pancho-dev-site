@@ -153,324 +153,324 @@ Also this time I choose to work with kind because it allows to do a lot of stuff
 <p>We will be creating a cluster in a similar way we created a cluster with other tools <a href="/posts/multinode-k8s-ignite-k3s/">in a past post</a> and at the end of the post I will do some basic comparison of what I experienced working with both.</p>
 <h2 id="creating-a-cluster">Creating a cluster</h2>
 <p>We will start creating the most basic cluster&hellip;</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Just by issuing this command you get a fresh new cluster</span>
-$ kind create cluster
-Creating cluster <span style="color:#e6db74">&#34;kind&#34;</span> ...
- ✓ Ensuring node image <span style="color:#f92672">(</span>kindest/node:v1.18.2<span style="color:#f92672">)</span> 🖼
- ✓ Preparing nodes 📦
- ✓ Writing configuration 📜
- ✓ Starting control-plane 🕹️
- ✓ Installing CNI 🔌
- ✓ Installing StorageClass 💾
-Set kubectl context to <span style="color:#e6db74">&#34;kind-kind&#34;</span>
-You can now use your cluster with:
-
-kubectl cluster-info --context kind-kind
-
-<span style="color:#75715e"># Let&#39;s show the cluster nodes</span>
-$ kubectl get nodes -o wide
-NAME                 STATUS   ROLES    AGE     VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE       KERNEL-VERSION     CONTAINER-RUNTIME
-kind-control-plane   Ready    master   2m45s   v1.18.2   172.18.0.2    &lt;none&gt;        Ubuntu 19.10   4.19.76-linuxkit   containerd://1.3.3-14-g449e9269
-
-<span style="color:#75715e"># Let&#39;s check what docker is running there</span>
-$ docker ps
-CONTAINER ID        IMAGE                  COMMAND                  CREATED             STATUS              PORTS                       NAMES
-4a116756e882        kindest/node:v1.18.2   <span style="color:#e6db74">&#34;/usr/local/bin/entr…&#34;</span>   <span style="color:#ae81ff">3</span> minutes ago       Up <span style="color:#ae81ff">3</span> minutes        127.0.0.1:65236-&gt;6443/tcp   kind-control-plane
-
-<span style="color:#75715e"># now let&#39;s show docker netowrks, kind created it&#39;s own network </span>
-<span style="color:#75715e"># to be isolated for other containers that might be running in docker.</span>
-$ docker network ls
-NETWORK ID          NAME                DRIVER              SCOPE
-227c42913b8d        bridge              bridge              local
-3bb54436f4f5        host                host                local
-052d7b1dcf12        kind                bridge              local
-41310fdd38ac        none                null                local
-
-<span style="color:#75715e"># Now show all pods that were created on the go</span>
-$ kubectl get pods --all-namespaces
-NAMESPACE            NAME                                         READY   STATUS    RESTARTS   AGE
-kube-system          coredns-66bff467f8-9zwn4                     1/1     Running   <span style="color:#ae81ff">0</span>          10m
-kube-system          coredns-66bff467f8-jc24h                     1/1     Running   <span style="color:#ae81ff">0</span>          10m
-kube-system          etcd-kind-control-plane                      1/1     Running   <span style="color:#ae81ff">0</span>          11m
-kube-system          kindnet-mltj7                                1/1     Running   <span style="color:#ae81ff">0</span>          10m
-kube-system          kube-apiserver-kind-control-plane            1/1     Running   <span style="color:#ae81ff">0</span>          11m
-kube-system          kube-controller-manager-kind-control-plane   1/1     Running   <span style="color:#ae81ff">0</span>          11m
-kube-system          kube-proxy-btv4q                             1/1     Running   <span style="color:#ae81ff">0</span>          10m
-kube-system          kube-scheduler-kind-control-plane            1/1     Running   <span style="color:#ae81ff">0</span>          11m
-local-path-storage   local-path-provisioner-bd4bb6b75-4w9cr       1/1     Running   <span style="color:#ae81ff">0</span>          10m
-
-
-<span style="color:#75715e"># now let&#39;s delete the cluster, as easy as that.</span>
-$ kind delete cluster
-Deleting cluster <span style="color:#e6db74">&#34;kind&#34;</span> ...
-</code></pre></div><p>This a a very basic cluster setup, however I really wanted something more complex to work with. Follow the link if you want to see a full list of what can be tweaked in <a href="https://kind.sigs.k8s.io/docs/user/configuration/">kind configurations</a><br>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Just by issuing this command you get a fresh new cluster</span>
+</span></span><span style="display:flex;"><span>$ kind create cluster
+</span></span><span style="display:flex;"><span>Creating cluster <span style="color:#e6db74">&#34;kind&#34;</span> ...
+</span></span><span style="display:flex;"><span> ✓ Ensuring node image <span style="color:#f92672">(</span>kindest/node:v1.18.2<span style="color:#f92672">)</span> 🖼
+</span></span><span style="display:flex;"><span> ✓ Preparing nodes 📦
+</span></span><span style="display:flex;"><span> ✓ Writing configuration 📜
+</span></span><span style="display:flex;"><span> ✓ Starting control-plane 🕹️
+</span></span><span style="display:flex;"><span> ✓ Installing CNI 🔌
+</span></span><span style="display:flex;"><span> ✓ Installing StorageClass 💾
+</span></span><span style="display:flex;"><span>Set kubectl context to <span style="color:#e6db74">&#34;kind-kind&#34;</span>
+</span></span><span style="display:flex;"><span>You can now use your cluster with:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>kubectl cluster-info --context kind-kind
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Let&#39;s show the cluster nodes</span>
+</span></span><span style="display:flex;"><span>$ kubectl get nodes -o wide
+</span></span><span style="display:flex;"><span>NAME                 STATUS   ROLES    AGE     VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE       KERNEL-VERSION     CONTAINER-RUNTIME
+</span></span><span style="display:flex;"><span>kind-control-plane   Ready    master   2m45s   v1.18.2   172.18.0.2    &lt;none&gt;        Ubuntu 19.10   4.19.76-linuxkit   containerd://1.3.3-14-g449e9269
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Let&#39;s check what docker is running there</span>
+</span></span><span style="display:flex;"><span>$ docker ps
+</span></span><span style="display:flex;"><span>CONTAINER ID        IMAGE                  COMMAND                  CREATED             STATUS              PORTS                       NAMES
+</span></span><span style="display:flex;"><span>4a116756e882        kindest/node:v1.18.2   <span style="color:#e6db74">&#34;/usr/local/bin/entr…&#34;</span>   <span style="color:#ae81ff">3</span> minutes ago       Up <span style="color:#ae81ff">3</span> minutes        127.0.0.1:65236-&gt;6443/tcp   kind-control-plane
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># now let&#39;s show docker netowrks, kind created it&#39;s own network </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># to be isolated for other containers that might be running in docker.</span>
+</span></span><span style="display:flex;"><span>$ docker network ls
+</span></span><span style="display:flex;"><span>NETWORK ID          NAME                DRIVER              SCOPE
+</span></span><span style="display:flex;"><span>227c42913b8d        bridge              bridge              local
+</span></span><span style="display:flex;"><span>3bb54436f4f5        host                host                local
+</span></span><span style="display:flex;"><span>052d7b1dcf12        kind                bridge              local
+</span></span><span style="display:flex;"><span>41310fdd38ac        none                null                local
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Now show all pods that were created on the go</span>
+</span></span><span style="display:flex;"><span>$ kubectl get pods --all-namespaces
+</span></span><span style="display:flex;"><span>NAMESPACE            NAME                                         READY   STATUS    RESTARTS   AGE
+</span></span><span style="display:flex;"><span>kube-system          coredns-66bff467f8-9zwn4                     1/1     Running   <span style="color:#ae81ff">0</span>          10m
+</span></span><span style="display:flex;"><span>kube-system          coredns-66bff467f8-jc24h                     1/1     Running   <span style="color:#ae81ff">0</span>          10m
+</span></span><span style="display:flex;"><span>kube-system          etcd-kind-control-plane                      1/1     Running   <span style="color:#ae81ff">0</span>          11m
+</span></span><span style="display:flex;"><span>kube-system          kindnet-mltj7                                1/1     Running   <span style="color:#ae81ff">0</span>          10m
+</span></span><span style="display:flex;"><span>kube-system          kube-apiserver-kind-control-plane            1/1     Running   <span style="color:#ae81ff">0</span>          11m
+</span></span><span style="display:flex;"><span>kube-system          kube-controller-manager-kind-control-plane   1/1     Running   <span style="color:#ae81ff">0</span>          11m
+</span></span><span style="display:flex;"><span>kube-system          kube-proxy-btv4q                             1/1     Running   <span style="color:#ae81ff">0</span>          10m
+</span></span><span style="display:flex;"><span>kube-system          kube-scheduler-kind-control-plane            1/1     Running   <span style="color:#ae81ff">0</span>          11m
+</span></span><span style="display:flex;"><span>local-path-storage   local-path-provisioner-bd4bb6b75-4w9cr       1/1     Running   <span style="color:#ae81ff">0</span>          10m
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># now let&#39;s delete the cluster, as easy as that.</span>
+</span></span><span style="display:flex;"><span>$ kind delete cluster
+</span></span><span style="display:flex;"><span>Deleting cluster <span style="color:#e6db74">&#34;kind&#34;</span> ...
+</span></span></code></pre></div><p>This a a very basic cluster setup, however I really wanted something more complex to work with. Follow the link if you want to see a full list of what can be tweaked in <a href="https://kind.sigs.k8s.io/docs/user/configuration/">kind configurations</a><br>
 Let&rsquo;s see an example configuration with 1 control plane (master node) and 2 worker nodes.<br>
 We need to create a config file lets name it <code>my-cluster.yml</code> with the following.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Cluster</span>
-<span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">kind.x-k8s.io/v1alpha4</span>
-<span style="color:#75715e"># One control plane node and two &#34;workers&#34;.</span>
-<span style="color:#f92672">nodes</span>:
-- <span style="color:#f92672">role</span>: <span style="color:#ae81ff">control-plane</span>
-- <span style="color:#f92672">role</span>: <span style="color:#ae81ff">worker</span>
-- <span style="color:#f92672">role</span>: <span style="color:#ae81ff">worker</span>
-</code></pre></div><p>Then run</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Create the cluster named my-cluster</span>
-$ kind create cluster --name my-cluster --config my-cluster.yml
-Creating cluster <span style="color:#e6db74">&#34;my-cluster&#34;</span> ...
- ✓ Ensuring node image <span style="color:#f92672">(</span>kindest/node:v1.18.2<span style="color:#f92672">)</span> 🖼
- ✓ Preparing nodes 📦 📦 📦
- ✓ Writing configuration 📜
- ✓ Starting control-plane 🕹️
- ✓ Installing CNI 🔌
- ✓ Installing StorageClass 💾
- ✓ Joining worker nodes 🚜
-Set kubectl context to <span style="color:#e6db74">&#34;kind-my-cluster&#34;</span>
-You can now use your cluster with:
-
-kubectl cluster-info --context kind-my-cluster
-
-Have a question, bug, or feature request? Let us know! https://kind.sigs.k8s.io/#community 🙂
-
-<span style="color:#75715e"># Show the recently created cluster</span>
-$ kind get clusters
-my-cluster
-
-<span style="color:#75715e"># Show the nodes</span>
-$ kubectl get nodes -o wide
-NAME                       STATUS   ROLES    AGE     VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE       KERNEL-VERSION     CONTAINER-RUNTIME
-my-cluster-control-plane   Ready    master   3m      v1.18.2   172.18.0.4    &lt;none&gt;        Ubuntu 19.10   4.19.76-linuxkit   containerd://1.3.3-14-g449e9269
-my-cluster-worker          Ready    &lt;none&gt;   2m27s   v1.18.2   172.18.0.2    &lt;none&gt;        Ubuntu 19.10   4.19.76-linuxkit   containerd://1.3.3-14-g449e9269
-my-cluster-worker2         Ready    &lt;none&gt;   2m21s   v1.18.2   172.18.0.3    &lt;none&gt;        Ubuntu 19.10   4.19.76-linuxkit   containerd://1.3.3-14-g449e9269
-
-<span style="color:#75715e"># Show all pods</span>
-$ kubectl get pods --all-namespaces
-NAMESPACE            NAME                                               READY   STATUS    RESTARTS   AGE
-kube-system          coredns-66bff467f8-97kfh                           1/1     Running   <span style="color:#ae81ff">0</span>          5m45s
-kube-system          coredns-66bff467f8-lxwl6                           1/1     Running   <span style="color:#ae81ff">0</span>          5m45s
-kube-system          etcd-my-cluster-control-plane                      1/1     Running   <span style="color:#ae81ff">0</span>          6m1s
-kube-system          kindnet-2db6f                                      1/1     Running   <span style="color:#ae81ff">0</span>          5m45s
-kube-system          kindnet-p6c5f                                      1/1     Running   <span style="color:#ae81ff">1</span>          5m25s
-kube-system          kindnet-wqht8                                      1/1     Running   <span style="color:#ae81ff">0</span>          5m31s
-kube-system          kube-apiserver-my-cluster-control-plane            1/1     Running   <span style="color:#ae81ff">0</span>          6m1s
-kube-system          kube-controller-manager-my-cluster-control-plane   1/1     Running   <span style="color:#ae81ff">0</span>          6m1s
-kube-system          kube-proxy-98d9r                                   1/1     Running   <span style="color:#ae81ff">0</span>          5m25s
-kube-system          kube-proxy-9xvn4                                   1/1     Running   <span style="color:#ae81ff">0</span>          5m45s
-kube-system          kube-proxy-ph5z8                                   1/1     Running   <span style="color:#ae81ff">0</span>          5m31s
-kube-system          kube-scheduler-my-cluster-control-plane            1/1     Running   <span style="color:#ae81ff">0</span>          6m
-local-path-storage   local-path-provisioner-bd4bb6b75-2rdpn             1/1     Running   <span style="color:#ae81ff">0</span>          5m45s
-</code></pre></div><p>With this setup we are running a 3 &ldquo;nodes&rdquo; k8s cluster so we are ready to start applying yaml files to deploy some workloads&hellip;<br>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="color:#f92672">kind</span>: <span style="color:#ae81ff">Cluster</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">apiVersion</span>: <span style="color:#ae81ff">kind.x-k8s.io/v1alpha4</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># One control plane node and two &#34;workers&#34;.</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">nodes</span>:
+</span></span><span style="display:flex;"><span>- <span style="color:#f92672">role</span>: <span style="color:#ae81ff">control-plane</span>
+</span></span><span style="display:flex;"><span>- <span style="color:#f92672">role</span>: <span style="color:#ae81ff">worker</span>
+</span></span><span style="display:flex;"><span>- <span style="color:#f92672">role</span>: <span style="color:#ae81ff">worker</span>
+</span></span></code></pre></div><p>Then run</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Create the cluster named my-cluster</span>
+</span></span><span style="display:flex;"><span>$ kind create cluster --name my-cluster --config my-cluster.yml
+</span></span><span style="display:flex;"><span>Creating cluster <span style="color:#e6db74">&#34;my-cluster&#34;</span> ...
+</span></span><span style="display:flex;"><span> ✓ Ensuring node image <span style="color:#f92672">(</span>kindest/node:v1.18.2<span style="color:#f92672">)</span> 🖼
+</span></span><span style="display:flex;"><span> ✓ Preparing nodes 📦 📦 📦
+</span></span><span style="display:flex;"><span> ✓ Writing configuration 📜
+</span></span><span style="display:flex;"><span> ✓ Starting control-plane 🕹️
+</span></span><span style="display:flex;"><span> ✓ Installing CNI 🔌
+</span></span><span style="display:flex;"><span> ✓ Installing StorageClass 💾
+</span></span><span style="display:flex;"><span> ✓ Joining worker nodes 🚜
+</span></span><span style="display:flex;"><span>Set kubectl context to <span style="color:#e6db74">&#34;kind-my-cluster&#34;</span>
+</span></span><span style="display:flex;"><span>You can now use your cluster with:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>kubectl cluster-info --context kind-my-cluster
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Have a question, bug, or feature request? Let us know! https://kind.sigs.k8s.io/#community 🙂
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Show the recently created cluster</span>
+</span></span><span style="display:flex;"><span>$ kind get clusters
+</span></span><span style="display:flex;"><span>my-cluster
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Show the nodes</span>
+</span></span><span style="display:flex;"><span>$ kubectl get nodes -o wide
+</span></span><span style="display:flex;"><span>NAME                       STATUS   ROLES    AGE     VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE       KERNEL-VERSION     CONTAINER-RUNTIME
+</span></span><span style="display:flex;"><span>my-cluster-control-plane   Ready    master   3m      v1.18.2   172.18.0.4    &lt;none&gt;        Ubuntu 19.10   4.19.76-linuxkit   containerd://1.3.3-14-g449e9269
+</span></span><span style="display:flex;"><span>my-cluster-worker          Ready    &lt;none&gt;   2m27s   v1.18.2   172.18.0.2    &lt;none&gt;        Ubuntu 19.10   4.19.76-linuxkit   containerd://1.3.3-14-g449e9269
+</span></span><span style="display:flex;"><span>my-cluster-worker2         Ready    &lt;none&gt;   2m21s   v1.18.2   172.18.0.3    &lt;none&gt;        Ubuntu 19.10   4.19.76-linuxkit   containerd://1.3.3-14-g449e9269
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Show all pods</span>
+</span></span><span style="display:flex;"><span>$ kubectl get pods --all-namespaces
+</span></span><span style="display:flex;"><span>NAMESPACE            NAME                                               READY   STATUS    RESTARTS   AGE
+</span></span><span style="display:flex;"><span>kube-system          coredns-66bff467f8-97kfh                           1/1     Running   <span style="color:#ae81ff">0</span>          5m45s
+</span></span><span style="display:flex;"><span>kube-system          coredns-66bff467f8-lxwl6                           1/1     Running   <span style="color:#ae81ff">0</span>          5m45s
+</span></span><span style="display:flex;"><span>kube-system          etcd-my-cluster-control-plane                      1/1     Running   <span style="color:#ae81ff">0</span>          6m1s
+</span></span><span style="display:flex;"><span>kube-system          kindnet-2db6f                                      1/1     Running   <span style="color:#ae81ff">0</span>          5m45s
+</span></span><span style="display:flex;"><span>kube-system          kindnet-p6c5f                                      1/1     Running   <span style="color:#ae81ff">1</span>          5m25s
+</span></span><span style="display:flex;"><span>kube-system          kindnet-wqht8                                      1/1     Running   <span style="color:#ae81ff">0</span>          5m31s
+</span></span><span style="display:flex;"><span>kube-system          kube-apiserver-my-cluster-control-plane            1/1     Running   <span style="color:#ae81ff">0</span>          6m1s
+</span></span><span style="display:flex;"><span>kube-system          kube-controller-manager-my-cluster-control-plane   1/1     Running   <span style="color:#ae81ff">0</span>          6m1s
+</span></span><span style="display:flex;"><span>kube-system          kube-proxy-98d9r                                   1/1     Running   <span style="color:#ae81ff">0</span>          5m25s
+</span></span><span style="display:flex;"><span>kube-system          kube-proxy-9xvn4                                   1/1     Running   <span style="color:#ae81ff">0</span>          5m45s
+</span></span><span style="display:flex;"><span>kube-system          kube-proxy-ph5z8                                   1/1     Running   <span style="color:#ae81ff">0</span>          5m31s
+</span></span><span style="display:flex;"><span>kube-system          kube-scheduler-my-cluster-control-plane            1/1     Running   <span style="color:#ae81ff">0</span>          6m
+</span></span><span style="display:flex;"><span>local-path-storage   local-path-provisioner-bd4bb6b75-2rdpn             1/1     Running   <span style="color:#ae81ff">0</span>          5m45s
+</span></span></code></pre></div><p>With this setup we are running a 3 &ldquo;nodes&rdquo; k8s cluster so we are ready to start applying yaml files to deploy some workloads&hellip;<br>
 But wait, if you are running on linux you will be able to access the k8s &ldquo;nodes&rdquo; with the ip docker assigned to the nodes, but when running in Mac or Windows there are some extra steps to take, as we all know docker desktop in mac or windows still runs inside a linux vm, so we need to take extra steps to get access to the workloads we will be setting up.<br>
 Before proceeding we will have to delete our cluster and</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ kind delete clusters my-cluster
-Deleted clusters: <span style="color:#f92672">[</span><span style="color:#e6db74">&#34;my-cluster&#34;</span><span style="color:#f92672">]</span>
-</code></pre></div><p>We will need to setup ingress controller and some port mappings to the workloads we want to run, if we want to access the workloads from the machine. Here are the official docs how to configure an <a href="https://kind.sigs.k8s.io/docs/user/ingress/">ingress</a> in kind.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># To create the cluster again we will take a dirrefent approach.</span>
-<span style="color:#75715e"># we will use a one shot command passing the yaml config from the cli, </span>
-<span style="color:#75715e"># this saves a step to prevent creating the file.</span>
-<span style="color:#75715e"># we will add the ports we want to access. normally would be 80 </span>
-<span style="color:#75715e"># and 443 but in this case I also added 8080</span>
-$ cat <span style="color:#e6db74">&lt;&lt;EOF | kind create cluster --name=my-cluster --config=-
-</span><span style="color:#e6db74">kind: Cluster
-</span><span style="color:#e6db74">apiVersion: kind.x-k8s.io/v1alpha4
-</span><span style="color:#e6db74">nodes:
-</span><span style="color:#e6db74">- role: control-plane
-</span><span style="color:#e6db74">  kubeadmConfigPatches:
-</span><span style="color:#e6db74">  - |
-</span><span style="color:#e6db74">    kind: InitConfiguration
-</span><span style="color:#e6db74">    nodeRegistration:
-</span><span style="color:#e6db74">      kubeletExtraArgs:
-</span><span style="color:#e6db74">        node-labels: &#34;ingress-ready=true&#34;
-</span><span style="color:#e6db74">  extraPortMappings:
-</span><span style="color:#e6db74">  - containerPort: 80
-</span><span style="color:#e6db74">    hostPort: 80
-</span><span style="color:#e6db74">    protocol: TCP
-</span><span style="color:#e6db74">  - containerPort: 443
-</span><span style="color:#e6db74">    hostPort: 443
-</span><span style="color:#e6db74">    protocol: TCP
-</span><span style="color:#e6db74">- role: worker
-</span><span style="color:#e6db74">- role: worker
-</span><span style="color:#e6db74">EOF</span>
-Creating cluster <span style="color:#e6db74">&#34;my-cluster&#34;</span> ...
- ✓ Ensuring node image <span style="color:#f92672">(</span>kindest/node:v1.18.2<span style="color:#f92672">)</span> 🖼
- ✓ Preparing nodes 📦 📦 📦
- ✓ Writing configuration 📜
- ✓ Starting control-plane 🕹️
- ✓ Installing CNI 🔌
- ✓ Installing StorageClass 💾
- ✓ Joining worker nodes 🚜
-Set kubectl context to <span style="color:#e6db74">&#34;kind-my-cluster&#34;</span>
-You can now use your cluster with:
-
-kubectl cluster-info --context kind-my-cluster
-
-Have a nice day! 👋
-
-<span style="color:#75715e"># kind doesn&#39;t have an ingress controller set by default</span>
-<span style="color:#75715e"># so we will need to setup one.</span>
-<span style="color:#75715e"># In the following example we will setup an nginx ingress </span>
-<span style="color:#75715e"># proxy but we could usin any other ingresses </span>
-<span style="color:#75715e"># like contour, ambassador, traefik, etc</span>
-
-<span style="color:#75715e"># lets check the nodes we have</span>
-$ kubectl get nodes
-NAME                       STATUS   ROLES    AGE     VERSION
-my-cluster-control-plane   Ready    master   6m23s   v1.18.2
-my-cluster-worker          Ready    &lt;none&gt;   5m48s   v1.18.2
-my-cluster-worker2         Ready    &lt;none&gt;   5m48s   v1.18.2
-
-<span style="color:#75715e"># Now lets apply the config to run an nginx ingress</span>
-$ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/kind/deploy.yaml
-namespace/ingress-nginx created
-serviceaccount/ingress-nginx created
-configmap/ingress-nginx-controller created
-clusterrole.rbac.authorization.k8s.io/ingress-nginx created
-clusterrolebinding.rbac.authorization.k8s.io/ingress-nginx created
-role.rbac.authorization.k8s.io/ingress-nginx created
-rolebinding.rbac.authorization.k8s.io/ingress-nginx created
-service/ingress-nginx-controller-admission created
-service/ingress-nginx-controller created
-deployment.apps/ingress-nginx-controller created
-validatingwebhookconfiguration.admissionregistration.k8s.io/ingress-nginx-admission created
-clusterrole.rbac.authorization.k8s.io/ingress-nginx-admission created
-clusterrolebinding.rbac.authorization.k8s.io/ingress-nginx-admission created
-job.batch/ingress-nginx-admission-create created
-job.batch/ingress-nginx-admission-patch created
-role.rbac.authorization.k8s.io/ingress-nginx-admission created
-rolebinding.rbac.authorization.k8s.io/ingress-nginx-admission created
-serviceaccount/ingress-nginx-admission created
-
-
-<span style="color:#75715e"># show that pods are creating</span>
-$ kubectl get pods --all-namespaces
-NAMESPACE            NAME                                               READY   STATUS              RESTARTS   AGE
-ingress-nginx        ingress-nginx-admission-create-nqgq9               0/1     ContainerCreating   <span style="color:#ae81ff">0</span>          8s
-ingress-nginx        ingress-nginx-admission-patch-p5cd8                0/1     ContainerCreating   <span style="color:#ae81ff">0</span>          8s
-ingress-nginx        ingress-nginx-controller-cc8dd9868-rgx5b           0/1     ContainerCreating   <span style="color:#ae81ff">0</span>          18s
-kube-system          coredns-66bff467f8-6gxmh                           1/1     Running             <span style="color:#ae81ff">0</span>          8m48s
-kube-system          coredns-66bff467f8-fvlz6                           1/1     Running             <span style="color:#ae81ff">0</span>          8m48s
-kube-system          etcd-my-cluster-control-plane                      1/1     Running             <span style="color:#ae81ff">0</span>          9m5s
-kube-system          kindnet-b2qcw                                      1/1     Running             <span style="color:#ae81ff">0</span>          8m34s
-kube-system          kindnet-bz87f                                      1/1     Running             <span style="color:#ae81ff">2</span>          8m34s
-kube-system          kindnet-rpb8k                                      1/1     Running             <span style="color:#ae81ff">0</span>          8m48s
-kube-system          kube-apiserver-my-cluster-control-plane            1/1     Running             <span style="color:#ae81ff">0</span>          9m5s
-kube-system          kube-controller-manager-my-cluster-control-plane   1/1     Running             <span style="color:#ae81ff">0</span>          9m5s
-kube-system          kube-proxy-5sc27                                   1/1     Running             <span style="color:#ae81ff">0</span>          8m34s
-kube-system          kube-proxy-q24kf                                   1/1     Running             <span style="color:#ae81ff">0</span>          8m48s
-kube-system          kube-proxy-tlhsk                                   1/1     Running             <span style="color:#ae81ff">0</span>          8m34s
-kube-system          kube-scheduler-my-cluster-control-plane            1/1     Running             <span style="color:#ae81ff">0</span>          9m5s
-local-path-storage   local-path-provisioner-bd4bb6b75-nqdgc             1/1     Running             <span style="color:#ae81ff">0</span>          8m48s
-
-<span style="color:#75715e"># And after it finishes we can see it here</span>
-$ kubectl get pods --all-namespaces
-NAMESPACE            NAME                                               READY   STATUS      RESTARTS   AGE
-ingress-nginx        ingress-nginx-admission-create-nqgq9               0/1     Completed   <span style="color:#ae81ff">0</span>          112s
-ingress-nginx        ingress-nginx-admission-patch-p5cd8                0/1     Completed   <span style="color:#ae81ff">1</span>          112s
-ingress-nginx        ingress-nginx-controller-cc8dd9868-rgx5b           1/1     Running     <span style="color:#ae81ff">0</span>          2m2s
-kube-system          coredns-66bff467f8-6gxmh                           1/1     Running     <span style="color:#ae81ff">0</span>          10m
-kube-system          coredns-66bff467f8-fvlz6                           1/1     Running     <span style="color:#ae81ff">0</span>          10m
-kube-system          etcd-my-cluster-control-plane                      1/1     Running     <span style="color:#ae81ff">0</span>          10m
-kube-system          kindnet-b2qcw                                      1/1     Running     <span style="color:#ae81ff">0</span>          10m
-kube-system          kindnet-bz87f                                      1/1     Running     <span style="color:#ae81ff">2</span>          10m
-kube-system          kindnet-rpb8k                                      1/1     Running     <span style="color:#ae81ff">0</span>          10m
-kube-system          kube-apiserver-my-cluster-control-plane            1/1     Running     <span style="color:#ae81ff">0</span>          10m
-kube-system          kube-controller-manager-my-cluster-control-plane   1/1     Running     <span style="color:#ae81ff">0</span>          10m
-kube-system          kube-proxy-5sc27                                   1/1     Running     <span style="color:#ae81ff">0</span>          10m
-kube-system          kube-proxy-q24kf                                   1/1     Running     <span style="color:#ae81ff">0</span>          10m
-kube-system          kube-proxy-tlhsk                                   1/1     Running     <span style="color:#ae81ff">0</span>          10m
-kube-system          kube-scheduler-my-cluster-control-plane            1/1     Running     <span style="color:#ae81ff">0</span>          10m
-local-path-storage   local-path-provisioner-bd4bb6b75-nqdgc             1/1     Running     <span style="color:#ae81ff">0</span>          10m
-
-<span style="color:#75715e"># After finishing the setup lets show the </span>
-<span style="color:#75715e"># containers running in docker. </span>
-<span style="color:#75715e"># We can see in this case the my-cluster-control-plane </span>
-<span style="color:#75715e"># container has the ports 80, 443, and 8080 </span>
-<span style="color:#75715e"># forwarded to allow traffic on the ingress. </span>
-<span style="color:#75715e"># That will allow use to use http://localhost </span>
-<span style="color:#75715e"># or https://localhost </span>
-<span style="color:#75715e"># there is a lmitation that we can only expose </span>
-<span style="color:#75715e"># those ports only in 1 container.</span>
-$ docker ps
-CONTAINER ID        IMAGE                  COMMAND                  CREATED             STATUS              PORTS                                                                                         NAMES
-a9b53a526c9e        kindest/node:v1.18.2   <span style="color:#e6db74">&#34;/usr/local/bin/entr…&#34;</span>   <span style="color:#ae81ff">13</span> minutes ago      Up <span style="color:#ae81ff">13</span> minutes                                                                                                     my-cluster-worker
-dc1c539eb315        kindest/node:v1.18.2   <span style="color:#e6db74">&#34;/usr/local/bin/entr…&#34;</span>   <span style="color:#ae81ff">13</span> minutes ago      Up <span style="color:#ae81ff">13</span> minutes       0.0.0.0:80-&gt;80/tcp, 0.0.0.0:443-&gt;443/tcp, 127.0.0.1:50462-&gt;6443/tcp   my-cluster-control-plane
-9c92b0528a6a        kindest/node:v1.18.2   <span style="color:#e6db74">&#34;/usr/local/bin/entr…&#34;</span>   <span style="color:#ae81ff">13</span> minutes ago      Up <span style="color:#ae81ff">13</span> minutes                                                                                                     my-cluster-worker2
-</code></pre></div><p>Now we have a ready to go cluster to play around running my workloads&hellip;<br>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ kind delete clusters my-cluster
+</span></span><span style="display:flex;"><span>Deleted clusters: <span style="color:#f92672">[</span><span style="color:#e6db74">&#34;my-cluster&#34;</span><span style="color:#f92672">]</span>
+</span></span></code></pre></div><p>We will need to setup ingress controller and some port mappings to the workloads we want to run, if we want to access the workloads from the machine. Here are the official docs how to configure an <a href="https://kind.sigs.k8s.io/docs/user/ingress/">ingress</a> in kind.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># To create the cluster again we will take a dirrefent approach.</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># we will use a one shot command passing the yaml config from the cli, </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># this saves a step to prevent creating the file.</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># we will add the ports we want to access. normally would be 80 </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># and 443 but in this case I also added 8080</span>
+</span></span><span style="display:flex;"><span>$ cat <span style="color:#e6db74">&lt;&lt;EOF | kind create cluster --name=my-cluster --config=-
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">kind: Cluster
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">apiVersion: kind.x-k8s.io/v1alpha4
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">nodes:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">- role: control-plane
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  kubeadmConfigPatches:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  - |
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    kind: InitConfiguration
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    nodeRegistration:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      kubeletExtraArgs:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        node-labels: &#34;ingress-ready=true&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  extraPortMappings:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  - containerPort: 80
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    hostPort: 80
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    protocol: TCP
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  - containerPort: 443
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    hostPort: 443
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    protocol: TCP
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">- role: worker
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">- role: worker
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">EOF</span>
+</span></span><span style="display:flex;"><span>Creating cluster <span style="color:#e6db74">&#34;my-cluster&#34;</span> ...
+</span></span><span style="display:flex;"><span> ✓ Ensuring node image <span style="color:#f92672">(</span>kindest/node:v1.18.2<span style="color:#f92672">)</span> 🖼
+</span></span><span style="display:flex;"><span> ✓ Preparing nodes 📦 📦 📦
+</span></span><span style="display:flex;"><span> ✓ Writing configuration 📜
+</span></span><span style="display:flex;"><span> ✓ Starting control-plane 🕹️
+</span></span><span style="display:flex;"><span> ✓ Installing CNI 🔌
+</span></span><span style="display:flex;"><span> ✓ Installing StorageClass 💾
+</span></span><span style="display:flex;"><span> ✓ Joining worker nodes 🚜
+</span></span><span style="display:flex;"><span>Set kubectl context to <span style="color:#e6db74">&#34;kind-my-cluster&#34;</span>
+</span></span><span style="display:flex;"><span>You can now use your cluster with:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>kubectl cluster-info --context kind-my-cluster
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Have a nice day! 👋
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># kind doesn&#39;t have an ingress controller set by default</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># so we will need to setup one.</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># In the following example we will setup an nginx ingress </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># proxy but we could usin any other ingresses </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># like contour, ambassador, traefik, etc</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># lets check the nodes we have</span>
+</span></span><span style="display:flex;"><span>$ kubectl get nodes
+</span></span><span style="display:flex;"><span>NAME                       STATUS   ROLES    AGE     VERSION
+</span></span><span style="display:flex;"><span>my-cluster-control-plane   Ready    master   6m23s   v1.18.2
+</span></span><span style="display:flex;"><span>my-cluster-worker          Ready    &lt;none&gt;   5m48s   v1.18.2
+</span></span><span style="display:flex;"><span>my-cluster-worker2         Ready    &lt;none&gt;   5m48s   v1.18.2
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Now lets apply the config to run an nginx ingress</span>
+</span></span><span style="display:flex;"><span>$ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/kind/deploy.yaml
+</span></span><span style="display:flex;"><span>namespace/ingress-nginx created
+</span></span><span style="display:flex;"><span>serviceaccount/ingress-nginx created
+</span></span><span style="display:flex;"><span>configmap/ingress-nginx-controller created
+</span></span><span style="display:flex;"><span>clusterrole.rbac.authorization.k8s.io/ingress-nginx created
+</span></span><span style="display:flex;"><span>clusterrolebinding.rbac.authorization.k8s.io/ingress-nginx created
+</span></span><span style="display:flex;"><span>role.rbac.authorization.k8s.io/ingress-nginx created
+</span></span><span style="display:flex;"><span>rolebinding.rbac.authorization.k8s.io/ingress-nginx created
+</span></span><span style="display:flex;"><span>service/ingress-nginx-controller-admission created
+</span></span><span style="display:flex;"><span>service/ingress-nginx-controller created
+</span></span><span style="display:flex;"><span>deployment.apps/ingress-nginx-controller created
+</span></span><span style="display:flex;"><span>validatingwebhookconfiguration.admissionregistration.k8s.io/ingress-nginx-admission created
+</span></span><span style="display:flex;"><span>clusterrole.rbac.authorization.k8s.io/ingress-nginx-admission created
+</span></span><span style="display:flex;"><span>clusterrolebinding.rbac.authorization.k8s.io/ingress-nginx-admission created
+</span></span><span style="display:flex;"><span>job.batch/ingress-nginx-admission-create created
+</span></span><span style="display:flex;"><span>job.batch/ingress-nginx-admission-patch created
+</span></span><span style="display:flex;"><span>role.rbac.authorization.k8s.io/ingress-nginx-admission created
+</span></span><span style="display:flex;"><span>rolebinding.rbac.authorization.k8s.io/ingress-nginx-admission created
+</span></span><span style="display:flex;"><span>serviceaccount/ingress-nginx-admission created
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># show that pods are creating</span>
+</span></span><span style="display:flex;"><span>$ kubectl get pods --all-namespaces
+</span></span><span style="display:flex;"><span>NAMESPACE            NAME                                               READY   STATUS              RESTARTS   AGE
+</span></span><span style="display:flex;"><span>ingress-nginx        ingress-nginx-admission-create-nqgq9               0/1     ContainerCreating   <span style="color:#ae81ff">0</span>          8s
+</span></span><span style="display:flex;"><span>ingress-nginx        ingress-nginx-admission-patch-p5cd8                0/1     ContainerCreating   <span style="color:#ae81ff">0</span>          8s
+</span></span><span style="display:flex;"><span>ingress-nginx        ingress-nginx-controller-cc8dd9868-rgx5b           0/1     ContainerCreating   <span style="color:#ae81ff">0</span>          18s
+</span></span><span style="display:flex;"><span>kube-system          coredns-66bff467f8-6gxmh                           1/1     Running             <span style="color:#ae81ff">0</span>          8m48s
+</span></span><span style="display:flex;"><span>kube-system          coredns-66bff467f8-fvlz6                           1/1     Running             <span style="color:#ae81ff">0</span>          8m48s
+</span></span><span style="display:flex;"><span>kube-system          etcd-my-cluster-control-plane                      1/1     Running             <span style="color:#ae81ff">0</span>          9m5s
+</span></span><span style="display:flex;"><span>kube-system          kindnet-b2qcw                                      1/1     Running             <span style="color:#ae81ff">0</span>          8m34s
+</span></span><span style="display:flex;"><span>kube-system          kindnet-bz87f                                      1/1     Running             <span style="color:#ae81ff">2</span>          8m34s
+</span></span><span style="display:flex;"><span>kube-system          kindnet-rpb8k                                      1/1     Running             <span style="color:#ae81ff">0</span>          8m48s
+</span></span><span style="display:flex;"><span>kube-system          kube-apiserver-my-cluster-control-plane            1/1     Running             <span style="color:#ae81ff">0</span>          9m5s
+</span></span><span style="display:flex;"><span>kube-system          kube-controller-manager-my-cluster-control-plane   1/1     Running             <span style="color:#ae81ff">0</span>          9m5s
+</span></span><span style="display:flex;"><span>kube-system          kube-proxy-5sc27                                   1/1     Running             <span style="color:#ae81ff">0</span>          8m34s
+</span></span><span style="display:flex;"><span>kube-system          kube-proxy-q24kf                                   1/1     Running             <span style="color:#ae81ff">0</span>          8m48s
+</span></span><span style="display:flex;"><span>kube-system          kube-proxy-tlhsk                                   1/1     Running             <span style="color:#ae81ff">0</span>          8m34s
+</span></span><span style="display:flex;"><span>kube-system          kube-scheduler-my-cluster-control-plane            1/1     Running             <span style="color:#ae81ff">0</span>          9m5s
+</span></span><span style="display:flex;"><span>local-path-storage   local-path-provisioner-bd4bb6b75-nqdgc             1/1     Running             <span style="color:#ae81ff">0</span>          8m48s
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># And after it finishes we can see it here</span>
+</span></span><span style="display:flex;"><span>$ kubectl get pods --all-namespaces
+</span></span><span style="display:flex;"><span>NAMESPACE            NAME                                               READY   STATUS      RESTARTS   AGE
+</span></span><span style="display:flex;"><span>ingress-nginx        ingress-nginx-admission-create-nqgq9               0/1     Completed   <span style="color:#ae81ff">0</span>          112s
+</span></span><span style="display:flex;"><span>ingress-nginx        ingress-nginx-admission-patch-p5cd8                0/1     Completed   <span style="color:#ae81ff">1</span>          112s
+</span></span><span style="display:flex;"><span>ingress-nginx        ingress-nginx-controller-cc8dd9868-rgx5b           1/1     Running     <span style="color:#ae81ff">0</span>          2m2s
+</span></span><span style="display:flex;"><span>kube-system          coredns-66bff467f8-6gxmh                           1/1     Running     <span style="color:#ae81ff">0</span>          10m
+</span></span><span style="display:flex;"><span>kube-system          coredns-66bff467f8-fvlz6                           1/1     Running     <span style="color:#ae81ff">0</span>          10m
+</span></span><span style="display:flex;"><span>kube-system          etcd-my-cluster-control-plane                      1/1     Running     <span style="color:#ae81ff">0</span>          10m
+</span></span><span style="display:flex;"><span>kube-system          kindnet-b2qcw                                      1/1     Running     <span style="color:#ae81ff">0</span>          10m
+</span></span><span style="display:flex;"><span>kube-system          kindnet-bz87f                                      1/1     Running     <span style="color:#ae81ff">2</span>          10m
+</span></span><span style="display:flex;"><span>kube-system          kindnet-rpb8k                                      1/1     Running     <span style="color:#ae81ff">0</span>          10m
+</span></span><span style="display:flex;"><span>kube-system          kube-apiserver-my-cluster-control-plane            1/1     Running     <span style="color:#ae81ff">0</span>          10m
+</span></span><span style="display:flex;"><span>kube-system          kube-controller-manager-my-cluster-control-plane   1/1     Running     <span style="color:#ae81ff">0</span>          10m
+</span></span><span style="display:flex;"><span>kube-system          kube-proxy-5sc27                                   1/1     Running     <span style="color:#ae81ff">0</span>          10m
+</span></span><span style="display:flex;"><span>kube-system          kube-proxy-q24kf                                   1/1     Running     <span style="color:#ae81ff">0</span>          10m
+</span></span><span style="display:flex;"><span>kube-system          kube-proxy-tlhsk                                   1/1     Running     <span style="color:#ae81ff">0</span>          10m
+</span></span><span style="display:flex;"><span>kube-system          kube-scheduler-my-cluster-control-plane            1/1     Running     <span style="color:#ae81ff">0</span>          10m
+</span></span><span style="display:flex;"><span>local-path-storage   local-path-provisioner-bd4bb6b75-nqdgc             1/1     Running     <span style="color:#ae81ff">0</span>          10m
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># After finishing the setup lets show the </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># containers running in docker. </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># We can see in this case the my-cluster-control-plane </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># container has the ports 80, 443, and 8080 </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># forwarded to allow traffic on the ingress. </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># That will allow use to use http://localhost </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># or https://localhost </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># there is a lmitation that we can only expose </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># those ports only in 1 container.</span>
+</span></span><span style="display:flex;"><span>$ docker ps
+</span></span><span style="display:flex;"><span>CONTAINER ID        IMAGE                  COMMAND                  CREATED             STATUS              PORTS                                                                                         NAMES
+</span></span><span style="display:flex;"><span>a9b53a526c9e        kindest/node:v1.18.2   <span style="color:#e6db74">&#34;/usr/local/bin/entr…&#34;</span>   <span style="color:#ae81ff">13</span> minutes ago      Up <span style="color:#ae81ff">13</span> minutes                                                                                                     my-cluster-worker
+</span></span><span style="display:flex;"><span>dc1c539eb315        kindest/node:v1.18.2   <span style="color:#e6db74">&#34;/usr/local/bin/entr…&#34;</span>   <span style="color:#ae81ff">13</span> minutes ago      Up <span style="color:#ae81ff">13</span> minutes       0.0.0.0:80-&gt;80/tcp, 0.0.0.0:443-&gt;443/tcp, 127.0.0.1:50462-&gt;6443/tcp   my-cluster-control-plane
+</span></span><span style="display:flex;"><span>9c92b0528a6a        kindest/node:v1.18.2   <span style="color:#e6db74">&#34;/usr/local/bin/entr…&#34;</span>   <span style="color:#ae81ff">13</span> minutes ago      Up <span style="color:#ae81ff">13</span> minutes                                                                                                     my-cluster-worker2
+</span></span></code></pre></div><p>Now we have a ready to go cluster to play around running my workloads&hellip;<br>
 In the next section we will run a hello world app that will help</p>
 <h1 id="running-a-workload">Running a workload</h1>
 <p>We will run the workload the same way as a previous <a href="/posts/multinode-k8s-ignite-k3s/">post</a> so we can compare one another.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Run an echoserver to test the installation</span>
-$ kubectl create deployment hello-node --image<span style="color:#f92672">=</span>k8s.gcr.io/echoserver:1.4
-deployment.apps/hello-node created
-
-<span style="color:#75715e"># Show the deployment</span>
-$ kubectl get deployments
-NAME         READY   UP-TO-DATE   AVAILABLE   AGE
-hello-node   1/1     <span style="color:#ae81ff">1</span>            <span style="color:#ae81ff">1</span>           45s
-
-<span style="color:#75715e"># Show the pods running</span>
-$ kubectl get pods
-NAME                          READY   STATUS    RESTARTS   AGE
-hello-node-7bf657c596-g5jdd   1/1     Running   <span style="color:#ae81ff">0</span>          75s
-
-<span style="color:#75715e"># Create the service for the hello-node app</span>
-$ cat <span style="color:#e6db74">&lt;&lt;EOF | kubectl apply -f -
-</span><span style="color:#e6db74">kind: Service
-</span><span style="color:#e6db74">apiVersion: v1
-</span><span style="color:#e6db74">metadata:
-</span><span style="color:#e6db74">  name: hello-node
-</span><span style="color:#e6db74">spec:
-</span><span style="color:#e6db74">  selector:
-</span><span style="color:#e6db74">    app: hello-node
-</span><span style="color:#e6db74">  ports:
-</span><span style="color:#e6db74">  # Default port used by the image
-</span><span style="color:#e6db74">  - port: 8080
-</span><span style="color:#e6db74">EOF</span>
-
-<span style="color:#75715e"># setup the ingress controller to forward</span>
-<span style="color:#75715e"># /helo path to helo-node service.</span>
-$ cat <span style="color:#e6db74">&lt;&lt;EOF | kubectl apply -f -
-</span><span style="color:#e6db74">apiVersion: extensions/v1beta1
-</span><span style="color:#e6db74">kind: Ingress
-</span><span style="color:#e6db74">metadata:
-</span><span style="color:#e6db74">  name: my-ingress
-</span><span style="color:#e6db74">spec:
-</span><span style="color:#e6db74">  rules:
-</span><span style="color:#e6db74">  - http:
-</span><span style="color:#e6db74">      paths:
-</span><span style="color:#e6db74">      - path: /helo
-</span><span style="color:#e6db74">        backend:
-</span><span style="color:#e6db74">          serviceName: hello-node
-</span><span style="color:#e6db74">          servicePort: 8080
-</span><span style="color:#e6db74">EOF</span>
-
-<span style="color:#75715e"># After that we can see the service in </span>
-<span style="color:#75715e"># our laptop/vm responding in localhost</span>
-$ curl http://localhost/helo
-CLIENT VALUES:
-client_address<span style="color:#f92672">=</span>10.244.0.2
-command<span style="color:#f92672">=</span>GET
-real path<span style="color:#f92672">=</span>/helo
-query<span style="color:#f92672">=</span>nil
-request_version<span style="color:#f92672">=</span>1.1
-request_uri<span style="color:#f92672">=</span>http://localhost:8080/helo
-
-SERVER VALUES:
-server_version<span style="color:#f92672">=</span>nginx: 1.10.0 - lua: <span style="color:#ae81ff">10001</span>
-
-HEADERS RECEIVED:
-accept<span style="color:#f92672">=</span>*/*
-host<span style="color:#f92672">=</span>localhost
-user-agent<span style="color:#f92672">=</span>curl/7.54.0
-x-forwarded-for<span style="color:#f92672">=</span>172.18.0.1
-x-forwarded-host<span style="color:#f92672">=</span>localhost
-x-forwarded-port<span style="color:#f92672">=</span><span style="color:#ae81ff">80</span>
-x-forwarded-proto<span style="color:#f92672">=</span>http
-x-real-ip<span style="color:#f92672">=</span>172.18.0.1
-x-request-id<span style="color:#f92672">=</span>6b5eda14f6519007efa646317cc3f371
-x-scheme<span style="color:#f92672">=</span>http
-BODY:
--no body in request-
-</code></pre></div><h1 id="conclusions">Conclusions</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Run an echoserver to test the installation</span>
+</span></span><span style="display:flex;"><span>$ kubectl create deployment hello-node --image<span style="color:#f92672">=</span>k8s.gcr.io/echoserver:1.4
+</span></span><span style="display:flex;"><span>deployment.apps/hello-node created
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Show the deployment</span>
+</span></span><span style="display:flex;"><span>$ kubectl get deployments
+</span></span><span style="display:flex;"><span>NAME         READY   UP-TO-DATE   AVAILABLE   AGE
+</span></span><span style="display:flex;"><span>hello-node   1/1     <span style="color:#ae81ff">1</span>            <span style="color:#ae81ff">1</span>           45s
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Show the pods running</span>
+</span></span><span style="display:flex;"><span>$ kubectl get pods
+</span></span><span style="display:flex;"><span>NAME                          READY   STATUS    RESTARTS   AGE
+</span></span><span style="display:flex;"><span>hello-node-7bf657c596-g5jdd   1/1     Running   <span style="color:#ae81ff">0</span>          75s
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Create the service for the hello-node app</span>
+</span></span><span style="display:flex;"><span>$ cat <span style="color:#e6db74">&lt;&lt;EOF | kubectl apply -f -
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">kind: Service
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">apiVersion: v1
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">metadata:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  name: hello-node
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">spec:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  selector:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    app: hello-node
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  ports:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  # Default port used by the image
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  - port: 8080
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">EOF</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># setup the ingress controller to forward</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># /helo path to helo-node service.</span>
+</span></span><span style="display:flex;"><span>$ cat <span style="color:#e6db74">&lt;&lt;EOF | kubectl apply -f -
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">apiVersion: extensions/v1beta1
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">kind: Ingress
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">metadata:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  name: my-ingress
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">spec:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  rules:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  - http:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      paths:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      - path: /helo
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        backend:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">          serviceName: hello-node
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">          servicePort: 8080
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">EOF</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># After that we can see the service in </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># our laptop/vm responding in localhost</span>
+</span></span><span style="display:flex;"><span>$ curl http://localhost/helo
+</span></span><span style="display:flex;"><span>CLIENT VALUES:
+</span></span><span style="display:flex;"><span>client_address<span style="color:#f92672">=</span>10.244.0.2
+</span></span><span style="display:flex;"><span>command<span style="color:#f92672">=</span>GET
+</span></span><span style="display:flex;"><span>real path<span style="color:#f92672">=</span>/helo
+</span></span><span style="display:flex;"><span>query<span style="color:#f92672">=</span>nil
+</span></span><span style="display:flex;"><span>request_version<span style="color:#f92672">=</span>1.1
+</span></span><span style="display:flex;"><span>request_uri<span style="color:#f92672">=</span>http://localhost:8080/helo
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>SERVER VALUES:
+</span></span><span style="display:flex;"><span>server_version<span style="color:#f92672">=</span>nginx: 1.10.0 - lua: <span style="color:#ae81ff">10001</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>HEADERS RECEIVED:
+</span></span><span style="display:flex;"><span>accept<span style="color:#f92672">=</span>*/*
+</span></span><span style="display:flex;"><span>host<span style="color:#f92672">=</span>localhost
+</span></span><span style="display:flex;"><span>user-agent<span style="color:#f92672">=</span>curl/7.54.0
+</span></span><span style="display:flex;"><span>x-forwarded-for<span style="color:#f92672">=</span>172.18.0.1
+</span></span><span style="display:flex;"><span>x-forwarded-host<span style="color:#f92672">=</span>localhost
+</span></span><span style="display:flex;"><span>x-forwarded-port<span style="color:#f92672">=</span><span style="color:#ae81ff">80</span>
+</span></span><span style="display:flex;"><span>x-forwarded-proto<span style="color:#f92672">=</span>http
+</span></span><span style="display:flex;"><span>x-real-ip<span style="color:#f92672">=</span>172.18.0.1
+</span></span><span style="display:flex;"><span>x-request-id<span style="color:#f92672">=</span>6b5eda14f6519007efa646317cc3f371
+</span></span><span style="display:flex;"><span>x-scheme<span style="color:#f92672">=</span>http
+</span></span><span style="display:flex;"><span>BODY:
+</span></span><span style="display:flex;"><span>-no body in request-
+</span></span></code></pre></div><h1 id="conclusions">Conclusions</h1>
 <p>I really enjoyed running kind on my laptop for this test. It&rsquo;s a great tool to run kubernetes clusters very fast in a local laptop, the official documentation is good.<br>
 I like the fact that I could run multiple &ldquo;nodes&rdquo; in my cluster also there is some tuning that can be done to suit your needs, it is very easy to spin up clusters with multiple control planes, it is very lightweight as it is running docker containers (if you are running on windows or Mac, it&rsquo;s still running 1 vm).<br>
 Takes care of all boilerplate configs specially kubectl config, and integrates in a seamless way with your existing kube config adding and removing contexts as you create clusters, this is great because in the past I had trouble with other tools screwing my kube config.<br>

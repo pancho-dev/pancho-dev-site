@@ -155,182 +155,182 @@ if (!doNotTrack) {
 <li>jq, for parsing json output to generate ansible inventory</li>
 </ul>
 <p>Preparing vms for running tests.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Start vms with multipass</span>
-<span style="color:#75715e"># you need to specify the username you will use</span>
-<span style="color:#75715e"># for ansible and the public key for passwrodless</span>
-<span style="color:#75715e"># authentication</span>
-$ <span style="color:#66d9ef">for</span> i in <span style="color:#f92672">{</span>1..3<span style="color:#f92672">}</span>
-<span style="color:#66d9ef">do</span> cat <span style="color:#e6db74">&lt;&lt;EOF | multipass launch --name testvm${i} -m 1G --cloud-init -
-</span><span style="color:#e6db74">users:
-</span><span style="color:#e6db74">  - default
-</span><span style="color:#e6db74">  - name: testuser
-</span><span style="color:#e6db74">    sudo: ALL=(ALL) NOPASSWD:ALL
-</span><span style="color:#e6db74">    groups: users, admin
-</span><span style="color:#e6db74">    ssh_import_id: None
-</span><span style="color:#e6db74">    lock_passwd: true
-</span><span style="color:#e6db74">    ssh_authorized_keys:
-</span><span style="color:#e6db74">      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCyrauoMmTD5Ar2MAvYd7hCXPKXLR75MabnZvMLyNxFVdbEX0M8Sz+UKIlnOGGUwoFgcl1xj7Bt7oUS/TVWBRBP/r9DQ47FxUZkEBycTty6hESkTSs56If7jMio56ygSTghA1aMYP8mGmVdcjWH0DYc1xgJylfvjuuUEaLJyMvWZeVGwUhPbX3/wqNSsGXczSTRJuYqfL+/tcAAs2u74Hg0YdY8GTT6pcKtchdsR4o9zih6MQktIotvAYinaD71inaggrN67DqIH8MfKk97jE8IIn1wjtMphuZEdRdVvn4ZbYQok1Fnm1kTelxLNWNar8h9hwGRx0O0lQyG1Todl3yL testuser
-</span><span style="color:#e6db74">EOF</span>
-<span style="color:#66d9ef">done</span>
-
-Launched: testvm1
-Launched: testvm2
-Launched: testvm3
-<span style="color:#66d9ef">done</span>
-
-<span style="color:#75715e"># Prepare the asible playbooks to configure the newly</span>
-<span style="color:#75715e"># created vms</span>
-$ mkdir ansible
-
-$ cd ansible
-
-<span style="color:#75715e"># Generate ansible invetory file</span>
-$ echo <span style="color:#e6db74">&#34;[all]&#34;</span> &gt; inventory
-
-$ multipass list --format json | jq .list<span style="color:#f92672">[]</span>.ipv4<span style="color:#f92672">[]</span> | cut -d<span style="color:#e6db74">&#34;\&#34;&#34;</span> -f2 &gt;&gt; inventory
-
-<span style="color:#75715e"># Create a new virtualenv</span>
-$ virtualenv -p python3 .env
-Already using interpreter /usr/bin/python3
-Using base prefix <span style="color:#e6db74">&#39;/usr&#39;</span>
-New python executable in /root/ansible/.env/bin/python3
-Also creating executable in /root/ansible/.env/bin/python
-Installing setuptools, pkg_resources, pip, wheel...done.
-
-<span style="color:#75715e"># Activate the virtualenv</span>
-$ source .env/bin/activate
-
-<span style="color:#75715e"># Intall ansible in the virtualenv</span>
-<span style="color:#f92672">(</span>.env<span style="color:#f92672">)</span>$ pip install ansible
-
-<span style="color:#75715e"># Generate a basic ansible cfg that will work </span>
-<span style="color:#75715e"># in the virtualenv</span>
-<span style="color:#f92672">(</span>.env<span style="color:#f92672">)</span>$ cat <span style="color:#e6db74">&lt;&lt;EOF | tee ansible.cfg
-</span><span style="color:#e6db74">[defaults]
-</span><span style="color:#e6db74">roles_path          = .env/roles
-</span><span style="color:#e6db74">inventory           = inventory
-</span><span style="color:#e6db74">retry_files_enabled = False
-</span><span style="color:#e6db74">host_key_checking   = False
-</span><span style="color:#e6db74">gathering           = smart
-</span><span style="color:#e6db74">stdout_callback     = debug
-</span><span style="color:#e6db74">callback_whitelist  = timer, profile_tasks
-</span><span style="color:#e6db74">[ssh_connection]
-</span><span style="color:#e6db74">pipelining          = True
-</span><span style="color:#e6db74">control_path        = ~/.ansible/cp/ansible-ssh-%%h-%%p-%%r
-</span><span style="color:#e6db74">ssh_args            = -o RequestTTY=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ControlMaster=auto -o ControlPersist=60s
-</span><span style="color:#e6db74">EOF</span>
-
-<span style="color:#75715e"># Install ansible docker role</span>
-<span style="color:#f92672">(</span>.env<span style="color:#f92672">)</span>$ ansible-galaxy role install fcastello.docker
-- downloading role <span style="color:#e6db74">&#39;docker&#39;</span>, owned by fcastello
-- downloading role from https://github.com/fcastello/ansible-docker/archive/0.0.4.tar.gz
-- extracting fcastello.docker to /home/francisco/ansible/.env/roles/fcastello.docker
-- fcastello.docker <span style="color:#f92672">(</span>0.0.4<span style="color:#f92672">)</span> was installed successfully
-
-<span style="color:#75715e"># Install ansible node exporter role</span>
-<span style="color:#f92672">(</span>.env<span style="color:#f92672">)</span>$ ansible-galaxy role install fcastello.node_exporter_docker
-- downloading role <span style="color:#e6db74">&#39;node_exporter_docker&#39;</span>, owned by fcastello
-- downloading role from https://github.com/fcastello/ansible-node-exporter-docker/archive/0.0.1.tar.gz
-- extracting fcastello.node_exporter_docker to /home/francisco/ansible/.env/roles/fcastello.node_exporter_docker
-- fcastello.node_exporter_docker <span style="color:#f92672">(</span>0.0.1<span style="color:#f92672">)</span> was installed successfully
-
-<span style="color:#75715e"># Create the playbook file which will install</span>
-<span style="color:#75715e"># everything needed</span>
-<span style="color:#f92672">(</span>.env<span style="color:#f92672">)</span>$ cat <span style="color:#e6db74">&lt;&lt;EOF | tee config.yml
-</span><span style="color:#e6db74">---
-</span><span style="color:#e6db74">- name: configure vm(s)
-</span><span style="color:#e6db74">  hosts: &#34;all&#34;
-</span><span style="color:#e6db74">  gather_facts: yes
-</span><span style="color:#e6db74">  become: yes
-</span><span style="color:#e6db74">  tasks:
-</span><span style="color:#e6db74">    - name: &#34;Install docker&#34;
-</span><span style="color:#e6db74">      import_role:
-</span><span style="color:#e6db74">        name: fcastello.docker
-</span><span style="color:#e6db74">    - name: &#34;Run node exporter&#34;
-</span><span style="color:#e6db74">      import_role:
-</span><span style="color:#e6db74">        name: fcastello.node_exporter_docker
-</span><span style="color:#e6db74">    - name: &#34;install iperf&#34;
-</span><span style="color:#e6db74">      apt:
-</span><span style="color:#e6db74">        name: iperf
-</span><span style="color:#e6db74">        state: present
-</span><span style="color:#e6db74">EOF</span>
-
-<span style="color:#75715e"># Run the ansible playbook on all vms</span>
-<span style="color:#f92672">(</span>.env<span style="color:#f92672">)</span>$ ansible-playbook config.yml
-PLAY <span style="color:#f92672">[</span>configure vm<span style="color:#f92672">(</span>s<span style="color:#f92672">)]</span> ******************************************************************************************************************************************************
-
-TASK <span style="color:#f92672">[</span>Gathering Facts<span style="color:#f92672">]</span> ******************************************************************************************************************************************************
-Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:08:23 +0000 <span style="color:#f92672">(</span>0:00:00.147<span style="color:#f92672">)</span>       0:00:00.147 *********
-ok: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
-ok: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
-ok: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
-
-TASK <span style="color:#f92672">[</span>fcastello.docker : install basic required software<span style="color:#f92672">]</span> *******************************************************************************************************************
-Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:08:30 +0000 <span style="color:#f92672">(</span>0:00:07.632<span style="color:#f92672">)</span>       0:00:07.779 *********
-changed: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
-changed: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
-changed: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
-
-TASK <span style="color:#f92672">[</span>fcastello.docker : Add docker gpg apt key<span style="color:#f92672">]</span> ****************************************************************************************************************************
-Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:16:30 +0000 <span style="color:#f92672">(</span>0:07:59.158<span style="color:#f92672">)</span>       0:08:06.939 *********
-changed: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
-changed: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
-changed: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
-
-TASK <span style="color:#f92672">[</span>fcastello.docker : get architecture<span style="color:#f92672">]</span> **********************************************************************************************************************************
-Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:16:35 +0000 <span style="color:#f92672">(</span>0:00:05.547<span style="color:#f92672">)</span>       0:08:12.486 *********
-changed: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
-changed: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
-changed: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
-
-TASK <span style="color:#f92672">[</span>fcastello.docker : Add Docker apt repository<span style="color:#f92672">]</span> *************************************************************************************************************************
-Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:16:36 +0000 <span style="color:#f92672">(</span>0:00:01.170<span style="color:#f92672">)</span>       0:08:13.656 *********
-changed: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
-changed: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
-changed: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
-
-TASK <span style="color:#f92672">[</span>fcastello.docker : Install docker-ce package<span style="color:#f92672">]</span> *************************************************************************************************************************
-Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:17:01 +0000 <span style="color:#f92672">(</span>0:00:24.326<span style="color:#f92672">)</span>       0:08:37.983 *********
-changed: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
-changed: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
-changed: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
-
-TASK <span style="color:#f92672">[</span>fcastello.node_exporter_docker : make sure python-docker package is present<span style="color:#f92672">]</span> ******************************************************************************************
-Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:19:07 +0000 <span style="color:#f92672">(</span>0:02:06.153<span style="color:#f92672">)</span>       0:10:44.136 *********
-ok: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
-ok: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
-ok: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
-
-TASK <span style="color:#f92672">[</span>fcastello.node_exporter_docker : make sure the diretory <span style="color:#66d9ef">for</span> text collectors exist<span style="color:#f92672">]</span> ************************************************************************************
-Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:19:12 +0000 <span style="color:#f92672">(</span>0:00:05.616<span style="color:#f92672">)</span>       0:10:49.752 *********
-changed: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
-changed: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
-changed: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
-
-TASK <span style="color:#f92672">[</span>fcastello.node_exporter_docker : run prometheus node exporter<span style="color:#f92672">]</span> ********************************************************************************************************
-Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:19:14 +0000 <span style="color:#f92672">(</span>0:00:01.295<span style="color:#f92672">)</span>       0:10:51.048 *********
-changed: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
-changed: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
-changed: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
-
-PLAY RECAP ******************************************************************************************************************************************************************
-10.0.100.157               : ok<span style="color:#f92672">=</span><span style="color:#ae81ff">9</span>    changed<span style="color:#f92672">=</span><span style="color:#ae81ff">7</span>    unreachable<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    failed<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    skipped<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    rescued<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    ignored<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>
-10.0.100.43                : ok<span style="color:#f92672">=</span><span style="color:#ae81ff">9</span>    changed<span style="color:#f92672">=</span><span style="color:#ae81ff">7</span>    unreachable<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    failed<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    skipped<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    rescued<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    ignored<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>
-10.0.100.99                : ok<span style="color:#f92672">=</span><span style="color:#ae81ff">9</span>    changed<span style="color:#f92672">=</span><span style="color:#ae81ff">7</span>    unreachable<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    failed<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    skipped<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    rescued<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    ignored<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>
-
-Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:19:32 +0000 <span style="color:#f92672">(</span>0:00:18.173<span style="color:#f92672">)</span>       0:11:09.221 *********
-<span style="color:#f92672">===============================================================================</span>
-fcastello.docker : install basic required software ----------------------------------------------------------------------------------------------------------------- 479.16s
-fcastello.docker : Install docker-ce package ----------------------------------------------------------------------------------------------------------------------- 126.15s
-fcastello.docker : Add Docker apt repository ------------------------------------------------------------------------------------------------------------------------ 24.33s
-fcastello.node_exporter_docker : run prometheus node exporter ------------------------------------------------------------------------------------------------------- 18.17s
-Gathering Facts ------------------------------------------------------------------------------------------------------------------------------------------------------ 7.63s
-fcastello.node_exporter_docker : make sure python-docker package is present ------------------------------------------------------------------------------------------ 5.62s
-fcastello.docker : Add docker gpg apt key ---------------------------------------------------------------------------------------------------------------------------- 5.55s
-fcastello.node_exporter_docker : make sure the diretory <span style="color:#66d9ef">for</span> text collectors exist ------------------------------------------------------------------------------------ 1.30s
-fcastello.docker : get architecture ---------------------------------------------------------------------------------------------------------------------------------- 1.17s
-Playbook run took <span style="color:#ae81ff">0</span> days, <span style="color:#ae81ff">0</span> hours, <span style="color:#ae81ff">11</span> minutes, <span style="color:#ae81ff">9</span> seconds
-</code></pre></div><p>Now we have our host and 3 vms to start playing around with the cpu and looking at metrics and explain what they are.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Start vms with multipass</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># you need to specify the username you will use</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># for ansible and the public key for passwrodless</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># authentication</span>
+</span></span><span style="display:flex;"><span>$ <span style="color:#66d9ef">for</span> i in <span style="color:#f92672">{</span>1..3<span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">do</span> cat <span style="color:#e6db74">&lt;&lt;EOF | multipass launch --name testvm${i} -m 1G --cloud-init -
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">users:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  - default
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  - name: testuser
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    sudo: ALL=(ALL) NOPASSWD:ALL
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    groups: users, admin
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    ssh_import_id: None
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    lock_passwd: true
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    ssh_authorized_keys:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCyrauoMmTD5Ar2MAvYd7hCXPKXLR75MabnZvMLyNxFVdbEX0M8Sz+UKIlnOGGUwoFgcl1xj7Bt7oUS/TVWBRBP/r9DQ47FxUZkEBycTty6hESkTSs56If7jMio56ygSTghA1aMYP8mGmVdcjWH0DYc1xgJylfvjuuUEaLJyMvWZeVGwUhPbX3/wqNSsGXczSTRJuYqfL+/tcAAs2u74Hg0YdY8GTT6pcKtchdsR4o9zih6MQktIotvAYinaD71inaggrN67DqIH8MfKk97jE8IIn1wjtMphuZEdRdVvn4ZbYQok1Fnm1kTelxLNWNar8h9hwGRx0O0lQyG1Todl3yL testuser
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">EOF</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">done</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Launched: testvm1
+</span></span><span style="display:flex;"><span>Launched: testvm2
+</span></span><span style="display:flex;"><span>Launched: testvm3
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">done</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Prepare the asible playbooks to configure the newly</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># created vms</span>
+</span></span><span style="display:flex;"><span>$ mkdir ansible
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>$ cd ansible
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Generate ansible invetory file</span>
+</span></span><span style="display:flex;"><span>$ echo <span style="color:#e6db74">&#34;[all]&#34;</span> &gt; inventory
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>$ multipass list --format json | jq .list<span style="color:#f92672">[]</span>.ipv4<span style="color:#f92672">[]</span> | cut -d<span style="color:#e6db74">&#34;\&#34;&#34;</span> -f2 &gt;&gt; inventory
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Create a new virtualenv</span>
+</span></span><span style="display:flex;"><span>$ virtualenv -p python3 .env
+</span></span><span style="display:flex;"><span>Already using interpreter /usr/bin/python3
+</span></span><span style="display:flex;"><span>Using base prefix <span style="color:#e6db74">&#39;/usr&#39;</span>
+</span></span><span style="display:flex;"><span>New python executable in /root/ansible/.env/bin/python3
+</span></span><span style="display:flex;"><span>Also creating executable in /root/ansible/.env/bin/python
+</span></span><span style="display:flex;"><span>Installing setuptools, pkg_resources, pip, wheel...done.
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Activate the virtualenv</span>
+</span></span><span style="display:flex;"><span>$ source .env/bin/activate
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Intall ansible in the virtualenv</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>.env<span style="color:#f92672">)</span>$ pip install ansible
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Generate a basic ansible cfg that will work </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># in the virtualenv</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>.env<span style="color:#f92672">)</span>$ cat <span style="color:#e6db74">&lt;&lt;EOF | tee ansible.cfg
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">[defaults]
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">roles_path          = .env/roles
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">inventory           = inventory
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">retry_files_enabled = False
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">host_key_checking   = False
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">gathering           = smart
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">stdout_callback     = debug
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">callback_whitelist  = timer, profile_tasks
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">[ssh_connection]
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">pipelining          = True
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">control_path        = ~/.ansible/cp/ansible-ssh-%%h-%%p-%%r
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">ssh_args            = -o RequestTTY=no -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ControlMaster=auto -o ControlPersist=60s
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">EOF</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Install ansible docker role</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>.env<span style="color:#f92672">)</span>$ ansible-galaxy role install fcastello.docker
+</span></span><span style="display:flex;"><span>- downloading role <span style="color:#e6db74">&#39;docker&#39;</span>, owned by fcastello
+</span></span><span style="display:flex;"><span>- downloading role from https://github.com/fcastello/ansible-docker/archive/0.0.4.tar.gz
+</span></span><span style="display:flex;"><span>- extracting fcastello.docker to /home/francisco/ansible/.env/roles/fcastello.docker
+</span></span><span style="display:flex;"><span>- fcastello.docker <span style="color:#f92672">(</span>0.0.4<span style="color:#f92672">)</span> was installed successfully
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Install ansible node exporter role</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>.env<span style="color:#f92672">)</span>$ ansible-galaxy role install fcastello.node_exporter_docker
+</span></span><span style="display:flex;"><span>- downloading role <span style="color:#e6db74">&#39;node_exporter_docker&#39;</span>, owned by fcastello
+</span></span><span style="display:flex;"><span>- downloading role from https://github.com/fcastello/ansible-node-exporter-docker/archive/0.0.1.tar.gz
+</span></span><span style="display:flex;"><span>- extracting fcastello.node_exporter_docker to /home/francisco/ansible/.env/roles/fcastello.node_exporter_docker
+</span></span><span style="display:flex;"><span>- fcastello.node_exporter_docker <span style="color:#f92672">(</span>0.0.1<span style="color:#f92672">)</span> was installed successfully
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Create the playbook file which will install</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># everything needed</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>.env<span style="color:#f92672">)</span>$ cat <span style="color:#e6db74">&lt;&lt;EOF | tee config.yml
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">---
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">- name: configure vm(s)
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  hosts: &#34;all&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  gather_facts: yes
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  become: yes
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  tasks:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - name: &#34;Install docker&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      import_role:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        name: fcastello.docker
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - name: &#34;Run node exporter&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      import_role:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        name: fcastello.node_exporter_docker
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">    - name: &#34;install iperf&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">      apt:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        name: iperf
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        state: present
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">EOF</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Run the ansible playbook on all vms</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">(</span>.env<span style="color:#f92672">)</span>$ ansible-playbook config.yml
+</span></span><span style="display:flex;"><span>PLAY <span style="color:#f92672">[</span>configure vm<span style="color:#f92672">(</span>s<span style="color:#f92672">)]</span> ******************************************************************************************************************************************************
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>TASK <span style="color:#f92672">[</span>Gathering Facts<span style="color:#f92672">]</span> ******************************************************************************************************************************************************
+</span></span><span style="display:flex;"><span>Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:08:23 +0000 <span style="color:#f92672">(</span>0:00:00.147<span style="color:#f92672">)</span>       0:00:00.147 *********
+</span></span><span style="display:flex;"><span>ok: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>ok: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>ok: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>TASK <span style="color:#f92672">[</span>fcastello.docker : install basic required software<span style="color:#f92672">]</span> *******************************************************************************************************************
+</span></span><span style="display:flex;"><span>Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:08:30 +0000 <span style="color:#f92672">(</span>0:00:07.632<span style="color:#f92672">)</span>       0:00:07.779 *********
+</span></span><span style="display:flex;"><span>changed: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>changed: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>changed: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>TASK <span style="color:#f92672">[</span>fcastello.docker : Add docker gpg apt key<span style="color:#f92672">]</span> ****************************************************************************************************************************
+</span></span><span style="display:flex;"><span>Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:16:30 +0000 <span style="color:#f92672">(</span>0:07:59.158<span style="color:#f92672">)</span>       0:08:06.939 *********
+</span></span><span style="display:flex;"><span>changed: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>changed: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>changed: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>TASK <span style="color:#f92672">[</span>fcastello.docker : get architecture<span style="color:#f92672">]</span> **********************************************************************************************************************************
+</span></span><span style="display:flex;"><span>Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:16:35 +0000 <span style="color:#f92672">(</span>0:00:05.547<span style="color:#f92672">)</span>       0:08:12.486 *********
+</span></span><span style="display:flex;"><span>changed: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>changed: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>changed: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>TASK <span style="color:#f92672">[</span>fcastello.docker : Add Docker apt repository<span style="color:#f92672">]</span> *************************************************************************************************************************
+</span></span><span style="display:flex;"><span>Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:16:36 +0000 <span style="color:#f92672">(</span>0:00:01.170<span style="color:#f92672">)</span>       0:08:13.656 *********
+</span></span><span style="display:flex;"><span>changed: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>changed: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>changed: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>TASK <span style="color:#f92672">[</span>fcastello.docker : Install docker-ce package<span style="color:#f92672">]</span> *************************************************************************************************************************
+</span></span><span style="display:flex;"><span>Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:17:01 +0000 <span style="color:#f92672">(</span>0:00:24.326<span style="color:#f92672">)</span>       0:08:37.983 *********
+</span></span><span style="display:flex;"><span>changed: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>changed: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>changed: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>TASK <span style="color:#f92672">[</span>fcastello.node_exporter_docker : make sure python-docker package is present<span style="color:#f92672">]</span> ******************************************************************************************
+</span></span><span style="display:flex;"><span>Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:19:07 +0000 <span style="color:#f92672">(</span>0:02:06.153<span style="color:#f92672">)</span>       0:10:44.136 *********
+</span></span><span style="display:flex;"><span>ok: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>ok: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>ok: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>TASK <span style="color:#f92672">[</span>fcastello.node_exporter_docker : make sure the diretory <span style="color:#66d9ef">for</span> text collectors exist<span style="color:#f92672">]</span> ************************************************************************************
+</span></span><span style="display:flex;"><span>Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:19:12 +0000 <span style="color:#f92672">(</span>0:00:05.616<span style="color:#f92672">)</span>       0:10:49.752 *********
+</span></span><span style="display:flex;"><span>changed: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>changed: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>changed: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>TASK <span style="color:#f92672">[</span>fcastello.node_exporter_docker : run prometheus node exporter<span style="color:#f92672">]</span> ********************************************************************************************************
+</span></span><span style="display:flex;"><span>Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:19:14 +0000 <span style="color:#f92672">(</span>0:00:01.295<span style="color:#f92672">)</span>       0:10:51.048 *********
+</span></span><span style="display:flex;"><span>changed: <span style="color:#f92672">[</span>10.0.100.99<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>changed: <span style="color:#f92672">[</span>10.0.100.43<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>changed: <span style="color:#f92672">[</span>10.0.100.157<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>PLAY RECAP ******************************************************************************************************************************************************************
+</span></span><span style="display:flex;"><span>10.0.100.157               : ok<span style="color:#f92672">=</span><span style="color:#ae81ff">9</span>    changed<span style="color:#f92672">=</span><span style="color:#ae81ff">7</span>    unreachable<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    failed<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    skipped<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    rescued<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    ignored<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>10.0.100.43                : ok<span style="color:#f92672">=</span><span style="color:#ae81ff">9</span>    changed<span style="color:#f92672">=</span><span style="color:#ae81ff">7</span>    unreachable<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    failed<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    skipped<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    rescued<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    ignored<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>10.0.100.99                : ok<span style="color:#f92672">=</span><span style="color:#ae81ff">9</span>    changed<span style="color:#f92672">=</span><span style="color:#ae81ff">7</span>    unreachable<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    failed<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    skipped<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    rescued<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>    ignored<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Saturday <span style="color:#ae81ff">11</span> July <span style="color:#ae81ff">2020</span>  19:19:32 +0000 <span style="color:#f92672">(</span>0:00:18.173<span style="color:#f92672">)</span>       0:11:09.221 *********
+</span></span><span style="display:flex;"><span><span style="color:#f92672">===============================================================================</span>
+</span></span><span style="display:flex;"><span>fcastello.docker : install basic required software ----------------------------------------------------------------------------------------------------------------- 479.16s
+</span></span><span style="display:flex;"><span>fcastello.docker : Install docker-ce package ----------------------------------------------------------------------------------------------------------------------- 126.15s
+</span></span><span style="display:flex;"><span>fcastello.docker : Add Docker apt repository ------------------------------------------------------------------------------------------------------------------------ 24.33s
+</span></span><span style="display:flex;"><span>fcastello.node_exporter_docker : run prometheus node exporter ------------------------------------------------------------------------------------------------------- 18.17s
+</span></span><span style="display:flex;"><span>Gathering Facts ------------------------------------------------------------------------------------------------------------------------------------------------------ 7.63s
+</span></span><span style="display:flex;"><span>fcastello.node_exporter_docker : make sure python-docker package is present ------------------------------------------------------------------------------------------ 5.62s
+</span></span><span style="display:flex;"><span>fcastello.docker : Add docker gpg apt key ---------------------------------------------------------------------------------------------------------------------------- 5.55s
+</span></span><span style="display:flex;"><span>fcastello.node_exporter_docker : make sure the diretory <span style="color:#66d9ef">for</span> text collectors exist ------------------------------------------------------------------------------------ 1.30s
+</span></span><span style="display:flex;"><span>fcastello.docker : get architecture ---------------------------------------------------------------------------------------------------------------------------------- 1.17s
+</span></span><span style="display:flex;"><span>Playbook run took <span style="color:#ae81ff">0</span> days, <span style="color:#ae81ff">0</span> hours, <span style="color:#ae81ff">11</span> minutes, <span style="color:#ae81ff">9</span> seconds
+</span></span></code></pre></div><p>Now we have our host and 3 vms to start playing around with the cpu and looking at metrics and explain what they are.</p>
 <h1 id="cpu-metrics">CPU metrics</h1>
 <p>To start viewing usage lets talk about what are the different components of cpu metrics. For that we can take a look at a screenshot for the <code>top</code> command.</p>
 <p><img src="../images/taming-the-cpu-metrics/top1.png" alt=""></p>
@@ -353,23 +353,23 @@ Most tests were performed in the vms that we created at the start of the post an
 <h2 id="userspace-usage">Userspace usage</h2>
 <p>Other common use case we catch with cpu metrics is to see applications running in userspace that use the cpu. This is normal and we should expect to see this percentage go higher when applications are busier.
 To generate userspace usage in one of the vms, for that will will run a container to stress test the cpu</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># log in to testvm1</span>
-$ multipass shell testvm1
-
-<span style="color:#75715e"># Run docker container that will hog 1 cpu</span>
-ubuntu@testvm1:~$ sudo docker run -it --name cpustress --rm containerstack/cpustress --cpu <span style="color:#ae81ff">1</span> --timeout 90s --metrics-brief
-Unable to find image <span style="color:#e6db74">&#39;containerstack/cpustress:latest&#39;</span> locally
-latest: Pulling from containerstack/cpustress
-c76b39ada3ed: Pull complete
-badc43fe7dea: Pull complete
-Digest: sha256:a72da3632d53fc69a5f60715a1b594b56e1a7d94c40963efbd4cdc37ca37d77e
-Status: Downloaded newer image <span style="color:#66d9ef">for</span> containerstack/cpustress:latest
-stress-ng: info: <span style="color:#f92672">[</span>1<span style="color:#f92672">]</span> dispatching hogs: <span style="color:#ae81ff">1</span> cpudocker run -it --name cpustress --rm containerstack/cpustress --cpu <span style="color:#ae81ff">1</span> --timeout 90s --metrics-brief
-stress-ng: info: <span style="color:#f92672">[</span>1<span style="color:#f92672">]</span> successful run completed in 90.05s
-stress-ng: info: <span style="color:#f92672">[</span>1<span style="color:#f92672">]</span> stressor      bogo ops real time  usr time  sys time   bogo ops/s   bogo ops/s
-stress-ng: info: <span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>                          <span style="color:#f92672">(</span>secs<span style="color:#f92672">)</span>    <span style="color:#f92672">(</span>secs<span style="color:#f92672">)</span>    <span style="color:#f92672">(</span>secs<span style="color:#f92672">)</span>   <span style="color:#f92672">(</span>real time<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>usr+sys time<span style="color:#f92672">)</span>
-stress-ng: info: <span style="color:#f92672">[</span>1<span style="color:#f92672">]</span> cpu              <span style="color:#ae81ff">12992</span>     90.05     88.83      0.01       144.28       146.24
-</code></pre></div><p>We ran a cpu stress test for 90 seconds and we can see the screenshots of the metrics.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># log in to testvm1</span>
+</span></span><span style="display:flex;"><span>$ multipass shell testvm1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Run docker container that will hog 1 cpu</span>
+</span></span><span style="display:flex;"><span>ubuntu@testvm1:~$ sudo docker run -it --name cpustress --rm containerstack/cpustress --cpu <span style="color:#ae81ff">1</span> --timeout 90s --metrics-brief
+</span></span><span style="display:flex;"><span>Unable to find image <span style="color:#e6db74">&#39;containerstack/cpustress:latest&#39;</span> locally
+</span></span><span style="display:flex;"><span>latest: Pulling from containerstack/cpustress
+</span></span><span style="display:flex;"><span>c76b39ada3ed: Pull complete
+</span></span><span style="display:flex;"><span>badc43fe7dea: Pull complete
+</span></span><span style="display:flex;"><span>Digest: sha256:a72da3632d53fc69a5f60715a1b594b56e1a7d94c40963efbd4cdc37ca37d77e
+</span></span><span style="display:flex;"><span>Status: Downloaded newer image <span style="color:#66d9ef">for</span> containerstack/cpustress:latest
+</span></span><span style="display:flex;"><span>stress-ng: info: <span style="color:#f92672">[</span>1<span style="color:#f92672">]</span> dispatching hogs: <span style="color:#ae81ff">1</span> cpudocker run -it --name cpustress --rm containerstack/cpustress --cpu <span style="color:#ae81ff">1</span> --timeout 90s --metrics-brief
+</span></span><span style="display:flex;"><span>stress-ng: info: <span style="color:#f92672">[</span>1<span style="color:#f92672">]</span> successful run completed in 90.05s
+</span></span><span style="display:flex;"><span>stress-ng: info: <span style="color:#f92672">[</span>1<span style="color:#f92672">]</span> stressor      bogo ops real time  usr time  sys time   bogo ops/s   bogo ops/s
+</span></span><span style="display:flex;"><span>stress-ng: info: <span style="color:#f92672">[</span>1<span style="color:#f92672">]</span>                          <span style="color:#f92672">(</span>secs<span style="color:#f92672">)</span>    <span style="color:#f92672">(</span>secs<span style="color:#f92672">)</span>    <span style="color:#f92672">(</span>secs<span style="color:#f92672">)</span>   <span style="color:#f92672">(</span>real time<span style="color:#f92672">)</span> <span style="color:#f92672">(</span>usr+sys time<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>stress-ng: info: <span style="color:#f92672">[</span>1<span style="color:#f92672">]</span> cpu              <span style="color:#ae81ff">12992</span>     90.05     88.83      0.01       144.28       146.24
+</span></span></code></pre></div><p>We ran a cpu stress test for 90 seconds and we can see the screenshots of the metrics.</p>
 <p><img src="../images/taming-the-cpu-metrics/user1.png" alt=""></p>
 <p>In the graph we can see during the stress test of the cpu, the testvm1 spiked the user space usage, shown as the yellow area, off course the stress test took all available cpu at the time of the test, but we can see a tiny spike in the green area which shows the time spent in kernel space processes, this is because even userspace processes can have interaction with the kernel depending on the tasks the process is doing.</p>
 <p><img src="../images/taming-the-cpu-metrics/user2.png" alt=""></p>
@@ -392,21 +392,21 @@ So this test was a raspberry pi running a kubernetes node and that snapshot of t
 <h2 id="high-interrupts">High interrupts</h2>
 <p>In this case to test a scenario that generates a high amount of interrupts I will run a network traffic stress test between testvm1 and testvm2, for that we will use <code>iperf</code> tool already installed with the ansible playbook.</p>
 <p>On testvm1 start iperf as server</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ubuntu@testvm1:~$ iperf -s
-------------------------------------------------------------
-Server listening on TCP port <span style="color:#ae81ff">5001</span>
-TCP window size:  <span style="color:#ae81ff">128</span> KByte <span style="color:#f92672">(</span>default<span style="color:#f92672">)</span>
-------------------------------------------------------------
-</code></pre></div><p>On the testvm2 run iperf as client</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ubuntu@testvm2:~$ iperf -c testvm1 -t <span style="color:#ae81ff">90</span>
-------------------------------------------------------------
-Client connecting to 10.0.100.1, TCP port <span style="color:#ae81ff">5001</span>
-TCP window size: 85.0 KByte <span style="color:#f92672">(</span>default<span style="color:#f92672">)</span>
-------------------------------------------------------------
-<span style="color:#f92672">[</span>  3<span style="color:#f92672">]</span> local 10.0.100.43 port <span style="color:#ae81ff">42832</span> connected with 10.0.100.1 port <span style="color:#ae81ff">5001</span>
-<span style="color:#f92672">[</span> ID<span style="color:#f92672">]</span> Interval       Transfer     Bandwidth
-<span style="color:#f92672">[</span>  3<span style="color:#f92672">]</span>  0.0-90.0 sec  92.8 GBytes  8.86 Gbits/sec
-</code></pre></div><p>This will generate a lot of interrupts for the network card, even if it&rsquo;s a virtual card the network card&rsquo;s driver will generate interrupts.<br>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>ubuntu@testvm1:~$ iperf -s
+</span></span><span style="display:flex;"><span>------------------------------------------------------------
+</span></span><span style="display:flex;"><span>Server listening on TCP port <span style="color:#ae81ff">5001</span>
+</span></span><span style="display:flex;"><span>TCP window size:  <span style="color:#ae81ff">128</span> KByte <span style="color:#f92672">(</span>default<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>------------------------------------------------------------
+</span></span></code></pre></div><p>On the testvm2 run iperf as client</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>ubuntu@testvm2:~$ iperf -c testvm1 -t <span style="color:#ae81ff">90</span>
+</span></span><span style="display:flex;"><span>------------------------------------------------------------
+</span></span><span style="display:flex;"><span>Client connecting to 10.0.100.1, TCP port <span style="color:#ae81ff">5001</span>
+</span></span><span style="display:flex;"><span>TCP window size: 85.0 KByte <span style="color:#f92672">(</span>default<span style="color:#f92672">)</span>
+</span></span><span style="display:flex;"><span>------------------------------------------------------------
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>  3<span style="color:#f92672">]</span> local 10.0.100.43 port <span style="color:#ae81ff">42832</span> connected with 10.0.100.1 port <span style="color:#ae81ff">5001</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span> ID<span style="color:#f92672">]</span> Interval       Transfer     Bandwidth
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>  3<span style="color:#f92672">]</span>  0.0-90.0 sec  92.8 GBytes  8.86 Gbits/sec
+</span></span></code></pre></div><p>This will generate a lot of interrupts for the network card, even if it&rsquo;s a virtual card the network card&rsquo;s driver will generate interrupts.<br>
 Let&rsquo;s look at the graph.</p>
 <p><img src="../images/taming-the-cpu-metrics/interrupts1.png" alt=""></p>
 <p>In this graph we can see spikes when the network stress test was being performed. I will go into details on the values that makes sense for this use case and not explain what has already been explained.</p>
@@ -419,10 +419,10 @@ Let&rsquo;s look at the graph.</p>
 <h2 id="noisy-neighbors">Noisy Neighbors</h2>
 <p>In this case I will show a test that will show in cpu metrics if we have &ldquo;noisy neighbors&rdquo; running on the same physical host. This means that we can see if other vms are affecting our vm by looking at the cpu percentages.</p>
 <p>For this test I will run the cpu stress test for 90 seconds in testvm1, testvm2 and testvm3</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Log in to all vms and run the following</span>
-<span style="color:#75715e"># run the docker container to stress the cpu</span>
-$ sudo docker run -it --name cpustress --rm containerstack/cpustress --cpu <span style="color:#ae81ff">1</span> --timeout 90s --metrics-brief
-</code></pre></div><p>Following I will show the graphs for all 3 vms.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Log in to all vms and run the following</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># run the docker container to stress the cpu</span>
+</span></span><span style="display:flex;"><span>$ sudo docker run -it --name cpustress --rm containerstack/cpustress --cpu <span style="color:#ae81ff">1</span> --timeout 90s --metrics-brief
+</span></span></code></pre></div><p>Following I will show the graphs for all 3 vms.</p>
 <p><img src="../images/taming-the-cpu-metrics/steal1.png" alt=""></p>
 <p><img src="../images/taming-the-cpu-metrics/steal2.png" alt=""></p>
 <p><img src="../images/taming-the-cpu-metrics/steal3.png" alt=""></p>

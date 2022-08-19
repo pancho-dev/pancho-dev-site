@@ -173,93 +173,93 @@ Off course probably very few people uses the AWS API directly and use AWS offici
 <h1 id="aws-go-sdk">AWS go SDK</h1>
 <p>To my surprise I had a Go application that was uploading files to S3 and one day I noticed the S3 bill was increasing every month, so first I didn&rsquo;t know what was it so ended up setting up tags on S3 buckets to be able to filter by each bucket in the AWS cost explorer. Then found out that I was paying very little for storage per day in this application and I was paying 10 to 12 times more on API calls.</p>
 <p>A code example to upload to S3</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
-
-<span style="color:#f92672">import</span> (
-    <span style="color:#e6db74">&#34;github.com/aws/aws-sdk-go/aws&#34;</span>
-    <span style="color:#e6db74">&#34;github.com/aws/aws-sdk-go/aws/session&#34;</span>
-    <span style="color:#e6db74">&#34;github.com/aws/aws-sdk-go/service/s3/s3manager&#34;</span>
-    <span style="color:#e6db74">&#34;fmt&#34;</span>
-    <span style="color:#e6db74">&#34;os&#34;</span>
-)
-
-<span style="color:#75715e">// Creates a S3 Bucket in the region configured in the shared config
-</span><span style="color:#75715e">// or AWS_REGION environment variable.
-</span><span style="color:#75715e">//
-</span><span style="color:#75715e">// Usage:
-</span><span style="color:#75715e">//    go run s3_upload_object.go BUCKET_NAME FILENAME
-</span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
-    <span style="color:#66d9ef">if</span> len(<span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Args</span>) <span style="color:#f92672">!=</span> <span style="color:#ae81ff">3</span> {
-        <span style="color:#a6e22e">exitErrorf</span>(<span style="color:#e6db74">&#34;bucket and file name required\nUsage: %s bucket_name filename&#34;</span>,
-            <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Args</span>[<span style="color:#ae81ff">0</span>])
-    }
-
-    <span style="color:#a6e22e">bucket</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Args</span>[<span style="color:#ae81ff">1</span>]
-    <span style="color:#a6e22e">filename</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Args</span>[<span style="color:#ae81ff">2</span>]
-
-    <span style="color:#a6e22e">file</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Open</span>(<span style="color:#a6e22e">filename</span>)
-    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
-        <span style="color:#a6e22e">exitErrorf</span>(<span style="color:#e6db74">&#34;Unable to open file %q, %v&#34;</span>, <span style="color:#a6e22e">err</span>)
-    }
-
-    <span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">file</span>.<span style="color:#a6e22e">Close</span>()
-
-    <span style="color:#75715e">// Initialize a session in us-west-2 that the SDK will use to load
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// credentials from the shared credentials file ~/.aws/credentials.
-</span><span style="color:#75715e"></span>    <span style="color:#a6e22e">sess</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">session</span>.<span style="color:#a6e22e">NewSession</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">aws</span>.<span style="color:#a6e22e">Config</span>{
-        <span style="color:#a6e22e">Region</span>: <span style="color:#a6e22e">aws</span>.<span style="color:#a6e22e">String</span>(<span style="color:#e6db74">&#34;us-west-2&#34;</span>)},
-    )
-
-    <span style="color:#75715e">// Setup the S3 Upload Manager. Also see the SDK doc for the Upload Manager
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// for more information on configuring part size, and concurrency.
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">//
-</span><span style="color:#75715e"></span>    <span style="color:#75715e">// http://docs.aws.amazon.com/sdk-for-go/api/service/s3/s3manager/#NewUploader
-</span><span style="display:block;width:100%;background-color:#3c3d38"><span style="color:#75715e"></span>    <span style="color:#a6e22e">uploader</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">s3manager</span>.<span style="color:#a6e22e">NewUploader</span>(<span style="color:#a6e22e">sess</span>)
-</span><span style="display:block;width:100%;background-color:#3c3d38">
-</span><span style="display:block;width:100%;background-color:#3c3d38">    <span style="color:#75715e">// Upload the file&#39;s body to S3 bucket as an object with the key being the
-</span></span><span style="display:block;width:100%;background-color:#3c3d38"><span style="color:#75715e"></span>    <span style="color:#75715e">// same as the filename.
-</span></span><span style="display:block;width:100%;background-color:#3c3d38"><span style="color:#75715e"></span>    <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">err</span> = <span style="color:#a6e22e">uploader</span>.<span style="color:#a6e22e">Upload</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">s3manager</span>.<span style="color:#a6e22e">UploadInput</span>{
-</span><span style="display:block;width:100%;background-color:#3c3d38">        <span style="color:#a6e22e">Bucket</span>: <span style="color:#a6e22e">aws</span>.<span style="color:#a6e22e">String</span>(<span style="color:#a6e22e">bucket</span>),
-</span><span style="display:block;width:100%;background-color:#3c3d38">
-</span><span style="display:block;width:100%;background-color:#3c3d38">        <span style="color:#75715e">// Can also use the `filepath` standard library package to modify the
-</span></span><span style="display:block;width:100%;background-color:#3c3d38"><span style="color:#75715e"></span>        <span style="color:#75715e">// filename as need for an S3 object key. Such as turning absolute path
-</span></span><span style="display:block;width:100%;background-color:#3c3d38"><span style="color:#75715e"></span>        <span style="color:#75715e">// to a relative path.
-</span></span><span style="display:block;width:100%;background-color:#3c3d38"><span style="color:#75715e"></span>        <span style="color:#a6e22e">Key</span>: <span style="color:#a6e22e">aws</span>.<span style="color:#a6e22e">String</span>(<span style="color:#a6e22e">filename</span>),
-</span><span style="display:block;width:100%;background-color:#3c3d38">
-</span><span style="display:block;width:100%;background-color:#3c3d38">        <span style="color:#75715e">// The file to be uploaded. io.ReadSeeker is preferred as the Uploader
-</span></span><span style="display:block;width:100%;background-color:#3c3d38"><span style="color:#75715e"></span>        <span style="color:#75715e">// will be able to optimize memory when uploading large content. io.Reader
-</span></span><span style="display:block;width:100%;background-color:#3c3d38"><span style="color:#75715e"></span>        <span style="color:#75715e">// is supported, but will require buffering of the reader&#39;s bytes for
-</span></span><span style="display:block;width:100%;background-color:#3c3d38"><span style="color:#75715e"></span>        <span style="color:#75715e">// each part.
-</span></span><span style="display:block;width:100%;background-color:#3c3d38"><span style="color:#75715e"></span>        <span style="color:#a6e22e">Body</span>: <span style="color:#a6e22e">file</span>,
-</span><span style="display:block;width:100%;background-color:#3c3d38">    })
-</span>    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
-        <span style="color:#75715e">// Print the error and exit.
-</span><span style="color:#75715e"></span>        <span style="color:#a6e22e">exitErrorf</span>(<span style="color:#e6db74">&#34;Unable to upload %q to %q, %v&#34;</span>, <span style="color:#a6e22e">filename</span>, <span style="color:#a6e22e">bucket</span>, <span style="color:#a6e22e">err</span>)
-    }
-
-    <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;Successfully uploaded %q to %q\n&#34;</span>, <span style="color:#a6e22e">filename</span>, <span style="color:#a6e22e">bucket</span>)
-}
-
-<span style="color:#66d9ef">func</span> <span style="color:#a6e22e">exitErrorf</span>(<span style="color:#a6e22e">msg</span> <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">args</span> <span style="color:#f92672">...</span><span style="color:#66d9ef">interface</span>{}) {
-    <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Fprintf</span>(<span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Stderr</span>, <span style="color:#a6e22e">msg</span><span style="color:#f92672">+</span><span style="color:#e6db74">&#34;\n&#34;</span>, <span style="color:#a6e22e">args</span><span style="color:#f92672">...</span>)
-    <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Exit</span>(<span style="color:#ae81ff">1</span>)
-}</code></pre></div>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;display:grid;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#f92672">package</span> <span style="color:#a6e22e">main</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">import</span> (
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;github.com/aws/aws-sdk-go/aws&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;github.com/aws/aws-sdk-go/aws/session&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;github.com/aws/aws-sdk-go/service/s3/s3manager&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;fmt&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;os&#34;</span>
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Creates a S3 Bucket in the region configured in the shared config
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// or AWS_REGION environment variable.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// Usage:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">//    go run s3_upload_object.go BUCKET_NAME FILENAME
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">main</span>() {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> len(<span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Args</span>) <span style="color:#f92672">!=</span> <span style="color:#ae81ff">3</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">exitErrorf</span>(<span style="color:#e6db74">&#34;bucket and file name required\nUsage: %s bucket_name filename&#34;</span>,
+</span></span><span style="display:flex;"><span>            <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Args</span>[<span style="color:#ae81ff">0</span>])
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">bucket</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Args</span>[<span style="color:#ae81ff">1</span>]
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">filename</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Args</span>[<span style="color:#ae81ff">2</span>]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">file</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Open</span>(<span style="color:#a6e22e">filename</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">exitErrorf</span>(<span style="color:#e6db74">&#34;Unable to open file %q, %v&#34;</span>, <span style="color:#a6e22e">err</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">defer</span> <span style="color:#a6e22e">file</span>.<span style="color:#a6e22e">Close</span>()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Initialize a session in us-west-2 that the SDK will use to load
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// credentials from the shared credentials file ~/.aws/credentials.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">sess</span>, <span style="color:#a6e22e">err</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">session</span>.<span style="color:#a6e22e">NewSession</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">aws</span>.<span style="color:#a6e22e">Config</span>{
+</span></span><span style="display:flex;"><span>        <span style="color:#a6e22e">Region</span>: <span style="color:#a6e22e">aws</span>.<span style="color:#a6e22e">String</span>(<span style="color:#e6db74">&#34;us-west-2&#34;</span>)},
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Setup the S3 Upload Manager. Also see the SDK doc for the Upload Manager
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// for more information on configuring part size, and concurrency.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">//
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// http://docs.aws.amazon.com/sdk-for-go/api/service/s3/s3manager/#NewUploader
+</span></span></span><span style="display:flex; background-color:#3c3d38"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">uploader</span> <span style="color:#f92672">:=</span> <span style="color:#a6e22e">s3manager</span>.<span style="color:#a6e22e">NewUploader</span>(<span style="color:#a6e22e">sess</span>)
+</span></span><span style="display:flex; background-color:#3c3d38"><span>
+</span></span><span style="display:flex; background-color:#3c3d38"><span>    <span style="color:#75715e">// Upload the file&#39;s body to S3 bucket as an object with the key being the
+</span></span></span><span style="display:flex; background-color:#3c3d38"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// same as the filename.
+</span></span></span><span style="display:flex; background-color:#3c3d38"><span><span style="color:#75715e"></span>    <span style="color:#a6e22e">_</span>, <span style="color:#a6e22e">err</span> = <span style="color:#a6e22e">uploader</span>.<span style="color:#a6e22e">Upload</span>(<span style="color:#f92672">&amp;</span><span style="color:#a6e22e">s3manager</span>.<span style="color:#a6e22e">UploadInput</span>{
+</span></span><span style="display:flex; background-color:#3c3d38"><span>        <span style="color:#a6e22e">Bucket</span>: <span style="color:#a6e22e">aws</span>.<span style="color:#a6e22e">String</span>(<span style="color:#a6e22e">bucket</span>),
+</span></span><span style="display:flex; background-color:#3c3d38"><span>
+</span></span><span style="display:flex; background-color:#3c3d38"><span>        <span style="color:#75715e">// Can also use the `filepath` standard library package to modify the
+</span></span></span><span style="display:flex; background-color:#3c3d38"><span><span style="color:#75715e"></span>        <span style="color:#75715e">// filename as need for an S3 object key. Such as turning absolute path
+</span></span></span><span style="display:flex; background-color:#3c3d38"><span><span style="color:#75715e"></span>        <span style="color:#75715e">// to a relative path.
+</span></span></span><span style="display:flex; background-color:#3c3d38"><span><span style="color:#75715e"></span>        <span style="color:#a6e22e">Key</span>: <span style="color:#a6e22e">aws</span>.<span style="color:#a6e22e">String</span>(<span style="color:#a6e22e">filename</span>),
+</span></span><span style="display:flex; background-color:#3c3d38"><span>
+</span></span><span style="display:flex; background-color:#3c3d38"><span>        <span style="color:#75715e">// The file to be uploaded. io.ReadSeeker is preferred as the Uploader
+</span></span></span><span style="display:flex; background-color:#3c3d38"><span><span style="color:#75715e"></span>        <span style="color:#75715e">// will be able to optimize memory when uploading large content. io.Reader
+</span></span></span><span style="display:flex; background-color:#3c3d38"><span><span style="color:#75715e"></span>        <span style="color:#75715e">// is supported, but will require buffering of the reader&#39;s bytes for
+</span></span></span><span style="display:flex; background-color:#3c3d38"><span><span style="color:#75715e"></span>        <span style="color:#75715e">// each part.
+</span></span></span><span style="display:flex; background-color:#3c3d38"><span><span style="color:#75715e"></span>        <span style="color:#a6e22e">Body</span>: <span style="color:#a6e22e">file</span>,
+</span></span><span style="display:flex; background-color:#3c3d38"><span>    })
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> <span style="color:#a6e22e">err</span> <span style="color:#f92672">!=</span> <span style="color:#66d9ef">nil</span> {
+</span></span><span style="display:flex;"><span>        <span style="color:#75715e">// Print the error and exit.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>        <span style="color:#a6e22e">exitErrorf</span>(<span style="color:#e6db74">&#34;Unable to upload %q to %q, %v&#34;</span>, <span style="color:#a6e22e">filename</span>, <span style="color:#a6e22e">bucket</span>, <span style="color:#a6e22e">err</span>)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Printf</span>(<span style="color:#e6db74">&#34;Successfully uploaded %q to %q\n&#34;</span>, <span style="color:#a6e22e">filename</span>, <span style="color:#a6e22e">bucket</span>)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">func</span> <span style="color:#a6e22e">exitErrorf</span>(<span style="color:#a6e22e">msg</span> <span style="color:#66d9ef">string</span>, <span style="color:#a6e22e">args</span> <span style="color:#f92672">...</span><span style="color:#66d9ef">interface</span>{}) {
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">fmt</span>.<span style="color:#a6e22e">Fprintf</span>(<span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Stderr</span>, <span style="color:#a6e22e">msg</span><span style="color:#f92672">+</span><span style="color:#e6db74">&#34;\n&#34;</span>, <span style="color:#a6e22e">args</span><span style="color:#f92672">...</span>)
+</span></span><span style="display:flex;"><span>    <span style="color:#a6e22e">os</span>.<span style="color:#a6e22e">Exit</span>(<span style="color:#ae81ff">1</span>)
+</span></span><span style="display:flex;"><span>}</span></span></code></pre></div>
 <p>In the  highlighted part of the example above shows a similar way the app was using the AWS SDK, I started investigating the code and lead me to AWS SDK code and I quickly found out that the uploader object uses multipart uploads by default. And here is a snippet of the defaults of the SDK (default on the day of this writing):</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-go" data-lang="go"><span style="color:#75715e">// MaxUploadParts is the maximum allowed number of parts in a multi-part upload
-</span><span style="color:#75715e">// on Amazon S3.
-</span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">MaxUploadParts</span> = <span style="color:#ae81ff">10000</span>
-
-<span style="color:#75715e">// MinUploadPartSize is the minimum allowed part size when uploading a part to
-</span><span style="color:#75715e">// Amazon S3.
-</span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">MinUploadPartSize</span> <span style="color:#66d9ef">int64</span> = <span style="color:#ae81ff">1024</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">1024</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">5</span>
-
-<span style="color:#75715e">// DefaultUploadPartSize is the default part size to buffer chunks of a
-</span><span style="color:#75715e">// payload into.
-</span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">DefaultUploadPartSize</span> = <span style="color:#a6e22e">MinUploadPartSize</span>
-
-<span style="color:#75715e">// DefaultUploadConcurrency is the default number of goroutines to spin up when
-</span><span style="color:#75715e">// using Upload().
-</span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">DefaultUploadConcurrency</span> = <span style="color:#ae81ff">5</span></code></pre></div>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-go" data-lang="go"><span style="display:flex;"><span><span style="color:#75715e">// MaxUploadParts is the maximum allowed number of parts in a multi-part upload
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// on Amazon S3.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">MaxUploadParts</span> = <span style="color:#ae81ff">10000</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// MinUploadPartSize is the minimum allowed part size when uploading a part to
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// Amazon S3.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">MinUploadPartSize</span> <span style="color:#66d9ef">int64</span> = <span style="color:#ae81ff">1024</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">1024</span> <span style="color:#f92672">*</span> <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// DefaultUploadPartSize is the default part size to buffer chunks of a
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// payload into.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">DefaultUploadPartSize</span> = <span style="color:#a6e22e">MinUploadPartSize</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// DefaultUploadConcurrency is the default number of goroutines to spin up when
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e">// using Upload().
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">DefaultUploadConcurrency</span> = <span style="color:#ae81ff">5</span></span></span></code></pre></div>
 <p>The interesting part AWS Go SDK is that the default chunk size for upload parts is defined to the minimum part size which is 5MB. And if we take the code from the example none of this values are getting overridden. If we take a look at the example code, it means that when we upload a 100MB file using that snippet will generate 21 API calls when uploading it 1 for initiating and 20 for the upload parts.<br>
 Fortunately this was a problem easy to fix just by setting <code>Uploader.PartSize</code> attribute can be adjusted to the needs of the application. In my case the app was uploading files from a few KB up to 100MB, and by setting it to a higher value like 50MB lowered the API calls costs by 10 to 12 times.<br>
 Off course before tuning this value, we need to be aware of what we are doing. Setting the value will depend on the applications needs, in my case uploading concurrently was not a requirement as it was archiving files and uploading speed was not an issue, but in a case where speed is a requirement for the upload, then uploading parts concurrently will help in that case at the tradeoff of being more expensive to upload.<br>
@@ -267,43 +267,43 @@ I found useful to set <code>Uploader.PartSize</code> to a value big enough that 
 <h1 id="other-languages">Other languages</h1>
 <p>I didn&rsquo;t have lots of time to dig into many other languages SDKs behavior however I did look into the python boto3 library at the time of this writing and found a similar behavior.<br>
 Here is a snippet of the constructor for the <code>TransferConfig</code> class used for S3 uploads</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#66d9ef">def</span> __init__(self,
-                 multipart_threshold<span style="color:#f92672">=</span><span style="color:#ae81ff">8</span> <span style="color:#f92672">*</span> MB,
-                 max_concurrency<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span>,
-                 multipart_chunksize<span style="color:#f92672">=</span><span style="color:#ae81ff">8</span> <span style="color:#f92672">*</span> MB,
-                 num_download_attempts<span style="color:#f92672">=</span><span style="color:#ae81ff">5</span>,
-                 max_io_queue<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>,
-                 io_chunksize<span style="color:#f92672">=</span><span style="color:#ae81ff">256</span> <span style="color:#f92672">*</span> KB,
-                 use_threads<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>):
-        <span style="color:#e6db74">&#34;&#34;&#34;Configuration object for managed S3 transfers
-</span><span style="color:#e6db74">        :param multipart_threshold: The transfer size threshold for which
-</span><span style="color:#e6db74">            multipart uploads, downloads, and copies will automatically be
-</span><span style="color:#e6db74">            triggered.
-</span><span style="color:#e6db74">        :param max_concurrency: The maximum number of threads that will be
-</span><span style="color:#e6db74">            making requests to perform a transfer. If ``use_threads`` is
-</span><span style="color:#e6db74">            set to ``False``, the value provided is ignored as the transfer
-</span><span style="color:#e6db74">            will only ever use the main thread.
-</span><span style="color:#e6db74">        :param multipart_chunksize: The partition size of each part for a
-</span><span style="color:#e6db74">            multipart transfer.
-</span><span style="color:#e6db74">        :param num_download_attempts: The number of download attempts that
-</span><span style="color:#e6db74">            will be retried upon errors with downloading an object in S3.
-</span><span style="color:#e6db74">            Note that these retries account for errors that occur when
-</span><span style="color:#e6db74">            streaming  down the data from s3 (i.e. socket errors and read
-</span><span style="color:#e6db74">            timeouts that occur after receiving an OK response from s3).
-</span><span style="color:#e6db74">            Other retryable exceptions such as throttling errors and 5xx
-</span><span style="color:#e6db74">            errors are already retried by botocore (this default is 5). This
-</span><span style="color:#e6db74">            does not take into account the number of exceptions retried by
-</span><span style="color:#e6db74">            botocore.
-</span><span style="color:#e6db74">        :param max_io_queue: The maximum amount of read parts that can be
-</span><span style="color:#e6db74">            queued in memory to be written for a download. The size of each
-</span><span style="color:#e6db74">            of these read parts is at most the size of ``io_chunksize``.
-</span><span style="color:#e6db74">        :param io_chunksize: The max size of each chunk in the io queue.
-</span><span style="color:#e6db74">            Currently, this is size used when ``read`` is called on the
-</span><span style="color:#e6db74">            downloaded stream as well.
-</span><span style="color:#e6db74">        :param use_threads: If True, threads will be used when performing
-</span><span style="color:#e6db74">            S3 transfers. If False, no threads will be used in
-</span><span style="color:#e6db74">            performing transfers: all logic will be ran in the main thread.
-</span><span style="color:#e6db74">        &#34;&#34;&#34;</span></code></pre></div>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#66d9ef">def</span> __init__(self,
+</span></span><span style="display:flex;"><span>                 multipart_threshold<span style="color:#f92672">=</span><span style="color:#ae81ff">8</span> <span style="color:#f92672">*</span> MB,
+</span></span><span style="display:flex;"><span>                 max_concurrency<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span>,
+</span></span><span style="display:flex;"><span>                 multipart_chunksize<span style="color:#f92672">=</span><span style="color:#ae81ff">8</span> <span style="color:#f92672">*</span> MB,
+</span></span><span style="display:flex;"><span>                 num_download_attempts<span style="color:#f92672">=</span><span style="color:#ae81ff">5</span>,
+</span></span><span style="display:flex;"><span>                 max_io_queue<span style="color:#f92672">=</span><span style="color:#ae81ff">100</span>,
+</span></span><span style="display:flex;"><span>                 io_chunksize<span style="color:#f92672">=</span><span style="color:#ae81ff">256</span> <span style="color:#f92672">*</span> KB,
+</span></span><span style="display:flex;"><span>                 use_threads<span style="color:#f92672">=</span><span style="color:#66d9ef">True</span>):
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;&#34;&#34;Configuration object for managed S3 transfers
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        :param multipart_threshold: The transfer size threshold for which
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            multipart uploads, downloads, and copies will automatically be
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            triggered.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        :param max_concurrency: The maximum number of threads that will be
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            making requests to perform a transfer. If ``use_threads`` is
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            set to ``False``, the value provided is ignored as the transfer
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            will only ever use the main thread.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        :param multipart_chunksize: The partition size of each part for a
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            multipart transfer.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        :param num_download_attempts: The number of download attempts that
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            will be retried upon errors with downloading an object in S3.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            Note that these retries account for errors that occur when
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            streaming  down the data from s3 (i.e. socket errors and read
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            timeouts that occur after receiving an OK response from s3).
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            Other retryable exceptions such as throttling errors and 5xx
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            errors are already retried by botocore (this default is 5). This
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            does not take into account the number of exceptions retried by
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            botocore.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        :param max_io_queue: The maximum amount of read parts that can be
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            queued in memory to be written for a download. The size of each
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            of these read parts is at most the size of ``io_chunksize``.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        :param io_chunksize: The max size of each chunk in the io queue.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            Currently, this is size used when ``read`` is called on the
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            downloaded stream as well.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        :param use_threads: If True, threads will be used when performing
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            S3 transfers. If False, no threads will be used in
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">            performing transfers: all logic will be ran in the main thread.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">        &#34;&#34;&#34;</span></span></span></code></pre></div>
 <p>As we can see the boto3 python lib has similar behavior where it has a <code>multipart_threshold</code> when the file exceeds this size multipart upload will be enabled. And when multipart is enabled and <code>multipart_chunksize</code> size is 8MB.</p>
 <p>I do believe this values are too small for defaults, probably there is a perfect explanation behind the reasoning of this values, but I still think defaults should be bigger as this can incur in lot of costs that probably people are not aware of or don&rsquo;t know why it&rsquo;s happening.</p>
 <h1 id="conclusion">Conclusion</h1>

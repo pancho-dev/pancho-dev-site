@@ -161,38 +161,38 @@ ALL following tests assume we are running the proxy locally in our machine and t
 <h3 id="testing-plain-http">Testing plain http</h3>
 <p>As mentioned the easiest way is to test is plain http, and the reason is that with plain http there is no tls handshake (will explain more later) and just by simple doing the request against the proxy and setting some header will help the routing. For testing we will use <code>curl</code> which is a command line tool easy to use and available in most operating systems.<br>
 There are 2 approaches for http, if the routing is path based like <code>http://proxy/service1</code> or <code>http://proxy/service2</code>, this one is easy as the routing doesn&rsquo;t depend on the hostname so we can use <code>localhost</code> or <code>127.0.0.1</code> as the proxy address.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># PATH BASED ROUTING</span>
-
-<span style="color:#75715e"># To test routing to service 1</span>
-$ curl -v http://localhost/service1
-
-<span style="color:#75715e"># To test routing to service 2</span>
-$ curl -v http://localhost/service2
-</code></pre></div><p>But if the routing at the proxy is based on hostname either then <code>localhost</code> or <code>127.0.0.1</code> won&rsquo;t work, because in the http request the <code>Host</code> header will be set to localhost or 127.0.0.1 then the proxy won&rsquo;t know where to route the request to, or will route the request to the default backend, but that depends on how the proxy configuration was set up. To actually help routing based on host we will need to tell curl to override the host header.<br>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># PATH BASED ROUTING</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># To test routing to service 1</span>
+</span></span><span style="display:flex;"><span>$ curl -v http://localhost/service1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># To test routing to service 2</span>
+</span></span><span style="display:flex;"><span>$ curl -v http://localhost/service2
+</span></span></code></pre></div><p>But if the routing at the proxy is based on hostname either then <code>localhost</code> or <code>127.0.0.1</code> won&rsquo;t work, because in the http request the <code>Host</code> header will be set to localhost or 127.0.0.1 then the proxy won&rsquo;t know where to route the request to, or will route the request to the default backend, but that depends on how the proxy configuration was set up. To actually help routing based on host we will need to tell curl to override the host header.<br>
 Now lets imagine I have service1.example.com and service2.example.com configured in the reverse proxy that need to be routed to the proper service, this time we would still use the localhost address for the proxy but overriding the <code>Host</code> header.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># HOST BASED ROUTING</span>
-
-<span style="color:#75715e"># To test routing to service 1</span>
-$ curl -v -H <span style="color:#e6db74">&#34;Host: service1.example.com&#34;</span> http://localhost/
-
-<span style="color:#75715e"># To test routing to service 2</span>
-$ curl -v -H <span style="color:#e6db74">&#34;Host: service2.example.com&#34;</span> http://localhost/
-</code></pre></div><p>Both path and host based routing can be combined, but if there is a host based config we will always have to set the <code>Host</code> header so the proxy knows what is the host part of the request.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># HOST AND PATH BASED ROUTING</span>
-
-<span style="color:#75715e"># To test routing to service 1 on path1</span>
-$ curl -v -H <span style="color:#e6db74">&#34;Host: service1.example.com&#34;</span> http://localhost/path1
-
-<span style="color:#75715e"># To test routing to service 1 on path2</span>
-$ curl -v -H <span style="color:#e6db74">&#34;Host: service1.example.com&#34;</span> http://localhost/path2
-
-
-<span style="color:#75715e"># To test routing to service 2 on path1</span>
-$ curl -v -H <span style="color:#e6db74">&#34;Host: service2.example.com&#34;</span> http://localhost/path1
-
-<span style="color:#75715e"># To test routing to service 2 on path2</span>
-$ curl -v -H <span style="color:#e6db74">&#34;Host: service2.example.com&#34;</span> http://localhost/path2
-</code></pre></div><p>This last one both service1 and service2 can implement the same paths as the proxy will know how to route them based on the <code>Host</code> header of the http request.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># HOST BASED ROUTING</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># To test routing to service 1</span>
+</span></span><span style="display:flex;"><span>$ curl -v -H <span style="color:#e6db74">&#34;Host: service1.example.com&#34;</span> http://localhost/
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># To test routing to service 2</span>
+</span></span><span style="display:flex;"><span>$ curl -v -H <span style="color:#e6db74">&#34;Host: service2.example.com&#34;</span> http://localhost/
+</span></span></code></pre></div><p>Both path and host based routing can be combined, but if there is a host based config we will always have to set the <code>Host</code> header so the proxy knows what is the host part of the request.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># HOST AND PATH BASED ROUTING</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># To test routing to service 1 on path1</span>
+</span></span><span style="display:flex;"><span>$ curl -v -H <span style="color:#e6db74">&#34;Host: service1.example.com&#34;</span> http://localhost/path1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># To test routing to service 1 on path2</span>
+</span></span><span style="display:flex;"><span>$ curl -v -H <span style="color:#e6db74">&#34;Host: service1.example.com&#34;</span> http://localhost/path2
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># To test routing to service 2 on path1</span>
+</span></span><span style="display:flex;"><span>$ curl -v -H <span style="color:#e6db74">&#34;Host: service2.example.com&#34;</span> http://localhost/path1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># To test routing to service 2 on path2</span>
+</span></span><span style="display:flex;"><span>$ curl -v -H <span style="color:#e6db74">&#34;Host: service2.example.com&#34;</span> http://localhost/path2
+</span></span></code></pre></div><p>This last one both service1 and service2 can implement the same paths as the proxy will know how to route them based on the <code>Host</code> header of the http request.</p>
 <h3 id="testing-with-https">Testing with https</h3>
 <p>When adding https into the equation things get a bit more complex, however they are easy to test using curl, but we need to know the differences to properly test https targets in a reverse proxy.<br>
 The primary problem with https is that the tls/ssl handshake happens before any http packets are exchanged, and since the <code>Host</code> header comes in the http request, then when establishing the https connection the proxy won&rsquo;t know what is the host, this is when SNI (Server Name Indication) comes to play, it&rsquo;s an extension for the tls protocol to be able to serve multiple domains on tls under the same IP and still provide the correct certificates to the right domain names.<br>
@@ -200,38 +200,38 @@ In order to do so we need to &ldquo;fake&rdquo; the dns resolution to the localh
 Other problem to test locally with https, is that certificates are bound to the dns name, even if using a wildcard certificate the request need to be done to the right domain otherwise it will not work and error saying a domain name miss-match, we can workaround the issue by using the <code>-k</code> flag in curl which won&rsquo;t verify the domain cert and authenticity but, since we are testing end to end I don&rsquo;t recommend to use it in this particular case, specially if the proxy change was to modify the certs.<br>
 This use case problem comes to play when the proxy is terminating https, there might be some other things to consider if the proxy is doing passthrough of https (normally a.k.a running in tcp mode), this last mode has some other things to consider when it comes to the proxy config and the routing configuration that are outside of the scope of this post. But testing the proxy behavior should be the same for both use cases as the client side will pretty much look the same.<br>
 So basically the easiest way to test with curl is to fake the dns resolution which can be done in recent versions of curl with the <code>--resolve</code> flag. Again lets consider 2 services service1 and service2, I will show both path based routing and host based is pretty much the same way with https.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># PATH BASED ROUTING on HTTPS</span>
-
-<span style="color:#75715e"># To test routing to service 1</span>
-$ curl -v --resolve example.com:443:127.0.0.1 https://example.com/service1
-
-<span style="color:#75715e"># To test routing to service 2</span>
-$ curl -v --resolve example.com:443:127.0.0.1 https://example.com/service2
-</code></pre></div><p>The <code>--resolve</code> flag expects 3 args separated by colons, full hostname, port, and ip address (in this case the localhost address 127.0.0.1). Since we are faking the dns resolution to our localhost, now we can use the same address as we would use in staging or production, and the request will look similar and domains will match in the request making the ssl certificates and routing based on SNI work as expected in the proxy.<br>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># PATH BASED ROUTING on HTTPS</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># To test routing to service 1</span>
+</span></span><span style="display:flex;"><span>$ curl -v --resolve example.com:443:127.0.0.1 https://example.com/service1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># To test routing to service 2</span>
+</span></span><span style="display:flex;"><span>$ curl -v --resolve example.com:443:127.0.0.1 https://example.com/service2
+</span></span></code></pre></div><p>The <code>--resolve</code> flag expects 3 args separated by colons, full hostname, port, and ip address (in this case the localhost address 127.0.0.1). Since we are faking the dns resolution to our localhost, now we can use the same address as we would use in staging or production, and the request will look similar and domains will match in the request making the ssl certificates and routing based on SNI work as expected in the proxy.<br>
 Let&rsquo;s look at host based routing with https.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># HOST BASED ROUTING on HTTPS</span>
-
-<span style="color:#75715e"># To test routing to service 1</span>
-$ curl -v --resolve service1.example.com:443:127.0.0.1 https://service1.example.com/
-
-<span style="color:#75715e"># To test routing to service 2</span>
-$ curl -v --resolve service2.example.com:443:127.0.0.1 https://service2.example.com/
-</code></pre></div><p>And also the same approach can be used with https using host and path routing</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># HOST and PATH BASED ROUTING on HTTPS</span>
-
-<span style="color:#75715e"># To test routing to service 1 and path 1</span>
-$ curl -v --resolve service1.example.com:443:127.0.0.1 https://service1.example.com/path1
-
-<span style="color:#75715e"># To test routing to service 1 and path 2</span>
-$ curl -v --resolve service1.example.com:443:127.0.0.1 https://service1.example.com/path2
-
-
-<span style="color:#75715e"># To test routing to service 2 and path 1</span>
-$ curl -v --resolve service2.example.com:443:127.0.0.1 https://service2.example.com/path1
-
-<span style="color:#75715e"># To test routing to service 2 and path 2</span>
-$ curl -v --resolve service2.example.com:443:127.0.0.1 https://service2.example.com/path2
-</code></pre></div><p>Nota as this last use case, for https and http path1 and path2 could be also different backends but that depends on the proxy configuration.<br>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># HOST BASED ROUTING on HTTPS</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># To test routing to service 1</span>
+</span></span><span style="display:flex;"><span>$ curl -v --resolve service1.example.com:443:127.0.0.1 https://service1.example.com/
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># To test routing to service 2</span>
+</span></span><span style="display:flex;"><span>$ curl -v --resolve service2.example.com:443:127.0.0.1 https://service2.example.com/
+</span></span></code></pre></div><p>And also the same approach can be used with https using host and path routing</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># HOST and PATH BASED ROUTING on HTTPS</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># To test routing to service 1 and path 1</span>
+</span></span><span style="display:flex;"><span>$ curl -v --resolve service1.example.com:443:127.0.0.1 https://service1.example.com/path1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># To test routing to service 1 and path 2</span>
+</span></span><span style="display:flex;"><span>$ curl -v --resolve service1.example.com:443:127.0.0.1 https://service1.example.com/path2
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># To test routing to service 2 and path 1</span>
+</span></span><span style="display:flex;"><span>$ curl -v --resolve service2.example.com:443:127.0.0.1 https://service2.example.com/path1
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># To test routing to service 2 and path 2</span>
+</span></span><span style="display:flex;"><span>$ curl -v --resolve service2.example.com:443:127.0.0.1 https://service2.example.com/path2
+</span></span></code></pre></div><p>Nota as this last use case, for https and http path1 and path2 could be also different backends but that depends on the proxy configuration.<br>
 Also another good point is that using <code>--resolve</code> flag can work also for http, and if we use this method there is no need to override the <code>Host</code> header as that header will be set to the right value when faking the resolution.<br>
 There are other ways of faking the resolution to localhost like modifying the <code>/etc/hosts</code> file adding the domains we need to test, but using all flags available in curl seems much easier and cleaner.</p>
 <h1 id="conclusion">Conclusion</h1>

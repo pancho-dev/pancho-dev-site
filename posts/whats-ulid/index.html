@@ -154,48 +154,48 @@ So this time I will introduce the <code>ulid</code>. Spoiler alert, it&rsquo;s a
 <h3 id="background">Background</h3>
 <p>I just want to give some background how I came across ulid and why I found it handy to use. I regularly find myself browsing through code from open source projects, even if I am not familiar with the language the projects are written, I always take a peek at the code. I have this obsession to know how things work under the hood, which has helped me to solve many tricky issues operating open source software.<br>
 So one day I was looking at <a href="https://prometheus.io/">Prometheus</a> data folder and I found the following</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">
-<span style="color:#75715e"># Looking at files and folders in the Prometheus data folder</span>
-$ ls -l
-total <span style="color:#ae81ff">84</span>
-drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> May <span style="color:#ae81ff">29</span> 21:00 01E9H3RBHR7NP48DNJJK99SRVN
-drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun  <span style="color:#ae81ff">1</span> 03:00 01E9PX50124DREREKAB8PDASV5
-drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun  <span style="color:#ae81ff">3</span> 09:00 01E9WPHK3Q7Y58K8X49AW5JRQR
-drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun  <span style="color:#ae81ff">5</span> 15:00 01EA2FY7JBZP2D6119TXG3EFWG
-drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun  <span style="color:#ae81ff">7</span> 21:00 01EA89ATAJHX36BMBAVRRG44XF
-drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">10</span> 03:00 01EAE2QEVTWR7Y4EKWEYYXEXP5
-drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">12</span> 09:00 01EAKW3Z3T1N2K0FQWVPTZ5T7T
-drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">14</span> 15:00 01EASNGHSNXG01MGREADK79EY2
-drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">16</span> 21:00 01EAZEX4YK3E0ACSPXETHG953Z
-drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">19</span> 03:00 01EB589TB6X24Q2JWFE5Z2RQWE
-drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">21</span> 09:00 01EBB1PEFAZGT5VG2MWK53ACAK
-drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">23</span> 15:00 01EBGV31HBX0BJGS1WFCWWEA7S
-drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">25</span> 21:00 01EBPMFNV6FQ4299NFMSAQTVWV
-drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">26</span> 15:02 01EBRJE3ABRFZBHET8ZJ34F5VX
-drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">27</span> 09:00 01EBTG2M659D94WBXTAZXEYR4C
-drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">27</span> 15:00 01EBV4NRBW7WXBFHSQ2DZ3EPSZ
-drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">27</span> 15:00 01EBV4NSMXJ3SRJ6J38Z4J7CAZ
-drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">27</span> 17:00 01EBVBHFM05VRE1B3QXGDTNE8B
-drwxr-xr-x <span style="color:#ae81ff">2</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">27</span> 17:00 chunks_head
--rw-r--r-- <span style="color:#ae81ff">1</span> nobody nogroup     <span style="color:#ae81ff">0</span> Apr <span style="color:#ae81ff">10</span> 22:17 lock
--rw-r--r-- <span style="color:#ae81ff">1</span> nobody nogroup <span style="color:#ae81ff">20001</span> Jun <span style="color:#ae81ff">26</span> 14:28 queries.active
-drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">27</span> 17:00 wal
-
-<span style="color:#75715e"># Then looking into one of this weird folders. It is where the </span>
-<span style="color:#75715e"># tsdb (time series database) structure is stored.</span>
-$ ls -lh 01EBVBHFM05VRE1B3QXGDTNE8B
-total 860K
-drwxr-xr-x <span style="color:#ae81ff">2</span> nobody nogroup 4.0K Jun <span style="color:#ae81ff">27</span> 17:00 chunks
--rw-r--r-- <span style="color:#ae81ff">1</span> nobody nogroup 845K Jun <span style="color:#ae81ff">27</span> 17:00 index
--rw-r--r-- <span style="color:#ae81ff">1</span> nobody nogroup  <span style="color:#ae81ff">279</span> Jun <span style="color:#ae81ff">27</span> 17:00 meta.json
--rw-r--r-- <span style="color:#ae81ff">1</span> nobody nogroup    <span style="color:#ae81ff">9</span> Jun <span style="color:#ae81ff">27</span> 17:00 tombstones
-</code></pre></div><p>Ever since I looked into that folder I wondered about the logic behind the design. Then some day I was looking thought the Prometheus code and I came across the term ulid. Off course I quickly googled the term and found out what it was, then the whole directory structure stated to make sense. I won&rsquo;t get into details of that as it is a subject matter that probably could get 2 or 3 blog posts itself. But I will get into details what ulid are and it might give developers some perspective to solve some problems in a clever way like Prometheus developers did.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Looking at files and folders in the Prometheus data folder</span>
+</span></span><span style="display:flex;"><span>$ ls -l
+</span></span><span style="display:flex;"><span>total <span style="color:#ae81ff">84</span>
+</span></span><span style="display:flex;"><span>drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> May <span style="color:#ae81ff">29</span> 21:00 01E9H3RBHR7NP48DNJJK99SRVN
+</span></span><span style="display:flex;"><span>drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun  <span style="color:#ae81ff">1</span> 03:00 01E9PX50124DREREKAB8PDASV5
+</span></span><span style="display:flex;"><span>drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun  <span style="color:#ae81ff">3</span> 09:00 01E9WPHK3Q7Y58K8X49AW5JRQR
+</span></span><span style="display:flex;"><span>drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun  <span style="color:#ae81ff">5</span> 15:00 01EA2FY7JBZP2D6119TXG3EFWG
+</span></span><span style="display:flex;"><span>drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun  <span style="color:#ae81ff">7</span> 21:00 01EA89ATAJHX36BMBAVRRG44XF
+</span></span><span style="display:flex;"><span>drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">10</span> 03:00 01EAE2QEVTWR7Y4EKWEYYXEXP5
+</span></span><span style="display:flex;"><span>drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">12</span> 09:00 01EAKW3Z3T1N2K0FQWVPTZ5T7T
+</span></span><span style="display:flex;"><span>drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">14</span> 15:00 01EASNGHSNXG01MGREADK79EY2
+</span></span><span style="display:flex;"><span>drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">16</span> 21:00 01EAZEX4YK3E0ACSPXETHG953Z
+</span></span><span style="display:flex;"><span>drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">19</span> 03:00 01EB589TB6X24Q2JWFE5Z2RQWE
+</span></span><span style="display:flex;"><span>drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">21</span> 09:00 01EBB1PEFAZGT5VG2MWK53ACAK
+</span></span><span style="display:flex;"><span>drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">23</span> 15:00 01EBGV31HBX0BJGS1WFCWWEA7S
+</span></span><span style="display:flex;"><span>drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">25</span> 21:00 01EBPMFNV6FQ4299NFMSAQTVWV
+</span></span><span style="display:flex;"><span>drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">26</span> 15:02 01EBRJE3ABRFZBHET8ZJ34F5VX
+</span></span><span style="display:flex;"><span>drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">27</span> 09:00 01EBTG2M659D94WBXTAZXEYR4C
+</span></span><span style="display:flex;"><span>drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">27</span> 15:00 01EBV4NRBW7WXBFHSQ2DZ3EPSZ
+</span></span><span style="display:flex;"><span>drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">27</span> 15:00 01EBV4NSMXJ3SRJ6J38Z4J7CAZ
+</span></span><span style="display:flex;"><span>drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">27</span> 17:00 01EBVBHFM05VRE1B3QXGDTNE8B
+</span></span><span style="display:flex;"><span>drwxr-xr-x <span style="color:#ae81ff">2</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">27</span> 17:00 chunks_head
+</span></span><span style="display:flex;"><span>-rw-r--r-- <span style="color:#ae81ff">1</span> nobody nogroup     <span style="color:#ae81ff">0</span> Apr <span style="color:#ae81ff">10</span> 22:17 lock
+</span></span><span style="display:flex;"><span>-rw-r--r-- <span style="color:#ae81ff">1</span> nobody nogroup <span style="color:#ae81ff">20001</span> Jun <span style="color:#ae81ff">26</span> 14:28 queries.active
+</span></span><span style="display:flex;"><span>drwxr-xr-x <span style="color:#ae81ff">3</span> nobody nogroup  <span style="color:#ae81ff">4096</span> Jun <span style="color:#ae81ff">27</span> 17:00 wal
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Then looking into one of this weird folders. It is where the </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># tsdb (time series database) structure is stored.</span>
+</span></span><span style="display:flex;"><span>$ ls -lh 01EBVBHFM05VRE1B3QXGDTNE8B
+</span></span><span style="display:flex;"><span>total 860K
+</span></span><span style="display:flex;"><span>drwxr-xr-x <span style="color:#ae81ff">2</span> nobody nogroup 4.0K Jun <span style="color:#ae81ff">27</span> 17:00 chunks
+</span></span><span style="display:flex;"><span>-rw-r--r-- <span style="color:#ae81ff">1</span> nobody nogroup 845K Jun <span style="color:#ae81ff">27</span> 17:00 index
+</span></span><span style="display:flex;"><span>-rw-r--r-- <span style="color:#ae81ff">1</span> nobody nogroup  <span style="color:#ae81ff">279</span> Jun <span style="color:#ae81ff">27</span> 17:00 meta.json
+</span></span><span style="display:flex;"><span>-rw-r--r-- <span style="color:#ae81ff">1</span> nobody nogroup    <span style="color:#ae81ff">9</span> Jun <span style="color:#ae81ff">27</span> 17:00 tombstones
+</span></span></code></pre></div><p>Ever since I looked into that folder I wondered about the logic behind the design. Then some day I was looking thought the Prometheus code and I came across the term ulid. Off course I quickly googled the term and found out what it was, then the whole directory structure stated to make sense. I won&rsquo;t get into details of that as it is a subject matter that probably could get 2 or 3 blog posts itself. But I will get into details what ulid are and it might give developers some perspective to solve some problems in a clever way like Prometheus developers did.</p>
 <h1 id="what-is-it-then">What is it then?</h1>
 <p>The term is ulid and it&rsquo;s long name is <code>Universally Unique Lexicographically Sortable Identifier</code>. <a href="https://github.com/ulid/spec">ulid spec</a> is hosted in GitHub if you would like to know more in details.<br>
 But in plain words it is a 128 bit ID, represented in a string using <a href="https://en.wikipedia.org/wiki/Base32#Crockford's_Base32">Crockford&rsquo;s Base32 encoding</a>.<br>
 It is composed by a timestamp which is the fist 48bits and a sequence of random 80 bits giving a 26 character string.<br>
 We can see how the representation is split</p>
-<pre><code> 01AN4Z07BY      79KA1307SR9X4MV3
+<pre tabindex="0"><code> 01AN4Z07BY      79KA1307SR9X4MV3
 
 |----------|    |----------------|
  Timestamp          Randomness
@@ -238,63 +238,63 @@ Some examples:</p>
 <p>I wanted to point out a use case that catches my attention and probably would have saved some problems with race conditions when sending messages in an async messaging platform and still have events that need to be ordered. In an distributed system sending messages/events to other systems and attaching a ulid to the message would help prevent or detect race conditions, it won&rsquo;t guarantee that my messages arrived in order but at least I would know that I got a message older than a message that I already received. Helping detect and remediate the situation that might have generated a race condition. Well this is not a bulletproof approach but would helped to detect some of this situations.</p>
 <h4 id="example">Example</h4>
 <p>As an example I would show how to generate a ulid in python but other languages should be pretty similar. The example I used <code>python-ulid</code> and <code>iPython</code> interpreter.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">Python <span style="color:#ae81ff">3.7.5</span> (default, Nov  <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">2019</span>, <span style="color:#ae81ff">02</span>:<span style="color:#ae81ff">16</span>:<span style="color:#ae81ff">32</span>)
-Type <span style="color:#e6db74">&#39;copyright&#39;</span>, <span style="color:#e6db74">&#39;credits&#39;</span> <span style="color:#f92672">or</span> <span style="color:#e6db74">&#39;license&#39;</span> <span style="color:#66d9ef">for</span> more information
-IPython <span style="color:#ae81ff">7.16.1</span> <span style="color:#f92672">--</span> An enhanced Interactive Python<span style="color:#f92672">.</span> Type <span style="color:#e6db74">&#39;?&#39;</span> <span style="color:#66d9ef">for</span> help<span style="color:#f92672">.</span>
-
-In [<span style="color:#ae81ff">1</span>]: <span style="color:#f92672">from</span> ulid <span style="color:#f92672">import</span> ULID
-
-In [<span style="color:#ae81ff">2</span>]: ULID()
-Out[<span style="color:#ae81ff">2</span>]: ULID(<span style="color:#ae81ff">01</span>EBVTVMGED7CVDDE8A0JDTQKZ)
-
-In [<span style="color:#ae81ff">3</span>]: ULID()
-Out[<span style="color:#ae81ff">3</span>]: ULID(<span style="color:#ae81ff">01</span>EBVTVP8HHF971ZMB2RQFQW8W)
-
-In [<span style="color:#ae81ff">4</span>]: ULID()
-Out[<span style="color:#ae81ff">4</span>]: ULID(<span style="color:#ae81ff">01</span>EBVTVQQ6K47WC9ZN9F3T6EBZ)
-</code></pre></div><p>As we can see the values generated where sortable in time.<br>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>Python <span style="color:#ae81ff">3.7.5</span> (default, Nov  <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">2019</span>, <span style="color:#ae81ff">02</span>:<span style="color:#ae81ff">16</span>:<span style="color:#ae81ff">32</span>)
+</span></span><span style="display:flex;"><span>Type <span style="color:#e6db74">&#39;copyright&#39;</span>, <span style="color:#e6db74">&#39;credits&#39;</span> <span style="color:#f92672">or</span> <span style="color:#e6db74">&#39;license&#39;</span> <span style="color:#66d9ef">for</span> more information
+</span></span><span style="display:flex;"><span>IPython <span style="color:#ae81ff">7.16.1</span> <span style="color:#f92672">--</span> An enhanced Interactive Python<span style="color:#f92672">.</span> Type <span style="color:#e6db74">&#39;?&#39;</span> <span style="color:#66d9ef">for</span> help<span style="color:#f92672">.</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#ae81ff">1</span>]: <span style="color:#f92672">from</span> ulid <span style="color:#f92672">import</span> ULID
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#ae81ff">2</span>]: ULID()
+</span></span><span style="display:flex;"><span>Out[<span style="color:#ae81ff">2</span>]: ULID(<span style="color:#ae81ff">01</span>EBVTVMGED7CVDDE8A0JDTQKZ)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#ae81ff">3</span>]: ULID()
+</span></span><span style="display:flex;"><span>Out[<span style="color:#ae81ff">3</span>]: ULID(<span style="color:#ae81ff">01</span>EBVTVP8HHF971ZMB2RQFQW8W)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#ae81ff">4</span>]: ULID()
+</span></span><span style="display:flex;"><span>Out[<span style="color:#ae81ff">4</span>]: ULID(<span style="color:#ae81ff">01</span>EBVTVQQ6K47WC9ZN9F3T6EBZ)
+</span></span></code></pre></div><p>As we can see the values generated where sortable in time.<br>
 Now we can generate a ulid and extract the timestamp from it</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">Python <span style="color:#ae81ff">3.7.5</span> (default, Nov  <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">2019</span>, <span style="color:#ae81ff">02</span>:<span style="color:#ae81ff">16</span>:<span style="color:#ae81ff">32</span>)
-Type <span style="color:#e6db74">&#39;copyright&#39;</span>, <span style="color:#e6db74">&#39;credits&#39;</span> <span style="color:#f92672">or</span> <span style="color:#e6db74">&#39;license&#39;</span> <span style="color:#66d9ef">for</span> more information
-IPython <span style="color:#ae81ff">7.16.1</span> <span style="color:#f92672">--</span> An enhanced Interactive Python<span style="color:#f92672">.</span> Type <span style="color:#e6db74">&#39;?&#39;</span> <span style="color:#66d9ef">for</span> help<span style="color:#f92672">.</span>
-
-In [<span style="color:#ae81ff">1</span>]: <span style="color:#f92672">from</span> ulid <span style="color:#f92672">import</span> ULID
-
-In [<span style="color:#ae81ff">2</span>]: ulid <span style="color:#f92672">=</span> ULID()
-
-In [<span style="color:#ae81ff">3</span>]: ulid<span style="color:#f92672">.</span>timestamp
-Out[<span style="color:#ae81ff">3</span>]: <span style="color:#ae81ff">1593293283.947</span>
-
-In [<span style="color:#ae81ff">4</span>]: ulid<span style="color:#f92672">.</span>milliseconds
-Out[<span style="color:#ae81ff">4</span>]: <span style="color:#ae81ff">1593293283947</span>
-
-In [<span style="color:#ae81ff">5</span>]: ulid<span style="color:#f92672">.</span>datetime
-Out[<span style="color:#ae81ff">5</span>]: datetime<span style="color:#f92672">.</span>datetime(<span style="color:#ae81ff">2020</span>, <span style="color:#ae81ff">6</span>, <span style="color:#ae81ff">27</span>, <span style="color:#ae81ff">21</span>, <span style="color:#ae81ff">28</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">947000</span>, tzinfo<span style="color:#f92672">=</span>datetime<span style="color:#f92672">.</span>timezone<span style="color:#f92672">.</span>utc)
-</code></pre></div><p>And at last, I will show how easy is to swap from ulid to UUID, and UUID to ulid.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">Python <span style="color:#ae81ff">3.7.5</span> (default, Nov  <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">2019</span>, <span style="color:#ae81ff">02</span>:<span style="color:#ae81ff">16</span>:<span style="color:#ae81ff">32</span>)
-Type <span style="color:#e6db74">&#39;copyright&#39;</span>, <span style="color:#e6db74">&#39;credits&#39;</span> <span style="color:#f92672">or</span> <span style="color:#e6db74">&#39;license&#39;</span> <span style="color:#66d9ef">for</span> more information
-IPython <span style="color:#ae81ff">7.16.1</span> <span style="color:#f92672">--</span> An enhanced Interactive Python<span style="color:#f92672">.</span> Type <span style="color:#e6db74">&#39;?&#39;</span> <span style="color:#66d9ef">for</span> help<span style="color:#f92672">.</span>
-
-In [<span style="color:#ae81ff">1</span>]: <span style="color:#f92672">from</span> ulid <span style="color:#f92672">import</span> ULID
-
-In [<span style="color:#ae81ff">2</span>]: uuid <span style="color:#f92672">=</span> ulid<span style="color:#f92672">.</span>to_uuid()
-
-In [<span style="color:#ae81ff">3</span>]: ulid<span style="color:#f92672">.</span>from_uuid(uuid)
-Out[<span style="color:#ae81ff">3</span>]: ULID(<span style="color:#ae81ff">01</span>EBVTW8KB5CWRHV0Q2BY5WSQA)
-
-In [<span style="color:#ae81ff">4</span>]: ulid <span style="color:#f92672">=</span> ULID()
-
-In [<span style="color:#ae81ff">5</span>]: ulid
-Out[<span style="color:#ae81ff">5</span>]: ULID(<span style="color:#ae81ff">01</span>EBVV37GHRTGN0PKZ0VBS3SPM)
-
-In [<span style="color:#ae81ff">6</span>]: ulid<span style="color:#f92672">.</span>to_uuid()
-Out[<span style="color:#ae81ff">6</span>]: UUID(<span style="color:#e6db74">&#39;0172f7b1-9e11-c6a1-505a-7f06d791e6d4&#39;</span>)
-
-In [<span style="color:#ae81ff">7</span>]:  uuid <span style="color:#f92672">=</span> ulid<span style="color:#f92672">.</span>to_uuid()
-
-In [<span style="color:#ae81ff">8</span>]: ulid<span style="color:#f92672">.</span>from_uuid(uuid)
-Out[<span style="color:#ae81ff">8</span>]: ULID(<span style="color:#ae81ff">01</span>EBVV37GHRTGN0PKZ0VBS3SPM)
-</code></pre></div><h1 id="conclusion">Conclusion</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>Python <span style="color:#ae81ff">3.7.5</span> (default, Nov  <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">2019</span>, <span style="color:#ae81ff">02</span>:<span style="color:#ae81ff">16</span>:<span style="color:#ae81ff">32</span>)
+</span></span><span style="display:flex;"><span>Type <span style="color:#e6db74">&#39;copyright&#39;</span>, <span style="color:#e6db74">&#39;credits&#39;</span> <span style="color:#f92672">or</span> <span style="color:#e6db74">&#39;license&#39;</span> <span style="color:#66d9ef">for</span> more information
+</span></span><span style="display:flex;"><span>IPython <span style="color:#ae81ff">7.16.1</span> <span style="color:#f92672">--</span> An enhanced Interactive Python<span style="color:#f92672">.</span> Type <span style="color:#e6db74">&#39;?&#39;</span> <span style="color:#66d9ef">for</span> help<span style="color:#f92672">.</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#ae81ff">1</span>]: <span style="color:#f92672">from</span> ulid <span style="color:#f92672">import</span> ULID
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#ae81ff">2</span>]: ulid <span style="color:#f92672">=</span> ULID()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#ae81ff">3</span>]: ulid<span style="color:#f92672">.</span>timestamp
+</span></span><span style="display:flex;"><span>Out[<span style="color:#ae81ff">3</span>]: <span style="color:#ae81ff">1593293283.947</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#ae81ff">4</span>]: ulid<span style="color:#f92672">.</span>milliseconds
+</span></span><span style="display:flex;"><span>Out[<span style="color:#ae81ff">4</span>]: <span style="color:#ae81ff">1593293283947</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#ae81ff">5</span>]: ulid<span style="color:#f92672">.</span>datetime
+</span></span><span style="display:flex;"><span>Out[<span style="color:#ae81ff">5</span>]: datetime<span style="color:#f92672">.</span>datetime(<span style="color:#ae81ff">2020</span>, <span style="color:#ae81ff">6</span>, <span style="color:#ae81ff">27</span>, <span style="color:#ae81ff">21</span>, <span style="color:#ae81ff">28</span>, <span style="color:#ae81ff">3</span>, <span style="color:#ae81ff">947000</span>, tzinfo<span style="color:#f92672">=</span>datetime<span style="color:#f92672">.</span>timezone<span style="color:#f92672">.</span>utc)
+</span></span></code></pre></div><p>And at last, I will show how easy is to swap from ulid to UUID, and UUID to ulid.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>Python <span style="color:#ae81ff">3.7.5</span> (default, Nov  <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">2019</span>, <span style="color:#ae81ff">02</span>:<span style="color:#ae81ff">16</span>:<span style="color:#ae81ff">32</span>)
+</span></span><span style="display:flex;"><span>Type <span style="color:#e6db74">&#39;copyright&#39;</span>, <span style="color:#e6db74">&#39;credits&#39;</span> <span style="color:#f92672">or</span> <span style="color:#e6db74">&#39;license&#39;</span> <span style="color:#66d9ef">for</span> more information
+</span></span><span style="display:flex;"><span>IPython <span style="color:#ae81ff">7.16.1</span> <span style="color:#f92672">--</span> An enhanced Interactive Python<span style="color:#f92672">.</span> Type <span style="color:#e6db74">&#39;?&#39;</span> <span style="color:#66d9ef">for</span> help<span style="color:#f92672">.</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#ae81ff">1</span>]: <span style="color:#f92672">from</span> ulid <span style="color:#f92672">import</span> ULID
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#ae81ff">2</span>]: uuid <span style="color:#f92672">=</span> ulid<span style="color:#f92672">.</span>to_uuid()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#ae81ff">3</span>]: ulid<span style="color:#f92672">.</span>from_uuid(uuid)
+</span></span><span style="display:flex;"><span>Out[<span style="color:#ae81ff">3</span>]: ULID(<span style="color:#ae81ff">01</span>EBVTW8KB5CWRHV0Q2BY5WSQA)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#ae81ff">4</span>]: ulid <span style="color:#f92672">=</span> ULID()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#ae81ff">5</span>]: ulid
+</span></span><span style="display:flex;"><span>Out[<span style="color:#ae81ff">5</span>]: ULID(<span style="color:#ae81ff">01</span>EBVV37GHRTGN0PKZ0VBS3SPM)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#ae81ff">6</span>]: ulid<span style="color:#f92672">.</span>to_uuid()
+</span></span><span style="display:flex;"><span>Out[<span style="color:#ae81ff">6</span>]: UUID(<span style="color:#e6db74">&#39;0172f7b1-9e11-c6a1-505a-7f06d791e6d4&#39;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#ae81ff">7</span>]:  uuid <span style="color:#f92672">=</span> ulid<span style="color:#f92672">.</span>to_uuid()
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>In [<span style="color:#ae81ff">8</span>]: ulid<span style="color:#f92672">.</span>from_uuid(uuid)
+</span></span><span style="display:flex;"><span>Out[<span style="color:#ae81ff">8</span>]: ULID(<span style="color:#ae81ff">01</span>EBVV37GHRTGN0PKZ0VBS3SPM)
+</span></span></code></pre></div><h1 id="conclusion">Conclusion</h1>
 <p>With this post I wanted to share something I learnt by digging how things work under the hood, and I wanted to share it because this might give other developers more tricks to solve issues in a different way or make their implementations much easier or simpler.<br>
 I know ulid won&rsquo;t replace UUIDs because of the fact that both probably compliment each other and one covers use cases the other doesn&rsquo;t. As I mentioned a few times already it would depend on the use cases. I would still use UUIDs when I need them to be completely random and being random is a must or need. But I would use ulid when the use case is not sensitive to having the timestamp embedded in the ID, then I would choose to generate them with ulid generator, you never know when it would be useful, and if the ulid was generated and then stored as UUID you can always recover the timestamp from the UUID if you stored it as UUID. Since they are compatible there would be some benefits to generating the UUID from a ulid generator and  convert to UUID.<br>
 And as I already mentioned I would definitely use it for use cases where we need some object ID ordered in time or sortable, when we need to also the timestamp of an event I would also choose the ulid.</p>

@@ -153,28 +153,28 @@ if (!doNotTrack) {
 <h1 id="how-to-save-a-docker-image-for-reuse-in-other-host">How to save a docker image for reuse in other host?</h1>
 <p>There is a handy command that helps save a docker image that is already in the system or already built, there are situations where builds take a long time and building the images in multiple hosts is time consuming, so we can save the image and copy it to other host and import it for reuse.<br>
 To save a docker image:</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Pull an ubuntu image, just for demo purpose but it can be any image</span>
-$ sudo docker pull ubuntu
-
-<span style="color:#75715e"># Then save the image to a tar.gz file.</span>
-<span style="color:#75715e"># once finished this file can be moved to other</span>
-<span style="color:#75715e"># host running docker or backed up if we </span>
-<span style="color:#75715e"># don&#39;t have a registry</span>
-$ sudo docker save ubuntu | gzip &gt; test.tar.gz
-</code></pre></div><h1 id="how-to-restore-an-image">How to restore an image?</h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Pull an ubuntu image, just for demo purpose but it can be any image</span>
+</span></span><span style="display:flex;"><span>$ sudo docker pull ubuntu
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Then save the image to a tar.gz file.</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># once finished this file can be moved to other</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># host running docker or backed up if we </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># don&#39;t have a registry</span>
+</span></span><span style="display:flex;"><span>$ sudo docker save ubuntu | gzip &gt; test.tar.gz
+</span></span></code></pre></div><h1 id="how-to-restore-an-image">How to restore an image?</h1>
 <p>Once we saved the image as tar.gz then it&rsquo;s easy to copy by scp or other means, and restore the same image there for future use.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e"># Load the file that was created with save</span>
-$ sudo gzcat test.tar.gz | sudo docker load
-</code></pre></div><p>This will restore the image in a new host or from a backup.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Load the file that was created with save</span>
+</span></span><span style="display:flex;"><span>$ sudo gzcat test.tar.gz | sudo docker load
+</span></span></code></pre></div><p>This will restore the image in a new host or from a backup.</p>
 <h1 id="bonus-track">Bonus Track</h1>
 <p>There are other commands that can be useful to export and import containers instead of images. While <code>docker save</code> and <code>docker load</code> are used to handle and copy container images. There might be times where we need to copy a container, it can be a container instance that has some data or modifications in it and we want to move it somewhere else. IMPORTANT: always differentiate both use cases as one is for images and other is for container.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">
-<span style="color:#75715e"># Create a copy of a container in tar-gz file</span>
-$ sudo docker export testcontainer | gzip &gt; testcontainer.tar.gz
-
-<span style="color:#75715e"># Restore a copy of a container as an image</span>
-$ sudo gzcat testcontainer.tar.gz | sudo docker import - testimage:new
-</code></pre></div><p>This last example restores the backup of a container as an image not the container itself. So in this case the import will create a new image named <code>testimage:new</code> that will that will have all changes that testcontainer had, however the new container needs to be started with the new image in order for full restore.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Create a copy of a container in tar-gz file</span>
+</span></span><span style="display:flex;"><span>$ sudo docker export testcontainer | gzip &gt; testcontainer.tar.gz
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Restore a copy of a container as an image</span>
+</span></span><span style="display:flex;"><span>$ sudo gzcat testcontainer.tar.gz | sudo docker import - testimage:new
+</span></span></code></pre></div><p>This last example restores the backup of a container as an image not the container itself. So in this case the import will create a new image named <code>testimage:new</code> that will that will have all changes that testcontainer had, however the new container needs to be started with the new image in order for full restore.</p>
 <h1 id="conclusion">Conclusion</h1>
 <p>I found this docker commands very handy when developing container and copying images from server to server without the need of a registry. It is something I use a lot at home for images I build and keep them locally, but I recommend using a private or public registry to keep your images, it simplifies the managing of container images, but we can&rsquo;t always have the infrastructure we need so this commands come very handy.<br>
 I really care about being able to save and copy images as they are software artifacts and they need to be properly managed to be reused, I added a bonus track to show how to backup or copy and move a container just to differentiate the 2 operations, however if there is a need to use export it could be an indication that we are not following some recommended practices. This is not a hard &ldquo;no&rdquo; to use export, but in my case I always like to keep images and containers as immutable as possible and leave configurations outside of the container, this helps with reusability and reproducibility of a container, and if there is a need to modify some config inside the container either find a way to configure it with ENV vars or volume mount the config files so the container is easy to reproduce even if we destroy the container completely, this applies to stateful things like databases, always volume mount the data and take backups of that data. Reproducibility and reusability is something I take very serious as the same setup can be reproduced much faster and restore times get lowered, or it can be reused in multiple projects.</p>
