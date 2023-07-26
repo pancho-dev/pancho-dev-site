@@ -8,6 +8,16 @@
     <language>en-us</language>
     <lastBuildDate>Wed, 25 Mar 2020 04:52:30 +0600</lastBuildDate><atom:link href="http://pancho.dev/index.xml" rel="self" type="application/rss+xml" />
     <item>
+      <title>Secrets Manager for Home Lab Automation</title>
+      <link>http://pancho.dev/posts/home-lab-automation-secrets/</link>
+      <pubDate>Tue, 25 Jul 2023 15:19:00 -0300</pubDate>
+      
+      <guid>http://pancho.dev/posts/home-lab-automation-secrets/</guid>
+      <description>One of the problems I found when working with my home lab is that I was lacking a solution for storing secrets. Even though there are open source solutions like Hashicorp vault to manage secrets, and managing it something requires maintenance and I didn&amp;rsquo;t want to have the operational burden.
+I used to manage my password with a KeePass vault file. However that solution fell short when dealing with multiple devices like phones and multiple laptops.</description>
+    </item>
+    
+    <item>
       <title>Working With Open Source Golang Projects</title>
       <link>http://pancho.dev/posts/working-with-golang-projects/</link>
       <pubDate>Fri, 19 Aug 2022 10:27:32 -0300</pubDate>

@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head><title>
+    Secrets Manager for Home Lab Automation | 
+    
+    pancho.dev</title>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="One of the problems I found when working with my home lab is that I was lacking a solution for storing secrets. Even though there are open source solutions like Hashicorp vault to manage secrets, and managing it something requires maintenance and I didn&rsquo;t want to have the operational burden.
+I used to manage my password with a KeePass vault file. However that solution fell short when dealing with multiple devices like phones and multiple laptops.
+    ">
+
+
+<meta property="og:title" content="Secrets Manager for Home Lab Automation" />
+<meta property="og:description" content="One of the problems I found when working with my home lab is that I was lacking a solution for storing secrets. Even though there are open source solutions like Hashicorp vault to manage secrets, and managing it something requires maintenance and I didn&rsquo;t want to have the operational burden.
+I used to manage my password with a KeePass vault file. However that solution fell short when dealing with multiple devices like phones and multiple laptops." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://pancho.dev/posts/home-lab-automation-secrets/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-07-25T15:19:00-03:00" />
+<meta property="article:modified_time" content="2023-07-25T15:19:00-03:00" />
+
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Secrets Manager for Home Lab Automation"/>
+<meta name="twitter:description" content="One of the problems I found when working with my home lab is that I was lacking a solution for storing secrets. Even though there are open source solutions like Hashicorp vault to manage secrets, and managing it something requires maintenance and I didn&rsquo;t want to have the operational burden.
+I used to manage my password with a KeePass vault file. However that solution fell short when dealing with multiple devices like phones and multiple laptops."/>
+
+<meta itemprop="name" content="Secrets Manager for Home Lab Automation">
+<meta itemprop="description" content="One of the problems I found when working with my home lab is that I was lacking a solution for storing secrets. Even though there are open source solutions like Hashicorp vault to manage secrets, and managing it something requires maintenance and I didn&rsquo;t want to have the operational burden.
+I used to manage my password with a KeePass vault file. However that solution fell short when dealing with multiple devices like phones and multiple laptops."><meta itemprop="datePublished" content="2023-07-25T15:19:00-03:00" />
+<meta itemprop="dateModified" content="2023-07-25T15:19:00-03:00" />
+<meta itemprop="wordCount" content="3977">
+<meta itemprop="keywords" content="" />
+<link rel="canonical" href="http://pancho.dev/posts/home-lab-automation-secrets/" />
+
+<link rel="icon" type="image/png" href="http://pancho.dev/image/favicon.ico">
+
+<link rel="stylesheet" href="/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/bulma.min.css">
+
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-WBLGT7MX26"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-WBLGT7MX26', { 'anonymize_ip': false });
+}
+</script>
+
+
+
+<script src=/js/ramium.js></script>
+<link rel="stylesheet" href=/css/ramium.css>
+
+
+
+
+
+</head>
+
+<body><nav class="navbar is-dark" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a class="navbar-item" href=/>
+      
+      <strong>pancho.dev </strong>
+      
+    </a>
+
+    <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false"
+      data-target="navbarBasicExample">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+
+  <div id="navbarBasicExample" class="navbar-menu">
+    <div class="navbar-start">
+      
+      
+      <a class="navbar-item" href="/">Home</a>
+      
+      
+      
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">Blog</a>
+        <div class="navbar-dropdown">
+          
+          <a class="navbar-item" href="/posts/">All Posts</a>
+          
+        </div>
+      </div>
+      
+      
+    </div>
+
+    <div class="navbar-end">
+      
+
+      
+    </div>
+  </div>
+</nav><div class="columns is-centered">
+        <div id="page-body" class="column is-7">
+
+<div class="content blog">
+    <h1>Secrets Manager for Home Lab Automation</h1>
+
+    <div id="infobar" class="level is-mobile">
+        <div class="level-left">
+            
+            <div class="level-item">
+                <p class="subtitle info date">Jul 25, 2023
+                </p>
+            </div>
+            
+
+            <div class="level-item">
+                <p class="subtitle info">
+                    22 mins read
+                </p>
+            </div>
+        </div>
+        <div class="level-right is-hidden-touch">
+            <div class="tags">
+                
+            </div>
+        </div>
+    </div>
+
+    <div class="tags is-hidden-desktop">
+        
+    </div>
+
+    <div class="blog-text">
+        
+
+        <p>One of the problems I found when working with my home lab is that I was lacking a solution for storing secrets. Even though there are open source solutions like Hashicorp vault to manage secrets, and managing it something requires maintenance and I didn&rsquo;t want to have the operational burden.<br>
+I used to manage my password with a KeePass vault file. However that solution fell short when dealing with multiple devices like phones and multiple laptops. So I chose a password manager. I ended up choosing Bitwarden as a password manager, one of the reasons I chose this solution was that it is open source and if I ever want to host it myself I can migrate to the open source version and migration will bee seamless to a hosted solution. I still chose the cloud version of it. And at some point working on my labs I decided to use my password manager to store the secrets I need for my automations.<br>
+Bitwarden offers a cli tool which is pretty handy for automations, it outputs secrets in json format which is pretty useful to be used in any language. I chose to keep things simple and use it on the shell and parse it with jq tool, one downside of the bitwarden CLI tool is that they don&rsquo;t offer a build for linux arm64 arch, so if you are running on a raspberry pi you will have to build the tool from source.<br>
+This post is opinionated to Bitwarden, but the same concepts should work for other password managers CLI tools, off source depending on outputs a few things should be adapted to other password managers outputs.</p>
+<h1 id="logging-in">Logging in</h1>
+<p>Fist of all you will need an account on the Bitwarden Cloud Offering, or host Bitwarden yourself. However when working with automations you might want to enter you master password only once.</p>
+<p>Once having an account there are some operations related to log in, log out and keeping a sessions open so no passwords are needed for the rest of the session.</p>
+<p>Also something to have in mind is that Bitwarden does not store any of your passwords unencrypted on the cloud, which means that every time you log in or start a new session it downloads the full vault and decrypts it locally in your environment. If you log in but don&rsquo;t log out a copy of you vault is still stored locally on your machine so a good security practice is to log out whenever you are not needing access to your secrets.</p>
+<p>Something important is to remind that the vault is downloaded and synchronized at intervals to the the Bitwarden server, so if you recently added a secret on the phone app or desktop app, to make sure you have the latest secret its always good to synchronize the vault before pulling any secret.</p>
+<ul>
+<li>Login</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Loging in to bitwarden</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># We will fist print the help for logging in to see what options we have</span>
+</span></span><span style="display:flex;"><span>$ bw login --help
+</span></span><span style="display:flex;"><span>Usage: bw login <span style="color:#f92672">[</span>options<span style="color:#f92672">]</span> <span style="color:#f92672">[</span>email<span style="color:#f92672">]</span> <span style="color:#f92672">[</span>password<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Log into a user account.
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Options:
+</span></span><span style="display:flex;"><span>  --method &lt;method&gt;              Two-step login method.
+</span></span><span style="display:flex;"><span>  --code &lt;code&gt;                  Two-step login code.
+</span></span><span style="display:flex;"><span>  --sso                          Log in with Single-Sign On.
+</span></span><span style="display:flex;"><span>  --apikey                       Log in with an Api Key.
+</span></span><span style="display:flex;"><span>  --passwordenv &lt;passwordenv&gt;    Environment variable storing your password
+</span></span><span style="display:flex;"><span>  --passwordfile &lt;passwordfile&gt;  Path to a file containing your password as its first line
+</span></span><span style="display:flex;"><span>  --check                        Check login status.
+</span></span><span style="display:flex;"><span>  -h, --help                     display help <span style="color:#66d9ef">for</span> command
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  Notes:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    See docs <span style="color:#66d9ef">for</span> valid <span style="color:#e6db74">`</span>method<span style="color:#e6db74">`</span> enum values.
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    Pass <span style="color:#e6db74">`</span>--raw<span style="color:#e6db74">`</span> option to only <span style="color:#66d9ef">return</span> the session key.
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  Examples:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    bw login
+</span></span><span style="display:flex;"><span>    bw login john@example.com myPassword321 --raw
+</span></span><span style="display:flex;"><span>    bw login john@example.com myPassword321 --method <span style="color:#ae81ff">1</span> --code <span style="color:#ae81ff">249213</span>
+</span></span><span style="display:flex;"><span>    bw login --sso
+</span></span></code></pre></div><p>As we can see there are multiple options and methods for logging in I will chose the simplest one for this example which is user and password, but if you can use 2 factor auth or SSO will make things more secure.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Let&#39;s check first if we are not logged in</span>
+</span></span><span style="display:flex;"><span>$ bw login --check 
+</span></span><span style="display:flex;"><span>You are not logged in.
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># We can see we are not logged in so we are going to log in</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># As I am doing it on an interactive terminal I will pass only the email address and password will be prompted</span>
+</span></span><span style="display:flex;"><span>$ bw login francisoc@example.com
+</span></span><span style="display:flex;"><span>? Master password: <span style="color:#f92672">[</span>hidden<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>You are logged in!
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>To unlock your vault, set your session key to the <span style="color:#e6db74">`</span>BW_SESSION<span style="color:#e6db74">`</span> environment variable. ex:
+</span></span><span style="display:flex;"><span>$ export BW_SESSION<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;rCyRhU35EVmU6/uNyUW2InaLZIgRUqs+95UpU+wps1GhI+UpLuwa1jqZkaOa/PbzyIO5lxfLhkbkZ1e6RU3ezQ==&#34;</span>
+</span></span><span style="display:flex;"><span>&gt; $env:BW_SESSION<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;rCyRhU35EVmU6/uNyUW2InaLZIgRUqs+95UpU+wps1GhI+UpLuwa1jqZkaOa/PbzyIO5lxfLhkbkZ1e6RU3ezQ==&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>You can also pass the session key to any command with the <span style="color:#e6db74">`</span>--session<span style="color:#e6db74">`</span> option. ex:
+</span></span><span style="display:flex;"><span>$ bw list items --session rCyRhU35EVmU6/uNyUW2InaLZIgRUqs+95UpU+wps1GhI+UpLuwa1jqZkaOa/PbzyIO5lxfLhkbkZ1e6RU3ezQ<span style="color:#f92672">==</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Now let&#39;s check if we are logged in</span>
+</span></span><span style="display:flex;"><span>$ bw login --check 
+</span></span><span style="display:flex;"><span>You are logged in!
+</span></span></code></pre></div><p>In the previous snippet we logged in, however the output we have there it&rsquo;s not so good for automation as you need to either copy the session key into an environment variable or pass it as a flag. So we are going to do the same but using the <code>--raw</code> flag which gives us the session token in raw text to be used as we want in the automation.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># we log in and we get to stdout the session token</span>
+</span></span><span style="display:flex;"><span>$ bw login francisco@example.com --raw
+</span></span><span style="display:flex;"><span>? Master password: <span style="color:#f92672">[</span>hidden<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>ZuLcwNxNBHGcj9ScsyrqJ2DwqlcKMTeEuYWzN59w5N+AUz5Xi0b2ypQQS9o+5Tpa7jlez5B4sQRUm6ev4B5a7A<span style="color:#f92672">==</span>
+</span></span></code></pre></div><p>Now we can get the session token and use it in our shell or scripts as we please. I found easy to use storing it on the <code>BW_SESSION</code> environment variable and export it in the current shell, so the session token is gone after closing the shell or it expires.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># we assign the token output to the BW_SESSION variable and export it so it&#39;s available to any child process of this shell which comes handy when running automations in terraform or ansible</span>
+</span></span><span style="display:flex;"><span>$ export BW_SESSION<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>bw login francisco@example.com --raw<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>? Master password: <span style="color:#f92672">[</span>hidden<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># now we output the variable (this is just to check, no need for this step once we know it&#39;s valueor print it)</span>
+</span></span><span style="display:flex;"><span>$ echo $BW_SESSION 
+</span></span><span style="display:flex;"><span>oRWccGyrilYt4ov1rfGS+8Ea8Juihce+/azz83QCZHqj4vZIRGVtnGn+mishRxqvnBTELHwuVxRfrAXnecMPtg<span style="color:#f92672">==</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Now let&#39;s check if we are logged in</span>
+</span></span><span style="display:flex;"><span>$ bw login --check 
+</span></span><span style="display:flex;"><span>You are logged in!
+</span></span></code></pre></div><p>Now you are logged in and session is saved to your shell to be used in automations without the need for password or tokens each time we call the <code>bw</code> command.</p>
+<p>But there is a catch. Once you are logged in, after a period of time the session expires and you need to fetch a new session token. There are multiple ways to do it and we will take a look at them in the following section.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Check the status, since session has timed out we will find it in locked state</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># all bw commends issued in locked state will ask for a password</span>
+</span></span><span style="display:flex;"><span>$ bw status | jq                      
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;serverUrl&#34;</span>: null,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;lastSync&#34;</span>: <span style="color:#e6db74">&#34;2023-07-25T19:20:32.961Z&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;userEmail&#34;</span>: <span style="color:#e6db74">&#34;francisco@example.com&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;userId&#34;</span>: <span style="color:#e6db74">&#34;801A29B6-6026-4228-AD00-8DC87FD7C99E&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;status&#34;</span>: <span style="color:#e6db74">&#34;locked&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Order to be able to unlock we need to get a new session ID. </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Using unlock (but we will record it on the session evironment variable)</span>
+</span></span><span style="display:flex;"><span>$ export BW_SESSION<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>bw unlock --raw<span style="color:#66d9ef">)</span>                           
+</span></span><span style="display:flex;"><span>? Master password: <span style="color:#f92672">[</span>hidden<span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Then we can check the status and it will show as Unlocked</span>
+</span></span><span style="display:flex;"><span>$ bw status | jq                      
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;serverUrl&#34;</span>: null,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;lastSync&#34;</span>: <span style="color:#e6db74">&#34;2023-07-25T19:20:35.961Z&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;userEmail&#34;</span>: <span style="color:#e6db74">&#34;francisco@example.com&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;userId&#34;</span>: <span style="color:#e6db74">&#34;801A29B6-6026-4228-AD00-8DC87FD7C99E&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;status&#34;</span>: <span style="color:#e6db74">&#34;unlocked&#34;</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># NOTE, if you are using the cloud Bitwarden server URL is null otherwise if using the hosted version will show where you are logged in.</span>
+</span></span></code></pre></div><p>Now we have everything we need in order to operate on the shell logged in and unlocked to run our automations.</p>
+<h1 id="fetching-secrets">Fetching secrets</h1>
+<p>A benefit of the bw cli tool is that it outputs secret data in json format, then it can be parsed easily and manipulated any way you need it for automations needs. There is a command that is <code>bw list items</code> which will print out in json format ALL of the secrets stored in the vault. I highly discourage using this command unless you are in a safe environment because being used without care it might lead to leaking ALL secrets in the vault.</p>
+<p>Before fetching any secret, if the secret was recently added using a different method (phone app, Desktop app, etc) you need to issue a <code>bw sync</code> to get the latest vault.</p>
+<p>For this exercise I created a test user we will use from now on</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># To get a specific secret we can use &#39;bw get item&#39; like the following</span>
+</span></span><span style="display:flex;"><span>$ bw get item <span style="color:#e6db74">&#39;My test login&#39;</span> | jq        
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;object&#34;</span>: <span style="color:#e6db74">&#34;item&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;id&#34;</span>: <span style="color:#e6db74">&#34;6bbc548b-b5ef-4ec1-a883-b04a014a754a&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;organizationId&#34;</span>: null,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;folderId&#34;</span>: null,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;type&#34;</span>: 1,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;reprompt&#34;</span>: 0,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;My test login&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;notes&#34;</span>: <span style="color:#e6db74">&#34;Notes on my test  secret&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;favorite&#34;</span>: false,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;fields&#34;</span>: <span style="color:#f92672">[</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;APIKEY&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;value&#34;</span>: <span style="color:#e6db74">&#34;MYAPIKEY12345667890&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;type&#34;</span>: 1,
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;linkedId&#34;</span>: null
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;TEST VALUE&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;value&#34;</span>: <span style="color:#e6db74">&#34;NON SENSITIVE VALUE&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;type&#34;</span>: 0,
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;linkedId&#34;</span>: null
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">]</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;login&#34;</span>: <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;uris&#34;</span>: <span style="color:#f92672">[</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;match&#34;</span>: null,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;uri&#34;</span>: <span style="color:#e6db74">&#34;https://example.com&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">]</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;username&#34;</span>: <span style="color:#e6db74">&#34;testuser&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;password&#34;</span>: <span style="color:#e6db74">&#34;supersecretpassword1234566789&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;totp&#34;</span>: null,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;passwordRevisionDate&#34;</span>: <span style="color:#e6db74">&#34;2023-07-25T20:07:18.461Z&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">}</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;collectionIds&#34;</span>: <span style="color:#f92672">[]</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;revisionDate&#34;</span>: <span style="color:#e6db74">&#34;2023-07-25T20:09:32.713Z&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;creationDate&#34;</span>: <span style="color:#e6db74">&#34;2023-07-25T20:09:32.713Z&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;deletedDate&#34;</span>: null,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;passwordHistory&#34;</span>: <span style="color:#f92672">[</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;lastUsedDate&#34;</span>: <span style="color:#e6db74">&#34;2023-07-25T20:07:18.461Z&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;password&#34;</span>: <span style="color:#e6db74">&#34;supersecretpassword123456&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;lastUsedDate&#34;</span>: <span style="color:#e6db74">&#34;2023-07-25T20:06:56.359Z&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;password&#34;</span>: <span style="color:#e6db74">&#34;supersecretpassword123&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>From the output if that command we can get several data. However I will focus on the ones that can be relevant to automation.</p>
+<ul>
+<li>
+<p>id: it&rsquo;s the unique identification (UUID) of the secret. This might be needed in certain use cases.</p>
+</li>
+<li>
+<p>name: That is the name of the secret we saved. Note this name is not unique so we might have duplicates here.</p>
+</li>
+<li>
+<p>type: The type of secret stored, it&rsquo;s a numeric value and mapping is: 1 login, 2 note, 3 credit Card , 4 Identity. We will focus on 1 and 2 as they have different fields but others can be used if needed.</p>
+</li>
+<li>
+<p>notes: This is freeform plan text field to save notes on a secret. This can be useful to store for example a public key however there are other type of secret that can be used for keys. and we will review it later on this post</p>
+</li>
+<li>
+<p>login: Is a collection of objects for the login, I will focus on the ones relevant for automations</p>
+<ul>
+<li>username: login username</li>
+<li>password: login password</li>
+<li>uris: a list of uris related to the project, might come handy for automating. Beware is a list that can hold multiple items</li>
+<li>totp: 2 factor auth code. If login has 2 factor auth will be shown here. However I discourage from using totp and user/pass credentials within the same app. It&rsquo;s not secure</li>
+</ul>
+</li>
+<li>
+<p>fields: It&rsquo;s a list of the custom fields set up. For example if you need user and password set in the same secret as an api key. The api key can be saved in a custom field as a hidden text. Since this is freeform I will explain a bit but not entirely as it is custom data. Each custom field in the list will have their own fields. Also will focus on the ones I consider relevant</p>
+<ul>
+<li>name: name of the field, you will use this name to identify in on the list</li>
+<li>value: the value of the field</li>
+<li>type: type of the field which can be 1 as hidden text, 0 plain text. I will not cover other types, but this 2 ones should cover any automation needs. If it&rsquo;s sensitive data use hidden and if it&rsquo;s non sensitive use 0, like some parameter that is needed for the automation.</li>
+</ul>
+</li>
+</ul>
+<p>I haven&rsquo;t found a use for automation for other of the values, but they are there to be used and there could be more uses to the data stored on the secret.</p>
+<h3 id="warning-when-fetching-secrets-by-name">Warning when fetching secrets by name</h3>
+<p>When fetching a secret, if possible use the secret ID which is unique. When fetching using text between quotes like the previous example &lsquo;My test login&rsquo;, will search in the vault for all secrets which start with that text so there will be use cases were it will return multiple objects.<br>
+To prove this I cloned the secret and got another one with a name &lsquo;My test login - Clone&rsquo;. Then get item in this case will return and error printing the 2 objects that match that start of the text. So be careful with naming which might break automations or use IDs which are safer. Downside of using the IDs is that they are not shown in the apps so you need to manually query it first to know the ID.</p>
+<p>Here is an example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># this query will result in more then one object matching</span>
+</span></span><span style="display:flex;"><span>$ bw get item <span style="color:#e6db74">&#39;My test login&#39;</span>                          
+</span></span><span style="display:flex;"><span>More than one result was found. Try getting a specific object by <span style="color:#e6db74">`</span>id<span style="color:#e6db74">`</span> instead. The following objects were found:
+</span></span><span style="display:flex;"><span>6bbc548b-b5ef-4ec1-a883-b04a014a754a
+</span></span><span style="display:flex;"><span>915a56a8-be14-4636-a220-b04a014c3680
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># If we get both items by id parsing the name with jq</span>
+</span></span><span style="display:flex;"><span>$ bw get item 6bbc548b-b5ef-4ec1-a883-b04a014a754a | jq -r .name
+</span></span><span style="display:flex;"><span>My test login
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>$ bw get item 915a56a8-be14-4636-a220-b04a014c3680 | jq -r .name
+</span></span><span style="display:flex;"><span>My test login - Clone
+</span></span></code></pre></div><p>As we can see in the example both secrets start with the same string so that is why the error was printed since fetching by name is very limited.</p>
+<h1 id="parsing-a-secret">Parsing a secret</h1>
+<p>When getting a secret depending on the info you want to get, there are different ways to fetch the data. Let&rsquo;s look at <code>bw get</code> documentation</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ bw get --help
+</span></span><span style="display:flex;"><span>Usage: bw get <span style="color:#f92672">[</span>options<span style="color:#f92672">]</span> &lt;object&gt; &lt;id&gt;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Get an object from the vault.
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Arguments:
+</span></span><span style="display:flex;"><span>  object                             Valid objects are: item, username, password, uri, totp, notes, exposed, attachment, folder, collection, org-collection, organization, template, fingerprint, send
+</span></span><span style="display:flex;"><span>  id                                 Search term or object<span style="color:#e6db74">&#39;s globally unique `id`.
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">Options:
+</span></span></span><span style="display:flex;"><span><span style="color:#e6db74">  --itemid &lt;itemid&gt;                  Attachment&#39;</span>s item id.
+</span></span><span style="display:flex;"><span>  --output &lt;output&gt;                  Output directory or filename <span style="color:#66d9ef">for</span> attachment.
+</span></span><span style="display:flex;"><span>  --organizationid &lt;organizationid&gt;  Organization id <span style="color:#66d9ef">for</span> an organization object.
+</span></span><span style="display:flex;"><span>  -h, --help                         display help <span style="color:#66d9ef">for</span> command
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  If raw output is specified and no output filename or directory is given <span style="color:#66d9ef">for</span>
+</span></span><span style="display:flex;"><span>  an attachment query, the attachment content is written to stdout.
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  Examples:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    bw get item 99ee88d2-6046-4ea7-92c2-acac464b1412
+</span></span><span style="display:flex;"><span>    bw get password https://google.com
+</span></span><span style="display:flex;"><span>    bw get totp google.com
+</span></span><span style="display:flex;"><span>    bw get notes google.com
+</span></span><span style="display:flex;"><span>    bw get exposed yahoo.com
+</span></span><span style="display:flex;"><span>    bw get attachment b857igwl1dzrs2 --itemid 99ee88d2-6046-4ea7-92c2-acac464b1412 --output ./photo.jpg
+</span></span><span style="display:flex;"><span>    bw get attachment photo.jpg --itemid 99ee88d2-6046-4ea7-92c2-acac464b1412 --raw
+</span></span><span style="display:flex;"><span>    bw get folder email
+</span></span><span style="display:flex;"><span>    bw get template folder
+</span></span></code></pre></div><p>From the documentation we have a couple of objects that can be fetched directly without any parsing of json, which make our lives much easier.<br>
+Objects that can be fetched that I found relevant for automations are username, password, uri, totp, and notes.<br>
+We will see a couple of examples here.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Get username</span>
+</span></span><span style="display:flex;"><span>$ bw get username 6bbc548b-b5ef-4ec1-a883-b04a014a754a
+</span></span><span style="display:flex;"><span>testuser
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Get password</span>
+</span></span><span style="display:flex;"><span>$ bw get password 6bbc548b-b5ef-4ec1-a883-b04a014a754a
+</span></span><span style="display:flex;"><span>supersecretpassword1234566789
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># get URI. NOTE: of there is more than 1 URI it will return the 1st one</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># If there are more and there is a need to fetch all of them get item needs to be used</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># and parse the json output</span>
+</span></span><span style="display:flex;"><span>$ bw get uri 6bbc548b-b5ef-4ec1-a883-b04a014a754a
+</span></span><span style="display:flex;"><span>https://example.com
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># get the notes of the secret</span>
+</span></span><span style="display:flex;"><span>$ bw get notes 6bbc548b-b5ef-4ec1-a883-b04a014a754a
+</span></span><span style="display:flex;"><span>Notes on my test  secret
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Also you can fetch the cretendials to environment variables.</span>
+</span></span><span style="display:flex;"><span>export MY_USERNAME<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>bw get username 6bbc548b-b5ef-4ec1-a883-b04a014a754a<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>export MY_PASSWORD<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>bw get password 6bbc548b-b5ef-4ec1-a883-b04a014a754a<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>export MY_URI<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>bw get uri 6bbc548b-b5ef-4ec1-a883-b04a014a754a<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>export MY_notes<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>bw get NOTES 6bbc548b-b5ef-4ec1-a883-b04a014a754a<span style="color:#66d9ef">)</span>
+</span></span></code></pre></div><h3 id="getting-custom-information">Getting custom information</h3>
+<p>The information we fetched so far is very straightforward; however, when using custom fields or  we need to parse more than 1 URI. We can use the <code>bw get item</code> which returns all the information for a secret in json format, and then We will be parsing it with jq tool.<br>
+If we look at the previous example</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># To get a specific secret we can use &#39;bw get item&#39; like the following</span>
+</span></span><span style="display:flex;"><span>$ bw get item <span style="color:#e6db74">&#39;My test login&#39;</span> | jq        
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;object&#34;</span>: <span style="color:#e6db74">&#34;item&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;id&#34;</span>: <span style="color:#e6db74">&#34;6bbc548b-b5ef-4ec1-a883-b04a014a754a&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;organizationId&#34;</span>: null,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;folderId&#34;</span>: null,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;type&#34;</span>: 1,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;reprompt&#34;</span>: 0,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;My test login&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;notes&#34;</span>: <span style="color:#e6db74">&#34;Notes on my test  secret&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;favorite&#34;</span>: false,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;fields&#34;</span>: <span style="color:#f92672">[</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;APIKEY&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;value&#34;</span>: <span style="color:#e6db74">&#34;MYAPIKEY12345667890&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;type&#34;</span>: 1,
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;linkedId&#34;</span>: null
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;TEST VALUE&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;value&#34;</span>: <span style="color:#e6db74">&#34;NON SENSITIVE VALUE&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;type&#34;</span>: 0,
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;linkedId&#34;</span>: null
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">]</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;login&#34;</span>: <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;uris&#34;</span>: <span style="color:#f92672">[</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;match&#34;</span>: null,
+</span></span><span style="display:flex;"><span>        <span style="color:#e6db74">&#34;uri&#34;</span>: <span style="color:#e6db74">&#34;https://example.com&#34;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">]</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;username&#34;</span>: <span style="color:#e6db74">&#34;testuser&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;password&#34;</span>: <span style="color:#e6db74">&#34;supersecretpassword1234566789&#34;</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;totp&#34;</span>: null,
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;passwordRevisionDate&#34;</span>: <span style="color:#e6db74">&#34;2023-07-25T20:07:18.461Z&#34;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">}</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;collectionIds&#34;</span>: <span style="color:#f92672">[]</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;revisionDate&#34;</span>: <span style="color:#e6db74">&#34;2023-07-25T20:09:32.713Z&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;creationDate&#34;</span>: <span style="color:#e6db74">&#34;2023-07-25T20:09:32.713Z&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;deletedDate&#34;</span>: null,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;passwordHistory&#34;</span>: <span style="color:#f92672">[</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;lastUsedDate&#34;</span>: <span style="color:#e6db74">&#34;2023-07-25T20:07:18.461Z&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;password&#34;</span>: <span style="color:#e6db74">&#34;supersecretpassword123456&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>,
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;lastUsedDate&#34;</span>: <span style="color:#e6db74">&#34;2023-07-25T20:06:56.359Z&#34;</span>,
+</span></span><span style="display:flex;"><span>      <span style="color:#e6db74">&#34;password&#34;</span>: <span style="color:#e6db74">&#34;supersecretpassword123&#34;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">]</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>We can get the information in the following fashion looking at the fields we have 2 custom fields with names &ldquo;APIKEY&rdquo; and  &ldquo;TEST VALUE&rdquo;. In order to successfully get those values we can get them using some jq tricks.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># get the field with name APIKEY</span>
+</span></span><span style="display:flex;"><span>$ bw get item <span style="color:#e6db74">&#39;My test login&#39;</span> | jq -r <span style="color:#e6db74">&#39;.fields[] | select (.name == &#34;APIKEY&#34;) .value&#39;</span>
+</span></span><span style="display:flex;"><span>MYAPIKEY12345667890
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># get the field with name TEST VALUE</span>
+</span></span><span style="display:flex;"><span>$ bw get item <span style="color:#e6db74">&#39;My test login&#39;</span> | jq -r <span style="color:#e6db74">&#39;.fields[] | select (.name == &#34;TEST VALUE&#34;) .value&#39;</span>
+</span></span><span style="display:flex;"><span>NON SENSITIVE VALUE
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Assign those values to environment variables to be used further in automations</span>
+</span></span><span style="display:flex;"><span>export MY_APIKEY<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>bw get item <span style="color:#e6db74">&#39;My test login&#39;</span> | jq -r <span style="color:#e6db74">&#39;.fields[] | select (.name == &#34;APIKEY&#34;) .value&#39;</span><span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>export MY_PARAMETER<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>bw get item <span style="color:#e6db74">&#39;My test login&#39;</span> | jq -r <span style="color:#e6db74">&#39;.fields[] | select (.name == &#34;TEST VALUE&#34;) .value&#39;</span><span style="color:#66d9ef">)</span>
+</span></span></code></pre></div><h3 id="getting-text-from-note-type">Getting text from NOTE type</h3>
+<p>Even though we can use login type and the notes field for some use cases, using the secure note type fits better the use case for secrets that require a big text field. A good use case is for storing Private and Public Keys for x509 keys or certificate chains, etc. Personally I use it to keep my SSH private keys (in case I loose my laptop) and also for storing SSH Pub Keys, which are not sensitive secrets but I fetch them from the same place for automation purposes.</p>
+<p>Not all object types support fetching the same data as the login object so we will be using <code>bw get item</code> and parse the json object for those use cases.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># fetch an object of type SECURE NOTE</span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;object&#34;</span>: <span style="color:#e6db74">&#34;item&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;id&#34;</span>: <span style="color:#e6db74">&#34;F59847A4-06EE-4791-B063-F762A0622B90&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;organizationId&#34;</span>: null,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;folderId&#34;</span>: <span style="color:#e6db74">&#34;5716E44F-08A1-4745-92E5-30F1DDECE38A&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;type&#34;</span>: 2,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;reprompt&#34;</span>: 0,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;SSH Pub Key francisco@test&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;notes&#34;</span>: <span style="color:#e6db74">&#34;ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCmoMcP8PIzEVANAIEwXd0B9RBIq8Zj+XrcoVlIsTph1it1iWnRQm6GYFd+s/TkqT6kfYHGOa2tGCOM5N10co0NP1sHrPVsWFZaY3tGU1+5nrLb09csk/XjByNjpp045iRVR4MKtD7lFhHHfhdB3Y7vYp+VqVIIWesmmomQwTg10TcHE+QWM44CmUwk25D3SsEFRVt3h2mlUysqlRrakzEhz8OxXOSkKuTDGMsyR5K4TTlFp0gB3pNYmbDbcKdKcrm4bOHGdoMieoqcGPF9SBO8V/tP/Pl4bzxtYNjf8sew8HNWHlmLJ5Yxwjsmed1P2nCY2Bsu1/idVgTV6fgS1lGiqAO+angKSPkcroUF8tKA8ti+U8kqnWQybur8MHJHezruv31VXeoM9BGnZ+kARTcsTwV7BIEXTjBXWHR6oIgjUK9FDc3zALM/nEZqvysD+Ybf2C1dMpjx+dnxndyiomzYutuP0C4497VioHZmLQKMvdevVRrlTUXUobbmaC65xLc= francisco@test&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;favorite&#34;</span>: false,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;secureNote&#34;</span>: <span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#e6db74">&#34;type&#34;</span>: <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">}</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;collectionIds&#34;</span>: <span style="color:#f92672">[]</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;revisionDate&#34;</span>: <span style="color:#e6db74">&#34;2022-10-25T20:25:24.376Z&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;creationDate&#34;</span>: <span style="color:#e6db74">&#34;2022-10-25T20:25:24.376Z&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;deletedDate&#34;</span>: null
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>As we can see these type of objects have less information and the main piece of information needed is the notes field. Fortunately the notes field is on the root of the json object so it is easy to parse.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Get the public SSH key from a secure note</span>
+</span></span><span style="display:flex;"><span>$ bw get item <span style="color:#e6db74">&#39;SSH Pub Key francisco@test&#39;</span> | jq -r .notes
+</span></span><span style="display:flex;"><span>ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCmoMcP8PIzEVANAIEwXd0B9RBIq8Zj+XrcoVlIsTph1it1iWnRQm6GYFd+s/TkqT6kfYHGOa2tGCOM5N10co0NP1sHrPVsWFZaY3tGU1+5nrLb09csk/XjByNjpp045iRVR4MKtD7lFhHHfhdB3Y7vYp+VqVIIWesmmomQwTg10TcHE+QWM44CmUwk25D3SsEFRVt3h2mlUysqlRrakzEhz8OxXOSkKuTDGMsyR5K4TTlFp0gB3pNYmbDbcKdKcrm4bOHGdoMieoqcGPF9SBO8V/tP/Pl4bzxtYNjf8sew8HNWHlmLJ5Yxwjsmed1P2nCY2Bsu1/idVgTV6fgS1lGiqAO+angKSPkcroUF8tKA8ti+U8kqnWQybur8MHJHezruv31VXeoM9BGnZ+kARTcsTwV7BIEXTjBXWHR6oIgjUK9FDc3zALM/nEZqvysD+Ybf2C1dMpjx+dnxndyiomzYutuP0C4497VioHZmLQKMvdevVRrlTUXUobbmaC65xLc<span style="color:#f92672">=</span> francisco@test
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Assign it to an environment variable</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>export SSH_PUB_KEY<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>bw get item <span style="color:#e6db74">&#39;SSH Pub Key francisco@test&#39;</span> | jq -r .notes<span style="color:#66d9ef">)</span>
+</span></span></code></pre></div><h1 id="common-use-cases">Common Use Cases</h1>
+<p>When working with automation tools like terraform, pulumi or ansible. Or using the cloud providers CLI tools like aws, google azure, digital ocean, vultr, etc. Fetching the credentials to a special environment variable its all you need for access. This is a somewhat safer than saving the credentials to a local file. As the environment variables scope is to the shell they are running, they are stored in memory and when the shell process is done the variables disappear.<br>
+Most of this tools can read credentials in their credentials chain from environment variables.</p>
+<p>Some of the credentials that I use the most are to create resources in the cloud. By doing so either using terraform or pulumi. The providers for the cloud providers always have a way to setting credentials with environment variables.<br>
+Following I will list some of the ones I use the most but just examples how this approach can be used.</p>
+<p>When dealing with api keys I tend to use the password field to store the api keys in a login object, which is easy to fetch</p>
+<h3 id="getting-credentials-in-ansible-task">Getting credentials in ansible task.</h3>
+<p>An example is using the lookup function to get env vars into ansible. We will take the SSH Pub key from previous example</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>export SSH_PUB_KEY<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>bw get item <span style="color:#e6db74">&#39;SSH Pub Key francisco@test&#39;</span> | jq -r .notes<span style="color:#66d9ef">)</span>
+</span></span></code></pre></div><p>Then use in ansible</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span>- <span style="color:#f92672">name</span>: <span style="color:#ae81ff">Print SSH Pub Key</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#f92672">ansible.builtin.debug</span>:
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">msg</span>: <span style="color:#e6db74">&#34;&#39;{{ lookup(&#39;ansible.builtin.env&#39;, &#39;SSH_PUB_KEY&#39;) }}&#39;&#34;</span>
+</span></span></code></pre></div><h3 id="using-environment-variables-in-terraform">Using environment variables in terraform</h3>
+<p>Using environment variables for credentials will depend on the terraform providers being used so I will go through the different ones I use for setting cloud services credentials</p>
+<h4 id="aws-provider">AWS provider</h4>
+<p>Most AWS services will not use just an API key but will use Access key ID and Secret Access key, AWS credential chain will fetch them from AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY respectively. I follow the practice to store the key id in the username field which is non sensitive and the secret access key in the password field.<br>
+Fetching credentials for AWS stored in a secret would look like.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>export AWS_ACCESS_KEY_ID<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>bw get item <span style="color:#e6db74">&#39;my AWS credential&#39;</span> | jq -r .login.username<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>export AWS_SECRET_ACCESS_KEY<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>bw get item <span style="color:#e6db74">&#39;my AWS credential&#39;</span> | jq -r .login.password<span style="color:#66d9ef">)</span>
+</span></span></code></pre></div><p>Then the terraform provider or the aws cli will pick it up. So making it safe as no one sees the credentials unless you print them from the environment.</p>
+<h4 id="cloudflare-provider">Cloudflare provider</h4>
+<p>Similar to AWS but the only use CLOUDFLARE_API_TOKEN variable for the provider. So we can store that api token in the password field of a secret and the provider will pick it up.</p>
+<p>Example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>export CLOUDFLARE_API_TOKEN<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>bw get item <span style="color:#e6db74">&#39;my cloudflare api token&#39;</span>| jq -r .login.password<span style="color:#66d9ef">)</span>
+</span></span></code></pre></div><h4 id="other-providers">Other providers</h4>
+<p>Similar to cloudflare, other providers like digital ocean, Google Cloud, vultr, etc would use an env or set of env variables to get credentials. Please refer to the providers documentation for the format of env vars to be stored in the secret.</p>
+<ul>
+<li>Digital Ocean env vars: <code>DIGITALOCEAN_TOKEN</code> or <code>DIGITALOCEAN_ACCESS_TOKEN</code></li>
+<li>Google Cloud:  <code>GOOGLE_CREDENTIALS</code>, <code>GOOGLE_CLOUD_KEYFILE_JSON</code>, <code>GCLOUD_KEYFILE_JSON</code></li>
+<li>vultr: <code>VULTR_API_KEY</code></li>
+</ul>
+<h1 id="example">Example</h1>
+<p>After explaining multiple ways of getting credentials from password manager for automating home labs secrets I will show an example.<br>
+Context: The following could be used in a terraform automation for creating a VM in vultr cloud provider and setting DNS records hosted in Cloudflare and using an AWS S3 or compatible backend to store terraform state. For this use case we would need vulr, cloudflare and S3 credentials. DISCLAIMED terraform code is out of the scope of this blog post and will probably be written in a future blog post. Also credential names are invented for the example purposes.<br>
+Getting credentials for the above use case. This could be done on the shell or scripted for making it easier to manage</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Loging to BW to get Session token</span>
+</span></span><span style="display:flex;"><span>export BW_SESSION<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>bw login francisco@example.com --raw<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># If already logged in unlock to get the session token</span>
+</span></span><span style="display:flex;"><span>export BW_SESSION<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>bw unlock --raw<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Get the cloud provider api key</span>
+</span></span><span style="display:flex;"><span>export VULTR_API_KEY<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>bw get item <span style="color:#e6db74">&#39;vultr api key&#39;</span>| jq -r .login.password<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Get S3 storage Backendn keys</span>
+</span></span><span style="display:flex;"><span>export AWS_ACCESS_KEY_ID<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>bw get item <span style="color:#e6db74">&#39;S3 terraform key&#39;</span> | jq -r .login.username<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>export AWS_SECRET_ACCESS_KEY<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>bw get item <span style="color:#e6db74">&#39;S3 terraform key&#39;</span> | jq -r .login.password<span style="color:#66d9ef">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Get cloudflare api token</span>
+</span></span><span style="display:flex;"><span>export CLOUDFLARE_API_TOKEN<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>bw get item <span style="color:#e6db74">&#39;Cloudflare API token&#39;</span>| jq -r .login.password<span style="color:#66d9ef">)</span>
+</span></span></code></pre></div><p>After setting all environment variables we would be all set for running the terraform stack described in the context of the example.</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>Using a password manager can be handy for those hobbyists who run home labs or cloud resources for personal purposes. In my case I was already using Bitwarden Password manager for personal secrets management so I integrated to my personal projects, without incurring in extra costs or setting up something else which requires maintenance.<br>
+A password manager could be used in an enterprise environment for automation purposes using shared secrets among users, however the level of control over the secrets probably is not the best fit as there are better solutions for enterprise environments like AWS Secrets manager, Google cloud Secret manager, Hashicorp vault in either enterprise version or open source, or Azure Key Vault. These solutions offer features better suited for enterprise use and finer grained control over secrets.<br>
+Back to personal use I am very happy with the solution, as I used to copy the passwords or a hardcoded files for environment variables or just kept them hardcoded in the code. This solutions allows me to keep the secrets safe outside of the code and files and it&rsquo;s ephemeral to runtime whenever used.</p>
+
+    </div>
+</div><div id="social-media-share" class="has-text-centered">
+	<p><i>Sharing is caring!</i></p>
+	<br>
+	
+	<div class="share-buttons">
+	    <a  href="https://www.facebook.com/sharer/sharer.php?u=http%3a%2f%2fpancho.dev%2fposts%2fhome-lab-automation-secrets%2f"
+	        onclick="socialMediaPopUp(this.href, '', 500, 500); return false;"
+	        title="Share on Facebook. Opens in a new window.">
+	        <img src=/img/icons/45px/facebook.png>
+	    </a>
+
+	    <a  href="https://twitter.com/intent/tweet?text=Secrets%20Manager%20for%20Home%20Lab%20Automation&url=http%3a%2f%2fpancho.dev%2fposts%2fhome-lab-automation-secrets%2f"
+	        onclick="socialMediaPopUp(this.href, '', 500, 500); return false;"
+	        title="Share on Twitter. Opens in a new window." >
+	        <img src=/img/icons/45px/twitter.png>
+	    </a>
+
+		<a  href="http://www.reddit.com/submit?url=http%3a%2f%2fpancho.dev%2fposts%2fhome-lab-automation-secrets%2f"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on Reddit. Opens in a new window." >
+	        <img src=/img/icons/45px/reddit.png>
+	    </a>
+
+	    <a  href="http://pinterest.com/pin/create/button/?url=http%3a%2f%2fpancho.dev%2fposts%2fhome-lab-automation-secrets%2f"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on Pinterest. Opens in a new window." >
+	        <img src=/img/icons/45px/pinterest.png>
+	    </a>
+
+	    <a  href="http://www.tumblr.com/share/link?url=http%3a%2f%2fpancho.dev%2fposts%2fhome-lab-automation-secrets%2f"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on Tumblr. Opens in a new window." >
+	        <img src=/img/icons/45px/tumblr.png>
+	    </a>
+
+		<a  href="https://www.linkedin.com/shareArticle?mini=true&url=http%3a%2f%2fpancho.dev%2fposts%2fhome-lab-automation-secrets%2f
+			&title=Secrets%20Manager%20for%20Home%20Lab%20Automation&summary=One%20of%20the%20problems%20I%20found%20when%20working%20with%20my%20home%20lab%20is%20that%20I%20was%20lacking%20a%20solution%20for%20storing%20secrets.%20Even%20though%20there%20are%20open%20source%20solutions%20like%20Hashicorp%20vault%20to%20manage%20secrets%2c%20and%20managing%20it%20something%20requires%20maintenance%20and%20I%20didn%26rsquo%3bt%20want%20to%20have%20the%20operational%20burden.%0aI%20used%20to%20manage%20my%20password%20with%20a%20KeePass%20vault%20file.%20However%20that%20solution%20fell%20short%20when%20dealing%20with%20multiple%20devices%20like%20phones%20and%20multiple%20laptops.&source=rafed123.github.io"
+	        onclick="socialMediaPopUp(this.href, '', 900, 500); return false;"
+	        title="Share on LinkedIn. Opens in a new window." >
+	        <img src=/img/icons/45px/linkedin.png>
+	    </a>
+
+	    <a  href="mailto:?subject=Secrets%20Manager%20for%20Home%20Lab%20Automation&amp;body=Check out this site http%3a%2f%2fpancho.dev%2fposts%2fhome-lab-automation-secrets%2f"
+	        title="Share via Email. Opens in a new window." >
+	        <img src=/img/icons/45px/mail.png>
+	    </a>
+	</div>
+</div>
+
+
+<br>
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+    (function () {
+        
+        
+        if (window.location.hostname == "localhost")
+            return;
+
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        var disqus_shortname = '';
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+        </div>
+    </div>
+
+<footer class="footer has-background-dark">
+    <div class="content has-text-centered has-text-white">
+        <p>
+            © 2020 Ramium. Powered by
+            <a class="has-text-light" href="https://github.com/gohugoio/hugo" target="_blank">
+            Hugo</a>. Theme
+            <a class="has-text-light" href="https://github.com/rafed123/ramium/" target="_blank">
+                Ramium.
+            </a>
+        </p>
+    </div>
+</footer>
+</body>
+
+</html>
