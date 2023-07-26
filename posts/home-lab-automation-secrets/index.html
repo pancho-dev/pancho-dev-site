@@ -150,9 +150,7 @@ This post is opinionated to Bitwarden, but the same concepts should work for oth
 <p>Once having an account there are some operations related to log in, log out and keeping a sessions open so no passwords are needed for the rest of the session.</p>
 <p>Also something to have in mind is that Bitwarden does not store any of your passwords unencrypted on the cloud, which means that every time you log in or start a new session it downloads the full vault and decrypts it locally in your environment. If you log in but don&rsquo;t log out a copy of you vault is still stored locally on your machine so a good security practice is to log out whenever you are not needing access to your secrets.</p>
 <p>Something important is to remind that the vault is downloaded and synchronized at intervals to the the Bitwarden server, so if you recently added a secret on the phone app or desktop app, to make sure you have the latest secret its always good to synchronize the vault before pulling any secret.</p>
-<ul>
-<li>Login</li>
-</ul>
+<h3 id="login">Login</h3>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Loging in to bitwarden</span>
 </span></span><span style="display:flex;"><span><span style="color:#75715e"># We will fist print the help for logging in to see what options we have</span>
 </span></span><span style="display:flex;"><span>$ bw login --help
